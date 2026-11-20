@@ -45,17 +45,35 @@ interface AcademyDao {
     @Query("SELECT EXISTS(SELECT 1 FROM rule_favorites WHERE rule_id = :ruleId)")
     suspend fun isRuleFavorite(ruleId: String): Boolean
 
+    @Query("SELECT * FROM quiz_attempts ORDER BY attempted_at ASC")
+    suspend fun getAllQuizAttemptsOnce(): List<QuizAttemptEntity>
+
+    @Query("SELECT * FROM rule_favorites ORDER BY rule_id ASC")
+    suspend fun getAllRuleFavoritesOnce(): List<RuleFavoriteEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertLessonProgress(progress: LessonProgressEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertLessonProgressList(items: List<LessonProgressEntity>)
 
     @Insert
     suspend fun insertQuizAttempt(attempt: QuizAttemptEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertQuizAttempts(items: List<QuizAttemptEntity>)
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertUnlockedAchievement(achievement: AchievementUnlockedEntity)
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertUnlockedAchievements(items: List<AchievementUnlockedEntity>)
+
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertRuleFavorite(favorite: RuleFavoriteEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertRuleFavorites(items: List<RuleFavoriteEntity>)
 
     @Query("DELETE FROM rule_favorites WHERE rule_id = :ruleId")
     suspend fun deleteRuleFavorite(ruleId: String): Int

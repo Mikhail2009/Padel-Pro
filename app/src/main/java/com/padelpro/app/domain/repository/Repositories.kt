@@ -2,12 +2,15 @@ package com.padelpro.app.domain.repository
 
 import com.padelpro.app.domain.model.AcademyCourse
 import com.padelpro.app.domain.model.AchievementItem
+import com.padelpro.app.domain.model.BackupImportOutcome
+import com.padelpro.app.domain.model.BackupValidationResult
 import com.padelpro.app.domain.model.CourseDetailData
 import com.padelpro.app.domain.model.DeleteFriendResult
 import com.padelpro.app.domain.model.LessonCompletionOutcome
 import com.padelpro.app.domain.model.LessonDetailData
 import com.padelpro.app.domain.model.LiveMatchSnapshot
 import com.padelpro.app.domain.model.MatchCompletionResult
+import com.padelpro.app.domain.model.MatchDetailsData
 import com.padelpro.app.domain.model.MatchFormat
 import com.padelpro.app.domain.model.MatchSummary
 import com.padelpro.app.domain.model.PerformanceSummary
@@ -78,6 +81,7 @@ interface MatchRepository {
     fun observeRecentMatches(limit: Int = 3): Flow<List<MatchSummary>>
     fun observeCompletedMatches(): Flow<List<MatchSummary>>
     fun observeMatchById(matchId: String): Flow<MatchSummary?>
+    fun observeMatchDetails(matchId: String): Flow<MatchDetailsData?>
     fun observeActiveMatchLive(): Flow<LiveMatchSnapshot?>
 
     suspend fun startMatch(
@@ -90,10 +94,17 @@ interface MatchRepository {
     suspend fun pauseActiveMatch(): Boolean
     suspend fun resumeActiveMatch(): Boolean
     suspend fun cancelActiveMatch(): Boolean
+    suspend fun deleteMatch(matchId: String): Boolean
     suspend fun completeMatchIfFinished(matchId: String): MatchCompletionResult?
     fun dismissRestoredBanner(matchId: String)
 }
 
 interface StatsRepository {
     fun observePerformanceSummary(): Flow<PerformanceSummary>
+}
+
+interface BackupRepository {
+    suspend fun exportBackupJson(): String
+    fun validateBackupJson(json: String): BackupValidationResult
+    suspend fun importBackupJson(json: String): BackupImportOutcome
 }

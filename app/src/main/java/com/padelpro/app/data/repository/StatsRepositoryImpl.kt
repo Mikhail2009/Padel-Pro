@@ -1,28 +1,38 @@
 package com.padelpro.app.data.repository
 
+import com.padelpro.app.core.common.SystemTimeProvider
+import com.padelpro.app.core.common.TimeProvider
 import com.padelpro.app.domain.model.MatchFormat
+import com.padelpro.app.domain.model.MatchSummary
 import com.padelpro.app.domain.model.MonthlyMatchCount
 import com.padelpro.app.domain.model.PerformanceSummary
 import com.padelpro.app.domain.repository.MatchRepository
 import com.padelpro.app.domain.repository.StatsRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.time.Instant
 import java.time.YearMonth
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.roundToInt
 
 class StatsRepositoryImpl(
-    private val matchRepository: MatchRepository
+    private val matchRepository: MatchRepository,
+    private val timeProvider: TimeProvider = SystemTimeProvider(),
+    private val zoneId: ZoneId = ZoneId.systemDefault()
 ) : StatsRepository {
 
     override fun observePerformanceSummary(): Flow<PerformanceSummary> =
         matchRepository.observeCompletedMatches().map { matches ->
-            val userMatches = matches.filter { it.userWon != null }
+            val userMatches = matches
+                .filter { it.userWon != null }
+                .sortedByDescending { it.endedAt ?: it.startedAt }
+
             val total = userMatches.size
             if (total == 0) {
                 return@map PerformanceSummary(
-                    monthlyActivity = emptySixMonths()
+                    monthlyActivity = buildSixMonths(emptyList())
                 )
             }
 
@@ -71,19 +81,26 @@ class StatsRepositoryImpl(
                 doublesMatches = doubles.size,
                 doublesWinRatePercent = doublesWinRate,
                 recentForm = userMatches.take(5).map { it.userWon == true },
-                monthlyActivity = emptySixMonths()
+                monthlyActivity = buildSixMonths(userMatches)
             )
         }
 
-    private fun emptySixMonths(): List<MonthlyMatchCount> {
-        val current = YearMonth.now()
+    private fun buildSixMonths(userMatches: List<MatchSummary>): List<MonthlyMatchCount> {
+        val current = YearMonth.from(timeProvider.currentLocalDate())
         val ruLocale = Locale.forLanguageTag("ru")
         val fmt = DateTimeFormatter.ofPattern("LLL", ruLocale)
+        val countsByMonth = userMatches
+            .groupingBy { match ->
+                val ts = match.endedAt ?: match.startedAt
+                YearMonth.from(Instant.ofEpochMilli(ts).atZone(zoneId))
+            }
+            .eachCount()
+
         return (5 downTo 0).map { offset ->
             val ym = current.minusMonths(offset.toLong())
             MonthlyMatchCount(
                 label = ym.format(fmt).trimEnd('.').take(3).lowercase(ruLocale),
-                count = 0,
+                count = countsByMonth[ym] ?: 0,
                 isCurrentMonth = offset == 0
             )
         }

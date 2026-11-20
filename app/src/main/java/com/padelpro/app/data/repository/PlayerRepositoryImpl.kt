@@ -1,5 +1,6 @@
 package com.padelpro.app.data.repository
 
+import android.database.sqlite.SQLiteConstraintException
 import androidx.room.withTransaction
 import com.padelpro.app.core.common.TimeProvider
 import com.padelpro.app.core.database.PadelProDatabase
@@ -125,8 +126,12 @@ class PlayerRepositoryImpl(
                 if (participations > 0) {
                     return@withTransaction DeleteFriendResult.IN_USE_BY_MATCHES
                 }
-                val deleted = playerDao.deleteFriendById(playerId)
-                if (deleted > 0) DeleteFriendResult.DELETED else DeleteFriendResult.NOT_FOUND
+                return@withTransaction try {
+                    val deleted = playerDao.deleteFriendById(playerId)
+                    if (deleted > 0) DeleteFriendResult.DELETED else DeleteFriendResult.NOT_FOUND
+                } catch (_: SQLiteConstraintException) {
+                    DeleteFriendResult.IN_USE_BY_MATCHES
+                }
             }
         }
 

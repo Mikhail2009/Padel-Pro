@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -143,10 +144,11 @@ fun PerformanceScreen(
                 item {
                     PpEmptyState(
                         icon = Icons.Rounded.SportsTennis,
-                        title = stringResource(R.string.history_empty_title),
-                        subtitle = stringResource(R.string.performance_empty_cta_text),
+                        title = stringResource(R.string.performance_empty_cta_text),
+                        subtitle = stringResource(R.string.home_recent_match_empty_sub),
                         ctaText = stringResource(R.string.action_start_a_match),
-                        onCtaClick = onStartMatch
+                        onCtaClick = onStartMatch,
+                        modifier = Modifier.testTag("performance_empty_state")
                     )
                 }
             }
@@ -155,7 +157,7 @@ fun PerformanceScreen(
                 PpSectionHeader(
                     title = stringResource(R.string.performance_section_monthly),
                     actionText = stringResource(R.string.performance_last_6_months),
-                    onActionClick = {}
+                    onActionClick = null
                 )
                 Spacer(Modifier.height(PpSpacing.sm))
                 PpCard(modifier = Modifier.fillMaxWidth()) {
@@ -189,7 +191,7 @@ fun PerformanceScreen(
                 PpSectionHeader(
                     title = stringResource(R.string.performance_section_recent_form),
                     actionText = stringResource(R.string.performance_last_5_matches),
-                    onActionClick = {}
+                    onActionClick = null
                 )
                 Spacer(Modifier.height(PpSpacing.sm))
                 PpCard(modifier = Modifier.fillMaxWidth()) {
@@ -239,6 +241,7 @@ fun PerformanceScreen(
                         modifier = Modifier
                             .clip(PpRadius.pill)
                             .clickable(onClick = onOpenMatchHistory)
+                            .testTag("performance_history_link")
                             .padding(horizontal = PpSpacing.lg, vertical = PpSpacing.md)
                     )
                 }

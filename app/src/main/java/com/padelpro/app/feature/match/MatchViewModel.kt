@@ -7,6 +7,7 @@ import com.padelpro.app.core.datastore.AppSettings
 import com.padelpro.app.core.datastore.SettingsRepository
 import com.padelpro.app.domain.model.DeleteFriendResult
 import com.padelpro.app.domain.model.DeuceMode
+import com.padelpro.app.domain.model.FriendActionError
 import com.padelpro.app.domain.model.MatchFormat
 import com.padelpro.app.domain.model.MatchSummary
 import com.padelpro.app.domain.model.Player
@@ -25,10 +26,6 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-
-enum class FriendActionError {
-    IN_USE_BY_MATCHES
-}
 
 sealed interface MatchSetupNavEvent {
     data object NavigateToLiveMatch : MatchSetupNavEvent

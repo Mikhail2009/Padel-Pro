@@ -1,6 +1,10 @@
 package com.padelpro.app.feature.profile
 
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,10 +25,13 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.FileDownload
+import androidx.compose.material.icons.rounded.FileUpload
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.material.icons.rounded.RadioButtonChecked
@@ -43,12 +50,17 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.padelpro.app.R
+import com.padelpro.app.core.designsystem.components.DeleteFriendConfirmDialog
+import com.padelpro.app.core.designsystem.components.FriendFormFields
+import com.padelpro.app.core.designsystem.components.FriendInUseErrorBanner
+import com.padelpro.app.core.designsystem.components.PlayerManagementRow
 import com.padelpro.app.core.designsystem.components.PpAchievementBadge
 import com.padelpro.app.core.designsystem.components.PpAvatar
 import com.padelpro.app.core.designsystem.components.PpAvatarPickerGrid
@@ -67,12 +79,24 @@ import com.padelpro.app.core.designsystem.components.PpXpIndicator
 import com.padelpro.app.core.designsystem.components.levelTitleRes
 import com.padelpro.app.core.designsystem.theme.PpBackground
 import com.padelpro.app.core.designsystem.theme.PpError
+import com.padelpro.app.core.designsystem.theme.PpErrorTint
 import com.padelpro.app.core.designsystem.theme.PpOutline
 import com.padelpro.app.core.designsystem.theme.PpPrimary
+import com.padelpro.app.core.designsystem.theme.PpPrimaryTint
+import com.padelpro.app.core.designsystem.theme.PpRadius
 import com.padelpro.app.core.designsystem.theme.PpSpacing
 import com.padelpro.app.core.designsystem.theme.PpTextStyles
+import com.padelpro.app.domain.model.BackupValidationError
 import com.padelpro.app.domain.model.DeuceMode
+import com.padelpro.app.domain.model.FriendActionError
 import com.padelpro.app.domain.model.MatchFormat
+import com.padelpro.app.domain.model.Player
+import java.nio.charset.StandardCharsets
+
+private sealed interface FriendSheetState {
+    data object Create : FriendSheetState
+    data class Edit(val player: Player) : FriendSheetState
+}
 
 @Composable
 fun ProfileScreen(
@@ -81,16 +105,56 @@ fun ProfileScreen(
     onResetComplete: () -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     var showEditSheet by remember { mutableStateOf(false) }
     var showScoringSheet by remember { mutableStateOf(false) }
+    var friendSheet by remember { mutableStateOf<FriendSheetState?>(null) }
+    var deleteFriendCandidate by remember { mutableStateOf<Player?>(null) }
     var resetStep by remember { mutableIntStateOf(0) }
+
+    val exportLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        if (uri != null) {
+            viewModel.exportBackup { json ->
+                runCatching {
+                    context.contentResolver.openOutputStream(uri)?.use { stream ->
+                        stream.write(json.toByteArray(StandardCharsets.UTF_8))
+                        stream.flush()
+                        true
+                    } ?: false
+                }.getOrDefault(false)
+            }
+        }
+    }
+
+    val importLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri != null) {
+            val content = runCatching {
+                context.contentResolver.openInputStream(uri)?.use { stream ->
+                    stream.bufferedReader(StandardCharsets.UTF_8).readText()
+                }
+            }.getOrNull()
+            viewModel.onImportFileRead(content)
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.resetCompleteEvent.collect {
             onResetComplete()
         }
     }
+
+    LaunchedEffect(Unit) {
+        viewModel.needsOnboardingEvent.collect {
+            onResetComplete()
+        }
+    }
+
+    BackHandler(onBack = onBack)
 
     Box(
         modifier = Modifier
@@ -116,7 +180,8 @@ fun ProfileScreen(
                         PpIconButton(
                             icon = Icons.AutoMirrored.Rounded.ArrowBack,
                             contentDescription = stringResource(R.string.action_back),
-                            onClick = onBack
+                            onClick = onBack,
+                            modifier = Modifier.testTag("profile_back_button")
                         )
                         Spacer(Modifier.width(PpSpacing.sm))
                         Text(
@@ -223,7 +288,7 @@ fun ProfileScreen(
                 PpSectionHeader(
                     title = stringResource(R.string.profile_section_achievements),
                     actionText = stringResource(R.string.profile_achievements_count_format, unlockedCount, state.achievements.size),
-                    onActionClick = {}
+                    onActionClick = null
                 )
                 Spacer(Modifier.height(PpSpacing.sm))
                 LazyRow(
@@ -242,21 +307,53 @@ fun ProfileScreen(
                 }
             }
 
+            // Friends section ("ИГРОКИ") reusing shared Friend management components
             item {
                 PpSectionHeader(title = stringResource(R.string.profile_section_players))
                 Spacer(Modifier.height(PpSpacing.sm))
                 PpCard(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = stringResource(R.string.profile_players_empty),
-                        style = PpTextStyles.Label,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    if (state.friendError == FriendActionError.IN_USE_BY_MATCHES) {
+                        FriendInUseErrorBanner(onDismiss = viewModel::clearFriendError)
+                        Spacer(Modifier.height(PpSpacing.md))
+                    }
+
+                    if (state.friends.isEmpty()) {
+                        Text(
+                            text = stringResource(R.string.profile_players_empty),
+                            style = PpTextStyles.Label,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    } else {
+                        Column(verticalArrangement = Arrangement.spacedBy(PpSpacing.sm)) {
+                            state.friends.forEach { friend ->
+                                PlayerManagementRow(
+                                    player = friend,
+                                    onSelect = {
+                                        viewModel.clearFriendError()
+                                        friendSheet = FriendSheetState.Edit(friend)
+                                    },
+                                    onEdit = {
+                                        viewModel.clearFriendError()
+                                        friendSheet = FriendSheetState.Edit(friend)
+                                    },
+                                    onDelete = {
+                                        viewModel.clearFriendError()
+                                        deleteFriendCandidate = friend
+                                    }
+                                )
+                            }
+                        }
+                    }
+
                     Spacer(Modifier.height(PpSpacing.md))
                     PpSecondaryButton(
                         text = stringResource(R.string.profile_add_player),
                         icon = Icons.Rounded.PersonAdd,
-                        onClick = {},
-                        enabled = false
+                        onClick = {
+                            viewModel.clearFriendError()
+                            friendSheet = FriendSheetState.Create
+                        },
+                        modifier = Modifier.testTag("profile_add_friend_button")
                     )
                 }
             }
@@ -306,49 +403,56 @@ fun ProfileScreen(
                 }
             }
 
+            // Data Backup / Restore section ("ДАННЫЕ")
             item {
                 PpSectionHeader(title = stringResource(R.string.profile_section_data))
                 Spacer(Modifier.height(PpSpacing.sm))
                 PpCard(modifier = Modifier.fillMaxWidth()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 48.dp)
-                            .alpha(0.5f),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = stringResource(R.string.profile_data_export),
-                            style = PpTextStyles.Body,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                        Text(
-                            text = stringResource(R.string.label_next_iteration_badge),
-                            style = PpTextStyles.Micro,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                    val exportSubtitle = state.backupLastExportedText?.let { date ->
+                        stringResource(R.string.profile_data_last_export_format, date)
+                    } ?: stringResource(R.string.profile_data_never_exported)
+
+                    Text(
+                        text = exportSubtitle,
+                        style = PpTextStyles.Label,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.testTag("profile_last_export_text")
+                    )
+
+                    val feedback = state.backupFeedback
+                    if (feedback != null) {
+                        Spacer(Modifier.height(PpSpacing.md))
+                        BackupFeedbackBanner(
+                            feedback = feedback,
+                            onDismiss = viewModel::clearBackupFeedback
                         )
                     }
+
+                    Spacer(Modifier.height(PpSpacing.md))
+                    DataActionRow(
+                        icon = Icons.Rounded.FileUpload,
+                        title = stringResource(R.string.profile_data_export),
+                        subtitle = stringResource(R.string.profile_data_export_sub),
+                        enabled = !state.isBackupBusy,
+                        onClick = {
+                            viewModel.clearBackupFeedback()
+                            exportLauncher.launch(viewModel.defaultBackupFilename())
+                        },
+                        modifier = Modifier.testTag("profile_export_button")
+                    )
+
                     Spacer(Modifier.height(PpSpacing.sm))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .heightIn(min = 48.dp)
-                            .alpha(0.5f),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = stringResource(R.string.profile_data_import),
-                            style = PpTextStyles.Body,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                        Text(
-                            text = stringResource(R.string.label_next_iteration_badge),
-                            style = PpTextStyles.Micro,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
+                    DataActionRow(
+                        icon = Icons.Rounded.FileDownload,
+                        title = stringResource(R.string.profile_data_import),
+                        subtitle = stringResource(R.string.profile_data_import_sub),
+                        enabled = !state.isBackupBusy,
+                        onClick = {
+                            viewModel.clearBackupFeedback()
+                            importLauncher.launch(arrayOf("application/json", "text/plain", "*/*"))
+                        },
+                        modifier = Modifier.testTag("profile_import_button")
+                    )
                 }
             }
 
@@ -398,6 +502,78 @@ fun ProfileScreen(
                 }
             )
         }
+    }
+
+    val activeFriendSheet = friendSheet
+    if (activeFriendSheet != null) {
+        val initialName = when (activeFriendSheet) {
+            FriendSheetState.Create -> ""
+            is FriendSheetState.Edit -> activeFriendSheet.player.displayName
+        }
+        val initialAvatar = when (activeFriendSheet) {
+            FriendSheetState.Create -> (state.friends.size + 1) % 12
+            is FriendSheetState.Edit -> activeFriendSheet.player.avatarId
+        }
+        var draftName by remember(activeFriendSheet) { mutableStateOf(initialName) }
+        var draftAvatar by remember(activeFriendSheet) { mutableIntStateOf(initialAvatar) }
+
+        PpBottomSheet(
+            onDismissRequest = { friendSheet = null },
+            title = when (activeFriendSheet) {
+                FriendSheetState.Create -> stringResource(R.string.match_setup_new_friend_title)
+                is FriendSheetState.Edit -> stringResource(R.string.match_setup_edit_friend_title)
+            }
+        ) {
+            FriendFormFields(
+                name = draftName,
+                onNameChange = { draftName = it },
+                avatarId = draftAvatar,
+                onSelectAvatar = { draftAvatar = it },
+                onCancel = { friendSheet = null },
+                onSave = {
+                    when (activeFriendSheet) {
+                        FriendSheetState.Create -> viewModel.createFriend(draftName, draftAvatar)
+                        is FriendSheetState.Edit -> viewModel.updateFriend(
+                            playerId = activeFriendSheet.player.id,
+                            displayName = draftName,
+                            avatarId = draftAvatar
+                        )
+                    }
+                    friendSheet = null
+                },
+                nameInputTag = "profile_friend_name_input",
+                saveButtonTag = "profile_save_friend_button"
+            )
+        }
+    }
+
+    val pendingDeleteFriend = deleteFriendCandidate
+    if (pendingDeleteFriend != null) {
+        DeleteFriendConfirmDialog(
+            playerName = pendingDeleteFriend.displayName,
+            onConfirm = {
+                viewModel.deleteFriend(pendingDeleteFriend.id)
+                deleteFriendCandidate = null
+            },
+            onDismiss = { deleteFriendCandidate = null }
+        )
+    }
+
+    val importPreview = state.pendingImportPreview
+    if (importPreview != null) {
+        PpConfirmDialog(
+            title = stringResource(R.string.profile_data_import_confirm_title),
+            body = stringResource(
+                R.string.profile_data_import_confirm_body,
+                importPreview.matchesCount,
+                importPreview.playersCount,
+                importPreview.lessonsCompletedCount
+            ),
+            confirmText = stringResource(R.string.profile_data_import_confirm_btn),
+            isDestructive = true,
+            onConfirm = viewModel::confirmPendingImport,
+            onDismiss = viewModel::dismissPendingImport
+        )
     }
 
     if (showScoringSheet) {
@@ -454,6 +630,99 @@ fun ProfileScreen(
                 viewModel.resetAllProgress()
             },
             onDismiss = { resetStep = 0 }
+        )
+    }
+}
+
+@Composable
+private fun DataActionRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    subtitle: String,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(PpRadius.input)
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp)
+            .clip(shape)
+            .background(MaterialTheme.colorScheme.surface)
+            .border(1.dp, PpOutline, shape)
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(horizontal = PpSpacing.md, vertical = PpSpacing.sm),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = PpPrimary
+        )
+        Spacer(Modifier.width(PpSpacing.md))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = PpTextStyles.Body,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Text(
+                text = subtitle,
+                style = PpTextStyles.Label,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        Icon(
+            imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun BackupFeedbackBanner(
+    feedback: ProfileBackupFeedback,
+    onDismiss: () -> Unit
+) {
+    val isSuccess = feedback is ProfileBackupFeedback.ExportSuccess ||
+        feedback is ProfileBackupFeedback.ImportSuccess
+    val text = when (feedback) {
+        ProfileBackupFeedback.ExportSuccess -> stringResource(R.string.profile_data_export_success)
+        ProfileBackupFeedback.ExportError -> stringResource(R.string.profile_data_export_error)
+        is ProfileBackupFeedback.ImportSuccess -> stringResource(
+            R.string.profile_data_import_success,
+            feedback.matchesCount,
+            feedback.playersCount
+        )
+        ProfileBackupFeedback.ReadError -> stringResource(R.string.profile_data_error_read)
+        is ProfileBackupFeedback.ImportValidationError -> when (feedback.error) {
+            BackupValidationError.INVALID_JSON -> stringResource(R.string.profile_data_error_invalid_json)
+            BackupValidationError.UNSUPPORTED_SCHEMA_VERSION -> stringResource(R.string.profile_data_error_schema_version)
+            BackupValidationError.UNKNOWN_CONTENT_REFERENCE -> stringResource(R.string.profile_data_error_unknown_content)
+            BackupValidationError.INVALID_DATA -> stringResource(R.string.profile_data_error_invalid_data)
+        }
+    }
+    val shape = RoundedCornerShape(PpRadius.input)
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shape)
+            .background(if (isSuccess) PpPrimaryTint else PpErrorTint)
+            .border(
+                1.dp,
+                if (isSuccess) PpPrimary.copy(alpha = 0.6f) else PpError.copy(alpha = 0.6f),
+                shape
+            )
+            .clickable(onClick = onDismiss)
+            .padding(PpSpacing.md)
+            .testTag("profile_backup_feedback_banner")
+    ) {
+        Text(
+            text = text,
+            style = PpTextStyles.Label,
+            color = if (isSuccess) PpPrimary else PpError
         )
     }
 }

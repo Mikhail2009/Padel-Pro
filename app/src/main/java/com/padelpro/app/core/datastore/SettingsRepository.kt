@@ -72,6 +72,27 @@ class SettingsRepository(private val context: Context) {
         context.dataStore.edit { it[Keys.DEFAULT_DEUCE_MODE] = mode.name }
     }
 
+    suspend fun setBackupLastExportedAt(timestampMillis: Long) {
+        context.dataStore.edit { it[Keys.BACKUP_LAST_EXPORTED_AT] = timestampMillis }
+    }
+
+    suspend fun applySettings(newSettings: AppSettings) {
+        context.dataStore.edit { prefs ->
+            prefs[Keys.ONBOARDING_COMPLETED] = newSettings.onboardingCompleted
+            prefs[Keys.HAPTICS_ENABLED] = newSettings.hapticsEnabled
+            prefs[Keys.KEEP_SCREEN_ON] = newSettings.keepScreenOn
+            prefs[Keys.DEFAULT_FORMAT] = newSettings.defaultFormat.name
+            prefs[Keys.DEFAULT_DEUCE_MODE] = newSettings.defaultDeuceMode.name
+            prefs[Keys.CONTENT_VERSION] = newSettings.contentVersion
+            val exportedAt = newSettings.backupLastExportedAt
+            if (exportedAt != null) {
+                prefs[Keys.BACKUP_LAST_EXPORTED_AT] = exportedAt
+            } else {
+                prefs.remove(Keys.BACKUP_LAST_EXPORTED_AT)
+            }
+        }
+    }
+
     suspend fun clearAll() {
         context.dataStore.edit { it.clear() }
     }

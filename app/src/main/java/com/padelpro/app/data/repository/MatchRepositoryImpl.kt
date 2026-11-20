@@ -18,7 +18,10 @@ import com.padelpro.app.domain.engine.MatchEngineState
 import com.padelpro.app.domain.model.DeuceMode
 import com.padelpro.app.domain.model.LiveMatchSnapshot
 import com.padelpro.app.domain.model.MatchCompletionResult
+import com.padelpro.app.domain.model.MatchDetailsData
 import com.padelpro.app.domain.model.MatchFormat
+import com.padelpro.app.domain.model.MatchParticipantDetail
+import com.padelpro.app.domain.model.MatchStatsCalculator
 import com.padelpro.app.domain.model.MatchStatus
 import com.padelpro.app.domain.model.MatchSummary
 import com.padelpro.app.domain.model.Player
@@ -71,6 +74,80 @@ class MatchRepositoryImpl(
     override fun observeMatchById(matchId: String): Flow<MatchSummary?> =
         matchDao.observeMatchById(matchId).map { entity ->
             entity?.let { buildMatchSummary(it) }
+        }
+
+    override fun observeMatchDetails(matchId: String): Flow<MatchDetailsData?> =
+        combine(
+            matchDao.observeMatchById(matchId),
+            matchDao.observeParticipantsForMatch(matchId),
+            matchDao.observeSetResultsForMatch(matchId),
+            matchDao.observeEventsForMatch(matchId)
+        ) { entity, participants, setEntities, eventEntities ->
+            if (entity == null) return@combine null
+            val playersById = loadPlayersMap(participants.map { it.playerId })
+
+            val teamADetails = participants
+                .filter { it.team == TeamSide.A.name }
+                .sortedBy { it.position }
+                .map { p ->
+                    MatchParticipantDetail(
+                        player = playersById[p.playerId] ?: fallbackPlayer(p),
+                        isUser = p.isUser == 1
+                    )
+                }
+            val teamBDetails = participants
+                .filter { it.team == TeamSide.B.name }
+                .sortedBy { it.position }
+                .map { p ->
+                    MatchParticipantDetail(
+                        player = playersById[p.playerId] ?: fallbackPlayer(p),
+                        isUser = p.isUser == 1
+                    )
+                }
+
+            val sets = setEntities.map {
+                SetScore(
+                    setIndex = it.setIndex,
+                    gamesA = it.gamesA,
+                    gamesB = it.gamesB,
+                    tbA = it.tbA,
+                    tbB = it.tbB
+                )
+            }
+            val winner = entity.winnerTeam?.let { runCatching { TeamSide.valueOf(it) }.getOrNull() }
+            val userTeam = participants.firstOrNull { it.isUser == 1 }?.team
+                ?.let { runCatching { TeamSide.valueOf(it) }.getOrNull() }
+            val userWon = if (winner != null && userTeam != null) winner == userTeam else null
+
+            val summary = MatchSummary(
+                id = entity.id,
+                format = runCatching { MatchFormat.valueOf(entity.format) }.getOrDefault(MatchFormat.DOUBLES),
+                deuceMode = runCatching { DeuceMode.valueOf(entity.deuceMode) }.getOrDefault(DeuceMode.GOLDEN_POINT),
+                status = runCatching { MatchStatus.valueOf(entity.status) }.getOrDefault(MatchStatus.COMPLETED),
+                startedAt = entity.startedAt,
+                endedAt = entity.endedAt,
+                durationMs = entity.durationMs,
+                winnerTeam = winner,
+                userWon = userWon,
+                teamANames = teamADetails.map { it.player.displayName },
+                teamBNames = teamBDetails.map { it.player.displayName },
+                sets = sets
+            )
+
+            val config = buildConfig(
+                entity = entity,
+                teamAPlayers = teamADetails.map { it.player },
+                teamBPlayers = teamBDetails.map { it.player }
+            )
+            val engineEvents = eventEntities.mapNotNull { it.toEngineEvent() }
+            val eventStats = MatchStatsCalculator.computeFromEvents(config, engineEvents)
+
+            MatchDetailsData(
+                summary = summary,
+                teamAPlayers = teamADetails,
+                teamBPlayers = teamBDetails,
+                stats = eventStats
+            )
         }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -264,6 +341,15 @@ class MatchRepositoryImpl(
     override suspend fun cancelActiveMatch(): Boolean = withContext(Dispatchers.IO) {
         database.withTransaction {
             matchDao.deleteAllActiveMatches() > 0
+        }
+    }
+
+    override suspend fun deleteMatch(matchId: String): Boolean = withContext(Dispatchers.IO) {
+        database.withTransaction {
+            matchDao.deleteSetResultsForMatch(matchId)
+            matchDao.deleteEventsForMatch(matchId)
+            matchDao.deleteParticipantsForMatch(matchId)
+            matchDao.deleteMatchById(matchId) > 0
         }
     }
 

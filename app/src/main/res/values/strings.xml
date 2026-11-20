@@ -67,6 +67,7 @@
     <string name="match_format_doubles_short">Парный</string>
     <string name="match_card_teams_vs_format">%1$s против %2$s</string>
     <string name="match_card_meta_format">%1$s · %2$s</string>
+    <string name="match_card_meta_duration_format">%1$s · %2$s · %3$s</string>
 
     <!-- Экран 01: Онбординг -->
     <string name="onboarding_feature_learn_title">УЧИСЬ</string>
@@ -402,24 +403,33 @@
     <string name="history_filter_doubles">ПАРНЫЙ</string>
     <string name="history_chip_win">ПОБЕДА</string>
     <string name="history_chip_loss">ПОРАЖЕНИЕ</string>
+    <string name="history_chip_completed">ЗАВЕРШЁН</string>
     <string name="history_empty_title">Пока нет матчей</string>
     <string name="history_empty_body">Сыграйте первый матч, чтобы начать собирать архив результатов.</string>
-    <string name="history_empty_filter_title">По фильтрам ничего не найдено</string>
+    <string name="history_empty_filter_title">Ничего не найдено</string>
+    <string name="history_empty_filter_body">Попробуйте изменить запрос или сбросить фильтры.</string>
 
     <!-- Экран 14: Детали матча -->
     <string name="details_title">ДЕТАЛИ МАТЧА</string>
+    <string name="details_winner_banner_win">ПОБЕДА В МАТЧЕ</string>
+    <string name="details_winner_banner_loss">ПОРАЖЕНИЕ В МАТЧЕ</string>
+    <string name="details_winner_banner_neutral">МАТЧ ЗАВЕРШЁН</string>
     <string name="details_table_team">КОМАНДА</string>
+    <string name="details_table_set_format">С%1$d</string>
     <string name="details_table_set1">СЕТ 1</string>
     <string name="details_table_set2">СЕТ 2</string>
     <string name="details_table_set3">СЕТ 3</string>
     <string name="details_section_teams">СОСТАВЫ</string>
+    <string name="details_section_info">О МАТЧЕ</string>
     <string name="details_section_stats">СТАТИСТИКА МАТЧА</string>
     <string name="details_total_points">ВСЕГО ОЧКОВ</string>
-    <string name="details_points_won">ВЫИГРАНО ОЧКОВ</string>
+    <string name="details_points_won">ОЧКИ КОМАНД (A / B)</string>
+    <string name="details_points_team_ratio_format">%1$d / %2$d</string>
     <string name="details_longest_set">САМЫЙ ДОЛГИЙ СЕТ</string>
+    <string name="details_longest_set_format">Сет %1$d · %2$s</string>
     <string name="details_delete_btn">УДАЛИТЬ МАТЧ</string>
     <string name="details_delete_confirm_title">Удалить этот матч?</string>
-    <string name="details_delete_confirm_body">Статистика будет пересчитана. Это действие нельзя отменить.</string>
+    <string name="details_delete_confirm_body">Матч будет удалён из истории, а статистика пересчитана. Это действие нельзя отменить.</string>
     <string name="details_empty_title">Матч не найден</string>
     <string name="details_empty_body">Запись о матче недоступна или была удалена.</string>
 
@@ -453,7 +463,7 @@
     <string name="performance_section_recent_form">ПОСЛЕДНЯЯ ФОРМА</string>
     <string name="performance_last_5_matches">Последние 5 матчей</string>
     <string name="performance_view_history">ИСТОРИЯ МАТЧЕЙ →</string>
-    <string name="performance_empty_cta_text">Сыграйте первый матч, чтобы открыть аналитику</string>
+    <string name="performance_empty_cta_text">Сыграйте первый матч, чтобы открыть статистику</string>
     <string name="performance_form_w">В</string>
     <string name="performance_form_l">П</string>
 
@@ -467,7 +477,7 @@
     <string name="profile_section_achievements">ДОСТИЖЕНИЯ</string>
     <string name="profile_achievements_count_format">%1$d/%2$d</string>
     <string name="profile_section_players">ИГРОКИ</string>
-    <string name="profile_players_empty">Сохранённых игроков пока нет. Партнёры и соперники появятся в обновлении модуля «Игра».</string>
+    <string name="profile_players_empty">Сохранённых друзей пока нет. Добавьте партнёра или соперника, чтобы быстрее выбирать состав.</string>
     <string name="profile_add_player">ДОБАВИТЬ ИГРОКА</string>
     <string name="profile_section_settings">НАСТРОЙКИ</string>
     <string name="profile_setting_haptics">Виброотклик</string>
@@ -475,7 +485,22 @@
     <string name="profile_setting_default_scoring">Режим счёта по умолчанию</string>
     <string name="profile_section_data">ДАННЫЕ</string>
     <string name="profile_data_export">Экспорт данных (JSON)</string>
-    <string name="profile_data_import">Импорт данных</string>
+    <string name="profile_data_export_sub">Сохранить профиль, матчи, друзей, Академию и настройки</string>
+    <string name="profile_data_import">Импорт данных (JSON)</string>
+    <string name="profile_data_import_sub">Восстановить данные из резервной копии</string>
+    <string name="profile_data_last_export_format">Последний экспорт: %1$s</string>
+    <string name="profile_data_never_exported">Резервная копия ещё не сохранялась</string>
+    <string name="profile_data_export_success">Резервная копия сохранена</string>
+    <string name="profile_data_export_error">Не удалось сохранить файл резервной копии</string>
+    <string name="profile_data_import_confirm_title">Заменить текущие данные?</string>
+    <string name="profile_data_import_confirm_body">Будут восстановлены: %1$d матчей, %2$d игроков, %3$d пройденных уроков. Текущие данные на устройстве будут полностью заменены.</string>
+    <string name="profile_data_import_confirm_btn">ЗАМЕНИТЬ</string>
+    <string name="profile_data_import_success">Данные успешно восстановлены (%1$d матчей, %2$d игроков)</string>
+    <string name="profile_data_error_invalid_json">Файл повреждён или не является корректным JSON резервной копии.</string>
+    <string name="profile_data_error_schema_version">Неподдерживаемая версия схемы резервной копии.</string>
+    <string name="profile_data_error_invalid_data">В файле резервной копии обнаружены некорректные или неполные данные.</string>
+    <string name="profile_data_error_unknown_content">Резервная копия содержит неизвестные ID уроков, достижений или правил.</string>
+    <string name="profile_data_error_read">Не удалось прочитать выбранный файл.</string>
     <string name="profile_section_danger">ОПАСНАЯ ЗОНА</string>
     <string name="profile_reset_btn">СБРОСИТЬ ПРОГРЕСС</string>
     <string name="profile_reset_step1_title">Сбросить весь прогресс?</string>

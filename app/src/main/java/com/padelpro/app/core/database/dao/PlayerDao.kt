@@ -24,8 +24,14 @@ interface PlayerDao {
     @Query("SELECT * FROM players WHERE id = :id LIMIT 1")
     suspend fun getPlayerById(id: String): PlayerEntity?
 
+    @Query("SELECT * FROM players ORDER BY is_user DESC, created_at ASC")
+    suspend fun getAllPlayersOnce(): List<PlayerEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertPlayer(player: PlayerEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPlayers(players: List<PlayerEntity>)
 
     @Query("UPDATE players SET display_name = :displayName, avatar_id = :avatarId WHERE is_user = 1")
     suspend fun updateUserProfile(displayName: String, avatarId: Int)

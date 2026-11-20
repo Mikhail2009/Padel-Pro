@@ -95,16 +95,25 @@ fun PpSectionHeader(
             style = PpTextStyles.Micro,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        if (actionText != null && onActionClick != null) {
-            Text(
-                text = actionText.uppercase(),
-                style = PpTextStyles.Micro,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .clip(PpRadius.pill)
-                    .clickable(onClick = onActionClick)
-                    .padding(horizontal = PpSpacing.sm, vertical = PpSpacing.xs)
-            )
+        if (actionText != null) {
+            if (onActionClick != null) {
+                Text(
+                    text = actionText.uppercase(),
+                    style = PpTextStyles.Micro,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .clip(PpRadius.pill)
+                        .clickable(onClick = onActionClick)
+                        .padding(horizontal = PpSpacing.sm, vertical = PpSpacing.xs)
+                )
+            } else {
+                Text(
+                    text = actionText.uppercase(),
+                    style = PpTextStyles.Micro,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = PpSpacing.sm, vertical = PpSpacing.xs)
+                )
+            }
         }
     }
 }
@@ -348,6 +357,19 @@ fun PpLessonRow(
 }
 
 @Composable
+fun formatDurationRu(durationMs: Long): String {
+    val totalSeconds = (durationMs / 1000L).coerceAtLeast(0L)
+    val hours = totalSeconds / 3600L
+    val minutes = (totalSeconds % 3600L) / 60L
+    val seconds = totalSeconds % 60L
+    return when {
+        hours > 0L -> stringResource(R.string.results_duration_hour_min_format, hours, minutes)
+        minutes > 0L -> stringResource(R.string.results_duration_min_sec_format, minutes, seconds)
+        else -> stringResource(R.string.results_duration_sec_format, seconds)
+    }
+}
+
+@Composable
 fun PpMatchCard(
     match: MatchSummary,
     dateText: String,
@@ -357,6 +379,11 @@ fun PpMatchCard(
     val teamAText = match.teamANames.joinToString(" & ").ifBlank { stringResource(R.string.live_match_team_a_placeholder) }
     val teamBText = match.teamBNames.joinToString(" & ").ifBlank { stringResource(R.string.live_match_team_b_placeholder) }
     val isWin = match.userWon == true
+    val chipText = when (match.userWon) {
+        true -> stringResource(R.string.history_chip_win)
+        false -> stringResource(R.string.history_chip_loss)
+        null -> stringResource(R.string.history_chip_completed)
+    }
     val scoreLine = match.sets.joinToString(" ") { set ->
         val tb = if (set.tbA != null && set.tbB != null) {
             "(${minOf(set.tbA, set.tbB)})"
@@ -384,7 +411,7 @@ fun PpMatchCard(
                     .padding(horizontal = PpSpacing.md, vertical = PpSpacing.xs)
             ) {
                 Text(
-                    text = if (isWin) stringResource(R.string.history_chip_win) else stringResource(R.string.history_chip_loss),
+                    text = chipText,
                     style = PpTextStyles.Micro,
                     color = if (isWin) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -409,10 +436,22 @@ fun PpMatchCard(
                     color = if (isWin) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onBackground
                 )
                 Spacer(Modifier.height(2.dp))
+                val metaText = if (match.durationMs != null) {
+                    stringResource(
+                        R.string.match_card_meta_duration_format,
+                        formatLabel,
+                        dateText,
+                        formatDurationRu(match.durationMs)
+                    )
+                } else {
+                    stringResource(R.string.match_card_meta_format, formatLabel, dateText)
+                }
                 Text(
-                    text = stringResource(R.string.match_card_meta_format, formatLabel, dateText),
+                    text = metaText,
                     style = PpTextStyles.Label,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
             Icon(

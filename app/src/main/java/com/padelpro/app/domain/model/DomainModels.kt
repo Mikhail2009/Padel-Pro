@@ -247,3 +247,59 @@ enum class DeleteFriendResult {
     IN_USE_BY_MATCHES,
     NOT_FOUND
 }
+
+enum class FriendActionError {
+    IN_USE_BY_MATCHES
+}
+
+data class MatchParticipantDetail(
+    val player: Player,
+    val isUser: Boolean
+)
+
+data class MatchEventStats(
+    val totalPoints: Int,
+    val teamAPoints: Int,
+    val teamBPoints: Int,
+    val longestSetIndex: Int?,
+    val longestSetDurationMs: Long?
+)
+
+data class MatchDetailsData(
+    val summary: MatchSummary,
+    val teamAPlayers: List<MatchParticipantDetail>,
+    val teamBPlayers: List<MatchParticipantDetail>,
+    val stats: MatchEventStats?
+)
+
+enum class BackupValidationError {
+    INVALID_JSON,
+    UNSUPPORTED_SCHEMA_VERSION,
+    INVALID_DATA,
+    UNKNOWN_CONTENT_REFERENCE
+}
+
+data class BackupPreview(
+    val schemaVersion: Int,
+    val exportedAt: Long,
+    val matchesCount: Int,
+    val playersCount: Int,
+    val lessonsCompletedCount: Int,
+    val hasUserProfile: Boolean
+)
+
+sealed interface BackupValidationResult {
+    data class Valid(val preview: BackupPreview) : BackupValidationResult
+    data class Invalid(val error: BackupValidationError) : BackupValidationResult
+}
+
+sealed interface BackupImportOutcome {
+    data class Success(
+        val hasUserProfile: Boolean,
+        val matchesCount: Int,
+        val playersCount: Int
+    ) : BackupImportOutcome
+
+    data class Error(val error: BackupValidationError) : BackupImportOutcome
+}
+

@@ -123,6 +123,8 @@ class LocalizationTest {
             override suspend fun resumeActiveMatch(): Boolean = false
             override suspend fun cancelActiveMatch(): Boolean = false
             override suspend fun completeMatchIfFinished(matchId: String) = null
+            override fun observeMatchDetails(matchId: String): Flow<com.padelpro.app.domain.model.MatchDetailsData?> = flowOf(null)
+            override suspend fun deleteMatch(matchId: String): Boolean = false
             override fun dismissRestoredBanner(matchId: String) = Unit
         }
         val statsRepo = StatsRepositoryImpl(repo)

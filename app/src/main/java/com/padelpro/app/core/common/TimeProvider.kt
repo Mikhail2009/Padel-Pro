@@ -12,6 +12,8 @@ interface TimeProvider {
     fun currentLocalDate(): LocalDate
     fun formatMonthYear(epochMillis: Long): String
     fun formatShortDate(epochMillis: Long): String
+    fun formatFullMonthYear(epochMillis: Long): String = formatMonthYear(epochMillis)
+    fun formatShortDateTime(epochMillis: Long): String = formatShortDate(epochMillis)
 }
 
 class SystemTimeProvider : TimeProvider {
@@ -39,5 +41,15 @@ class SystemTimeProvider : TimeProvider {
     override fun formatShortDate(epochMillis: Long): String {
         val date = Instant.ofEpochMilli(epochMillis).atZone(ZoneId.systemDefault()).toLocalDate()
         return date.format(DateTimeFormatter.ofPattern("d MMM yyyy", russianLocale))
+    }
+
+    override fun formatFullMonthYear(epochMillis: Long): String {
+        val date = Instant.ofEpochMilli(epochMillis).atZone(ZoneId.systemDefault()).toLocalDate()
+        return date.format(DateTimeFormatter.ofPattern("LLLL yyyy", russianLocale))
+    }
+
+    override fun formatShortDateTime(epochMillis: Long): String {
+        val dateTime = Instant.ofEpochMilli(epochMillis).atZone(ZoneId.systemDefault()).toLocalDateTime()
+        return dateTime.format(DateTimeFormatter.ofPattern("d MMM yyyy, HH:mm", russianLocale))
     }
 }

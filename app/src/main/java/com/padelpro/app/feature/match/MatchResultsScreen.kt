@@ -46,6 +46,7 @@ import com.padelpro.app.core.designsystem.components.PpPrimaryButton
 import com.padelpro.app.core.designsystem.components.PpSecondaryButton
 import com.padelpro.app.core.designsystem.components.PpSectionHeader
 import com.padelpro.app.core.designsystem.components.PpSetScoreRow
+import com.padelpro.app.core.designsystem.components.formatDurationRu
 import com.padelpro.app.core.designsystem.theme.PpBackground
 import com.padelpro.app.core.designsystem.theme.PpPrimary
 import com.padelpro.app.core.designsystem.theme.PpPrimaryTint
@@ -117,6 +118,7 @@ fun MatchResultsScreen(
                     }
                     ResultsActionButtons(
                         matchId = matchId,
+                        detailsEnabled = false,
                         onViewStatistics = onViewStatistics,
                         onOpenDetails = onOpenDetails,
                         onReturnHome = onReturnHome
@@ -325,6 +327,7 @@ private fun MatchResultsContent(
 
         ResultsActionButtons(
             matchId = match.id,
+            detailsEnabled = true,
             onViewStatistics = onViewStatistics,
             onOpenDetails = onOpenDetails,
             onReturnHome = onReturnHome
@@ -335,6 +338,7 @@ private fun MatchResultsContent(
 @Composable
 private fun ResultsActionButtons(
     matchId: String,
+    detailsEnabled: Boolean,
     onViewStatistics: () -> Unit,
     onOpenDetails: (String) -> Unit,
     onReturnHome: () -> Unit
@@ -351,12 +355,13 @@ private fun ResultsActionButtons(
             onClick = onViewStatistics,
             modifier = Modifier.testTag("results_view_stats_button")
         )
-        PpSecondaryButton(
-            text = stringResource(R.string.results_btn_match_details),
-            onClick = { onOpenDetails(matchId) },
-            enabled = false,
-            modifier = Modifier.testTag("results_match_details_button")
-        )
+        if (detailsEnabled) {
+            PpSecondaryButton(
+                text = stringResource(R.string.results_btn_match_details),
+                onClick = { onOpenDetails(matchId) },
+                modifier = Modifier.testTag("results_match_details_button")
+            )
+        }
         TextButton(
             onClick = onReturnHome,
             modifier = Modifier.testTag("results_return_home_button")
@@ -408,18 +413,5 @@ private fun formatSetsLine(sets: List<SetScore>): String {
             "(${minOf(set.tbA, set.tbB)})"
         } else ""
         "${set.gamesA}-${set.gamesB}$tb"
-    }
-}
-
-@Composable
-private fun formatDurationRu(durationMs: Long): String {
-    val totalSeconds = (durationMs / 1000L).coerceAtLeast(0L)
-    val hours = totalSeconds / 3600L
-    val minutes = (totalSeconds % 3600L) / 60L
-    val seconds = totalSeconds % 60L
-    return when {
-        hours > 0L -> stringResource(R.string.results_duration_hour_min_format, hours, minutes)
-        minutes > 0L -> stringResource(R.string.results_duration_min_sec_format, minutes, seconds)
-        else -> stringResource(R.string.results_duration_sec_format, seconds)
     }
 }

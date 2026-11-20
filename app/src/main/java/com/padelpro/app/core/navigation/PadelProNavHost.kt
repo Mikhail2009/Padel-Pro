@@ -43,6 +43,7 @@ import com.padelpro.app.feature.academy.QuizViewModel
 import com.padelpro.app.feature.academy.RulebookScreen
 import com.padelpro.app.feature.history.HistoryViewModel
 import com.padelpro.app.feature.history.MatchDetailsScreen
+import com.padelpro.app.feature.history.MatchDetailsViewModel
 import com.padelpro.app.feature.history.MatchHistoryScreen
 import com.padelpro.app.feature.home.HomeScreen
 import com.padelpro.app.feature.home.HomeViewModel
@@ -361,8 +362,10 @@ private fun PadelProNavGraph(
             // 14 Match Details
             composable<AppRoute.MatchDetails> { entry ->
                 val args = entry.toRoute<AppRoute.MatchDetails>()
+                val vm: MatchDetailsViewModel = viewModel(factory = viewModelFactory)
                 MatchDetailsScreen(
                     matchId = args.matchId,
+                    viewModel = vm,
                     onBack = { navController.popBackStack() }
                 )
             }

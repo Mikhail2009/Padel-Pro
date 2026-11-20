@@ -8,6 +8,7 @@ import com.padelpro.app.core.common.SystemTimeProvider
 import com.padelpro.app.core.common.TimeProvider
 import com.padelpro.app.core.database.PadelProDatabase
 import com.padelpro.app.core.datastore.SettingsRepository
+import com.padelpro.app.data.backup.BackupRepositoryImpl
 import com.padelpro.app.data.content.AssetAcademyContentLoader
 import com.padelpro.app.data.repository.AcademyRepositoryImpl
 import com.padelpro.app.data.repository.MatchRepositoryImpl
@@ -15,6 +16,7 @@ import com.padelpro.app.data.repository.PlayerRepositoryImpl
 import com.padelpro.app.data.repository.StatsRepositoryImpl
 import com.padelpro.app.domain.academy.ContentPack
 import com.padelpro.app.domain.repository.AcademyRepository
+import com.padelpro.app.domain.repository.BackupRepository
 import com.padelpro.app.domain.repository.MatchRepository
 import com.padelpro.app.domain.repository.PlayerRepository
 import com.padelpro.app.domain.repository.StatsRepository
@@ -24,6 +26,7 @@ import com.padelpro.app.feature.academy.CourseDetailViewModel
 import com.padelpro.app.feature.academy.LessonViewModel
 import com.padelpro.app.feature.academy.QuizViewModel
 import com.padelpro.app.feature.history.HistoryViewModel
+import com.padelpro.app.feature.history.MatchDetailsViewModel
 import com.padelpro.app.feature.home.HomeViewModel
 import com.padelpro.app.feature.main.AppEntryViewModel
 import com.padelpro.app.feature.match.LiveMatchViewModel
@@ -72,8 +75,18 @@ class AppContainer(context: Context) {
     )
 
     val statsRepository: StatsRepository = StatsRepositoryImpl(
-        matchRepository = matchRepository
+        matchRepository = matchRepository,
+        timeProvider = timeProvider
     )
+
+    val backupRepository: BackupRepository by lazy {
+        BackupRepositoryImpl(
+            database = database,
+            settingsRepository = settingsRepository,
+            timeProvider = timeProvider,
+            contentPackProvider = { contentPack }
+        )
+    }
 
     val viewModelFactory: ViewModelProvider.Factory = object : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
@@ -127,6 +140,11 @@ class AppContainer(context: Context) {
                         matchRepository = matchRepository,
                         timeProvider = timeProvider
                     ) as T
+                modelClass.isAssignableFrom(MatchDetailsViewModel::class.java) ->
+                    MatchDetailsViewModel(
+                        matchRepository = matchRepository,
+                        timeProvider = timeProvider
+                    ) as T
                 modelClass.isAssignableFrom(PerformanceViewModel::class.java) ->
                     PerformanceViewModel(statsRepository = statsRepository) as T
                 modelClass.isAssignableFrom(ProfileViewModel::class.java) ->
@@ -135,6 +153,7 @@ class AppContainer(context: Context) {
                         academyRepository = academyRepository,
                         statsRepository = statsRepository,
                         settingsRepository = settingsRepository,
+                        backupRepository = backupRepository,
                         timeProvider = timeProvider
                     ) as T
                 else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
