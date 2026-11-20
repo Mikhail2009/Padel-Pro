@@ -1,0 +1,6 @@
+{
+  "name": "PADEL PRO",
+  "description": "Your complete offline padel companion — learn, score matches, and track performance.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

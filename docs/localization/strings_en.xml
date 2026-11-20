@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PADEL PRO</string>
+
+    <!-- Brand & Common -->
+    <string name="brand_padel">PADEL</string>
+    <string name="brand_pro">PRO</string>
+    <string name="brand_tagline">YOUR COMPLETE PADEL COMPANION</string>
+    <string name="offline_footer">Works 100% offline. No account needed.</string>
+    <string name="action_back">Back</string>
+    <string name="action_close">Close</string>
+    <string name="action_cancel">CANCEL</string>
+    <string name="action_continue">CONTINUE</string>
+    <string name="action_save">SAVE</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_delete">DELETE</string>
+    <string name="action_clear_filters">CLEAR FILTERS</string>
+    <string name="action_start_a_match">START A MATCH</string>
+    <string name="cd_user_avatar">Player avatar</string>
+    <string name="cd_court_diagram">Padel court diagram</string>
+    <string name="cd_padel_logo">PADEL PRO icon</string>
+    <string name="cd_serving_indicator">Serving indicator</string>
+    <string name="dash_placeholder">—</string>
+    <string name="label_you">YOU</string>
+    <string name="label_vs">VS</string>
+    <string name="label_next_iteration_badge">Engine in next update</string>
+
+    <!-- Bottom Navigation -->
+    <string name="nav_home">HOME</string>
+    <string name="nav_academy">ACADEMY</string>
+    <string name="nav_play">PLAY</string>
+    <string name="nav_stats">STATS</string>
+
+    <!-- Levels -->
+    <string name="level_title_rookie">ROOKIE</string>
+    <string name="level_title_challenger">CHALLENGER</string>
+    <string name="level_title_competitor">COMPETITOR</string>
+    <string name="level_title_playmaker">PLAYMAKER</string>
+    <string name="level_title_strategist">STRATEGIST</string>
+    <string name="level_title_ace">ACE</string>
+    <string name="level_title_pro">PRO</string>
+    <string name="level_title_elite">ELITE</string>
+    <string name="level_title_master">MASTER</string>
+    <string name="level_title_legend">LEGEND</string>
+    <string name="level_badge_format">LEVEL %1$d · %2$s</string>
+    <string name="xp_progress_format">%1$d / %2$d XP</string>
+    <string name="xp_total_format">%1$d XP</string>
+    <string name="streak_days_format">%1$d-DAY STREAK</string>
+
+    <!-- Screen 01: Onboarding -->
+    <string name="onboarding_feature_learn_title">LEARN</string>
+    <string name="onboarding_feature_learn_desc">Structured courses &amp; quizzes</string>
+    <string name="onboarding_feature_play_title">PLAY</string>
+    <string name="onboarding_feature_play_desc">Live match scoring</string>
+    <string name="onboarding_feature_track_title">TRACK</string>
+    <string name="onboarding_feature_track_desc">Real performance stats</string>
+    <string name="onboarding_cta_get_started">GET STARTED</string>
+    <string name="onboarding_cta_already_play">I ALREADY PLAY PADEL</string>
+    <string name="onboarding_step2_title">BUILT FOR THE COURT</string>
+    <string name="onboarding_step2_subtitle">Everything you need for amateur and club play — right in your pocket.</string>
+    <string name="onboarding_step2_p1_title">FIP 2026 Rules &amp; Tactics</string>
+    <string name="onboarding_step2_p1_desc">Learn scoring, serves, walls and doubles positioning at your own pace.</string>
+    <string name="onboarding_step2_p2_title">One-Handed Live Scoreboard</string>
+    <string name="onboarding_step2_p2_desc">Score singles or doubles with Advantage, Golden Point or Star Point.</string>
+    <string name="onboarding_step2_p3_title">100% Honest Analytics</string>
+    <string name="onboarding_step2_p3_desc">Every win rate, streak and chart is calculated strictly from your matches.</string>
+    <string name="onboarding_profile_title">CREATE YOUR PROFILE</string>
+    <string name="onboarding_profile_subtitle">Stored locally on your device. No sign-up required.</string>
+    <string name="onboarding_name_label">DISPLAY NAME</string>
+    <string name="onboarding_name_hint">Enter your name (max 20 chars)</string>
+    <string name="onboarding_name_counter">%1$d/20</string>
+    <string name="onboarding_avatar_label">CHOOSE AN AVATAR</string>
+    <string name="onboarding_format_label">PREFERRED FORMAT</string>
+    <string name="onboarding_cta_finish">ENTER PADEL PRO</string>
+
+    <!-- Screen 02: Home Dashboard -->
+    <string name="home_greeting_morning">GOOD MORNING,</string>
+    <string name="home_greeting_afternoon">GOOD AFTERNOON,</string>
+    <string name="home_greeting_evening">GOOD EVENING,</string>
+    <string name="home_action_start_match">START A MATCH</string>
+    <string name="home_action_start_match_sub">Singles or doubles</string>
+    <string name="home_action_continue_learning">CONTINUE LEARNING</string>
+    <string name="home_action_continue_learning_sub">Open Padel Academy</string>
+    <string name="home_section_academy_progress">ACADEMY PROGRESS</string>
+    <string name="home_academy_progress_format">%1$d%% complete · %2$d/%3$d lessons</string>
+    <string name="home_section_recent_match">RECENT MATCH</string>
+    <string name="home_recent_match_empty_title">No matches yet</string>
+    <string name="home_recent_match_empty_sub">Play your first match to see results here</string>
+    <string name="home_section_performance">PERFORMANCE</string>
+    <string name="home_stat_matches_label">MATCHES</string>
+    <string name="home_stat_win_rate_label">WIN RATE</string>
+    <string name="home_stat_streak_label">STREAK</string>
+    <string name="home_resume_match_title">MATCH IN PROGRESS</string>
+    <string name="home_resume_cta">RESUME</string>
+
+    <!-- Screen 03: Padel Academy -->
+    <string name="academy_title">PADEL ACADEMY</string>
+    <string name="academy_rulebook_btn">RULEBOOK</string>
+    <string name="academy_progress_summary_format">%1$d%% ACADEMY PROGRESS</string>
+    <string name="academy_chip_all">ALL</string>
+    <string name="academy_chip_fundamentals">FUNDAMENTALS</string>
+    <string name="academy_chip_rules">RULES</string>
+    <string name="academy_chip_serving">SERVING</string>
+    <string name="academy_chip_technique">TECHNIQUE</string>
+    <string name="academy_chip_tactics">TACTICS</string>
+    <string name="academy_course_meta_format">%1$d lessons · %2$d min</string>
+    <string name="academy_status_completed">COMPLETED</string>
+    <string name="academy_status_continue">CONTINUE</string>
+    <string name="academy_status_start">START</string>
+    <string name="academy_status_locked">Complete previous course</string>
+    <string name="academy_locked_sheet_title">Course Locked</string>
+    <string name="academy_locked_sheet_body">Complete the previous course and pass its quizzes to unlock this module.</string>
+    <string name="academy_locked_sheet_ok">GOT IT</string>
+    <string name="course_1_title">Padel Fundamentals</string>
+    <string name="course_1_desc">Learn the core concept of padel, the glass walls, basic scoring flow, and how a rally is played.</string>
+    <string name="course_2_title">Court and Equipment</string>
+    <string name="course_2_desc">Understand court dimensions, the net, glass and mesh walls, rackets, and official padel balls.</string>
+    <string name="course_3_title">Rules and Scoring</string>
+    <string name="course_3_desc">Master the tennis-style count, deuce modes, tie-breaks, and how sets decide a padel match.</string>
+    <string name="course_4_title">Serving</string>
+    <string name="course_4_desc">Underarm serve mechanics, diagonal service boxes, foot faults, lets, and serving rotation.</string>
+    <string name="course_5_title">Techniques</string>
+    <string name="course_5_desc">Core strokes including forehand, backhand, bandeja, vibora, volley, lob, and bajada.</string>
+    <string name="course_6_title">Court Positioning</string>
+    <string name="course_6_desc">Moving as a pair between defense at the back glass and attacking pressure at the net.</string>
+    <string name="course_7_title">Doubles Strategy</string>
+    <string name="course_7_desc">Coordinated communication, covering the middle, lobs to regain the net, and target selection.</string>
+    <string name="course_8_title">Advanced Tactics</string>
+    <string name="course_8_desc">Controlling match tempo, playing off double glass, chiquitas, and handling deciding points.</string>
+
+    <!-- Screen 04: Course Detail -->
+    <string name="course_meta_lessons_format">%1$d LESSONS</string>
+    <string name="course_meta_min_format">%1$d MIN</string>
+    <string name="course_meta_xp_format">+%1$d XP</string>
+    <string name="course_progress_complete_format">%1$d%% COMPLETE</string>
+    <string name="course_lessons_count_format">%1$d/%2$d lessons</string>
+    <string name="course_section_lessons">LESSONS</string>
+    <string name="course_cta_continue">CONTINUE COURSE</string>
+    <string name="course_lesson_placeholder_title">Lesson %1$d · Coming in Content Pack</string>
+    <string name="course_lesson_placeholder_meta">5 min · Quiz included</string>
+    <string name="course_content_pending_note">Interactive lesson content and quizzes will unlock in the Academy update.</string>
+
+    <!-- Screen 05: Interactive Lesson -->
+    <string name="lesson_header_meta_format">%1$s · LESSON %2$d</string>
+    <string name="lesson_page_counter_format">%1$d/%2$d</string>
+    <string name="lesson_key_facts">KEY FACTS</string>
+    <string name="lesson_btn_previous">PREVIOUS</string>
+    <string name="lesson_btn_take_quiz">TAKE THE QUIZ</string>
+    <string name="lesson_empty_title">Lesson Content Pending</string>
+    <string name="lesson_empty_body">Structured lesson blocks and court diagrams are scheduled for the Academy content update.</string>
+    <string name="lesson_exit_title">Leave lesson?</string>
+    <string name="lesson_exit_body">Your current reading position will remain saved.</string>
+    <string name="lesson_exit_confirm">LEAVE</string>
+
+    <!-- Screen 06: Knowledge Quiz -->
+    <string name="quiz_question_counter_format">QUESTION %1$d/%2$d</string>
+    <string name="quiz_xp_hint">+5 XP per correct answer (first attempt)</string>
+    <string name="quiz_btn_check">CHECK</string>
+    <string name="quiz_btn_next">NEXT QUESTION</string>
+    <string name="quiz_btn_see_results">SEE RESULTS</string>
+    <string name="quiz_feedback_correct">CORRECT</string>
+    <string name="quiz_feedback_incorrect">INCORRECT</string>
+    <string name="quiz_empty_title">Quiz Not Loaded</string>
+    <string name="quiz_empty_body">Interactive quiz questions will be enabled once the Academy content engine is active.</string>
+    <string name="quiz_exit_title">Exit quiz?</string>
+    <string name="quiz_exit_body">Progress in this quiz attempt will be lost.</string>
+    <string name="quiz_exit_confirm">EXIT QUIZ</string>
+
+    <!-- Screen 07: Lesson Completion -->
+    <string name="completion_title">LESSON COMPLETE</string>
+    <string name="completion_xp_gained_format">+%1$d XP</string>
+    <string name="completion_breakdown_lesson_format">Lesson +%1$d</string>
+    <string name="completion_breakdown_quiz_format">Quiz %1$d/%2$d correct +%3$d</string>
+    <string name="completion_stat_quiz_score">QUIZ SCORE</string>
+    <string name="completion_stat_course_lessons">COURSE LESSONS</string>
+    <string name="completion_achievement_label">ACHIEVEMENT UNLOCKED</string>
+    <string name="completion_btn_return_academy">RETURN TO ACADEMY</string>
+    <string name="completion_empty_subtitle">Complete a lesson and quiz to earn XP and track progress.</string>
+
+    <!-- Screen 08: Padel Rulebook -->
+    <string name="rulebook_title">PADEL RULEBOOK</string>
+    <string name="rulebook_search_hint">Search rules…</string>
+    <string name="rulebook_cat_all">ALL</string>
+    <string name="rulebook_cat_court">COURT</string>
+    <string name="rulebook_cat_equipment">EQUIPMENT</string>
+    <string name="rulebook_cat_scoring">SCORING</string>
+    <string name="rulebook_cat_serving">SERVING</string>
+    <string name="rulebook_cat_walls">WALLS</string>
+    <string name="rulebook_cat_fouls">FOULS</string>
+    <string name="rulebook_cat_favorites">FAVORITES</string>
+    <string name="rulebook_empty_title">No rules available yet</string>
+    <string name="rulebook_empty_body">Official FIP 2026 rules reference will be populated in the Academy content update.</string>
+    <string name="rulebook_empty_search">No rules found for your query</string>
+
+    <!-- Screen 09: Match Center -->
+    <string name="match_center_title">MATCH CENTER</string>
+    <string name="match_center_start_new">START NEW MATCH</string>
+    <string name="match_center_start_sub">Configure players, format &amp; scoring</string>
+    <string name="match_center_singles">SINGLES</string>
+    <string name="match_center_singles_meta">1 vs 1</string>
+    <string name="match_center_doubles">DOUBLES</string>
+    <string name="match_center_doubles_meta">2 vs 2</string>
+    <string name="match_center_most_popular">MOST POPULAR</string>
+    <string name="match_center_recent_matches">RECENT MATCHES</string>
+    <string name="match_center_view_all">VIEW ALL</string>
+    <string name="match_center_empty_recent">No matches yet. Your story starts here.</string>
+    <string name="match_center_format_sheet_title">Choose Match Format</string>
+
+    <!-- Screen 10: Match Setup -->
+    <string name="match_setup_title">MATCH SETUP</string>
+    <string name="match_setup_team_a">TEAM A</string>
+    <string name="match_setup_team_b">TEAM B</string>
+    <string name="match_setup_slot_empty">Tap to assign player</string>
+    <string name="match_setup_first_server">FIRST SERVER</string>
+    <string name="match_setup_scoring">SCORING</string>
+    <string name="match_setup_deuce_advantage">Advantage (classic deuce)</string>
+    <string name="match_setup_deuce_golden">Golden Point (sudden death at 40-40)</string>
+    <string name="match_setup_deuce_star">Star Point (2 advantages, then decider)</string>
+    <string name="match_setup_fip_tag">FIP 2026</string>
+    <string name="match_setup_decider_hint">Receiving team chooses the side on deciding points.</string>
+    <string name="match_setup_start_btn">START MATCH</string>
+    <string name="match_setup_engine_note">Live match creation and scoring engine unlock in the Match Center update.</string>
+
+    <!-- Screen 11: Live Match Scoreboard -->
+    <string name="live_match_header_placeholder">SET 1 · DOUBLES · GOLDEN POINT</string>
+    <string name="live_match_games_label">GAMES</string>
+    <string name="live_match_team_a_placeholder">TEAM A</string>
+    <string name="live_match_team_b_placeholder">TEAM B</string>
+    <string name="live_match_undo">UNDO</string>
+    <string name="live_match_finish">FINISH MATCH</string>
+    <string name="live_match_pause">Pause match</string>
+    <string name="live_match_settings">Match settings</string>
+    <string name="live_match_no_active">No active match in progress</string>
+    <string name="live_match_golden_banner">GOLDEN POINT · RECEIVERS CHOOSE SIDE</string>
+    <string name="live_match_star_banner">STAR POINT · RECEIVERS CHOOSE SIDE</string>
+    <string name="live_match_change_ends">CHANGE ENDS</string>
+    <string name="live_match_end_early_title">End early?</string>
+    <string name="live_match_end_early_body">Incomplete matches are discarded and will not affect your statistics.</string>
+
+    <!-- Screen 12: Match Results -->
+    <string name="results_completed_label">MATCH COMPLETED</string>
+    <string name="results_winners_label">WINNERS</string>
+    <string name="results_runners_up_label">RUNNERS-UP</string>
+    <string name="results_duration_label">DURATION</string>
+    <string name="results_date_label">DATE</string>
+    <string name="results_format_label">FORMAT</string>
+    <string name="results_scoring_label">SCORING</string>
+    <string name="results_btn_view_stats">VIEW STATISTICS</string>
+    <string name="results_btn_match_details">MATCH DETAILS</string>
+    <string name="results_btn_return_home">RETURN HOME</string>
+    <string name="results_empty_title">No Match Result</string>
+    <string name="results_empty_body">Complete a live match to view final scores and earned XP.</string>
+
+    <!-- Screen 13: Match History -->
+    <string name="history_title">MATCH HISTORY</string>
+    <string name="history_count_format">%1$d MATCHES</string>
+    <string name="history_search_hint">Search by player…</string>
+    <string name="history_filter_all">ALL</string>
+    <string name="history_filter_wins">WINS</string>
+    <string name="history_filter_losses">LOSSES</string>
+    <string name="history_filter_singles">SINGLES</string>
+    <string name="history_filter_doubles">DOUBLES</string>
+    <string name="history_chip_win">WIN</string>
+    <string name="history_chip_loss">LOSS</string>
+    <string name="history_empty_title">No matches yet</string>
+    <string name="history_empty_body">Start your first match to build your local match archive.</string>
+    <string name="history_empty_filter_title">Nothing matches these filters</string>
+
+    <!-- Screen 14: Match Details -->
+    <string name="details_title">MATCH DETAILS</string>
+    <string name="details_table_team">TEAM</string>
+    <string name="details_table_set1">SET 1</string>
+    <string name="details_table_set2">SET 2</string>
+    <string name="details_table_set3">SET 3</string>
+    <string name="details_section_teams">TEAMS</string>
+    <string name="details_section_stats">MATCH STATS</string>
+    <string name="details_total_points">TOTAL POINTS</string>
+    <string name="details_points_won">POINTS WON</string>
+    <string name="details_longest_set">LONGEST SET</string>
+    <string name="details_delete_btn">DELETE MATCH</string>
+    <string name="details_delete_confirm_title">Delete this match?</string>
+    <string name="details_delete_confirm_body">Statistics will be recalculated. This cannot be undone.</string>
+    <string name="details_empty_title">Match not found</string>
+    <string name="details_empty_body">This match record is unavailable or has been deleted.</string>
+
+    <!-- Screen 15: Performance Analytics -->
+    <string name="performance_title">PERFORMANCE</string>
+    <string name="performance_win_rate_label">WIN RATE</string>
+    <string name="performance_wins_format">%1$d WINS</string>
+    <string name="performance_losses_format">%1$d LOSSES</string>
+    <string name="performance_kpi_matches">MATCHES</string>
+    <string name="performance_kpi_current_streak">CURRENT STREAK</string>
+    <string name="performance_kpi_best_streak">BEST STREAK</string>
+    <string name="performance_section_monthly">MONTHLY ACTIVITY</string>
+    <string name="performance_last_6_months">Last 6 months</string>
+    <string name="performance_section_format_split">SINGLES VS DOUBLES</string>
+    <string name="performance_format_meta_format">%1$d matches · %2$s</string>
+    <string name="performance_section_recent_form">RECENT FORM</string>
+    <string name="performance_last_5_matches">Last 5 matches</string>
+    <string name="performance_view_history">VIEW MATCH HISTORY →</string>
+    <string name="performance_empty_cta_text">Play your first match to unlock analytics</string>
+    <string name="performance_form_w">W</string>
+    <string name="performance_form_l">L</string>
+
+    <!-- Screen 16: Player Profile -->
+    <string name="profile_title">PROFILE</string>
+    <string name="profile_member_since_format">Member since %1$s</string>
+    <string name="profile_stat_matches">MATCHES</string>
+    <string name="profile_stat_win_rate">WIN RATE</string>
+    <string name="profile_stat_lessons">LESSONS</string>
+    <string name="profile_section_preferred_format">PREFERRED FORMAT</string>
+    <string name="profile_section_achievements">ACHIEVEMENTS</string>
+    <string name="profile_achievements_count_format">%1$d/%2$d</string>
+    <string name="profile_section_players">PLAYERS</string>
+    <string name="profile_players_empty">No saved friends yet. Add partners and opponents in the Match Center update.</string>
+    <string name="profile_add_player">ADD PLAYER</string>
+    <string name="profile_section_settings">SETTINGS</string>
+    <string name="profile_setting_haptics">Haptics</string>
+    <string name="profile_setting_keep_screen_on">Keep screen on during matches</string>
+    <string name="profile_setting_default_scoring">Default scoring</string>
+    <string name="profile_section_data">DATA</string>
+    <string name="profile_data_export">Export data (JSON)</string>
+    <string name="profile_data_import">Import data</string>
+    <string name="profile_section_danger">DANGER ZONE</string>
+    <string name="profile_reset_btn">RESET PROGRESS</string>
+    <string name="profile_reset_step1_title">Reset all progress?</string>
+    <string name="profile_reset_step1_body">This will erase your local profile, XP, and settings.</string>
+    <string name="profile_reset_step2_title">Are you absolutely sure?</string>
+    <string name="profile_reset_step2_body">Erase all matches, XP, and progress? This cannot be undone.</string>
+    <string name="profile_reset_confirm">RESET</string>
+    <string name="profile_edit_sheet_title">Edit Profile</string>
+    <string name="profile_scoring_sheet_title">Default Scoring Mode</string>
+    <string name="profile_default_player_name">Player</string>
+
+    <!-- Achievements (14 definitions from §12.7) -->
+    <string name="ach_first_lesson_title">FIRST STEP</string>
+    <string name="ach_first_lesson_desc">Complete your first lesson</string>
+    <string name="ach_first_course_title">GRADUATE</string>
+    <string name="ach_first_course_desc">Complete an entire course</string>
+    <string name="ach_perfect_quiz_title">PERFECT QUIZ</string>
+    <string name="ach_perfect_quiz_desc">Score 100% on any quiz</string>
+    <string name="ach_streak_3_title">STREAK 3</string>
+    <string name="ach_streak_3_desc">Learn 3 days in a row</string>
+    <string name="ach_streak_7_title">STREAK 7</string>
+    <string name="ach_streak_7_desc">Learn 7 days in a row</string>
+    <string name="ach_first_match_title">FIRST MATCH</string>
+    <string name="ach_first_match_desc">Complete your first match</string>
+    <string name="ach_first_win_title">FIRST WIN</string>
+    <string name="ach_first_win_desc">Win your first match</string>
+    <string name="ach_win_streak_3_title">ON FIRE</string>
+    <string name="ach_win_streak_3_desc">Win 3 matches in a row</string>
+    <string name="ach_singles_5_title">SOLO ACE</string>
+    <string name="ach_singles_5_desc">Win 5 singles matches</string>
+    <string name="ach_doubles_5_title">DYNAMIC DUO</string>
+    <string name="ach_doubles_5_desc">Win 5 doubles matches</string>
+    <string name="ach_matches_10_title">REGULAR</string>
+    <string name="ach_matches_10_desc">Complete 10 matches</string>
+    <string name="ach_matches_25_title">VETERAN</string>
+    <string name="ach_matches_25_desc">Complete 25 matches</string>
+    <string name="ach_level_5_title">STRATEGIST</string>
+    <string name="ach_level_5_desc">Reach Level 5</string>
+    <string name="ach_golden_win_title">CLUTCH</string>
+    <string name="ach_golden_win_desc">Win a Golden Point match</string>
+</resources>

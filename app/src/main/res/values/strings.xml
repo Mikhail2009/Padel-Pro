@@ -1,0 +1,483 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PADEL PRO</string>
+
+    <!-- Бренд и общие строки -->
+    <string name="brand_padel">PADEL</string>
+    <string name="brand_pro">PRO</string>
+    <string name="brand_tagline">ТВОЙ ПАДЕЛ-КОМПАНЬОН</string>
+    <string name="offline_footer">Работает 100% офлайн. Без регистрации.</string>
+    <string name="action_back">Назад</string>
+    <string name="action_close">Закрыть</string>
+    <string name="action_cancel">ОТМЕНА</string>
+    <string name="action_continue">ПРОДОЛЖИТЬ</string>
+    <string name="action_save">СОХРАНИТЬ</string>
+    <string name="action_edit">Редактировать</string>
+    <string name="action_delete">УДАЛИТЬ</string>
+    <string name="action_clear_filters">СБРОСИТЬ ФИЛЬТРЫ</string>
+    <string name="action_start_a_match">НАЧАТЬ МАТЧ</string>
+    <string name="cd_user_avatar">Аватар игрока</string>
+    <string name="cd_court_diagram">Схема падел-корта</string>
+    <string name="cd_padel_logo">Иконка PADEL PRO</string>
+    <string name="cd_serving_indicator">Индикатор подачи</string>
+    <string name="dash_placeholder">—</string>
+    <string name="label_you">ВЫ</string>
+    <string name="label_vs">ПРОТИВ</string>
+    <string name="label_next_iteration_badge">В следующем обновлении</string>
+
+    <!-- Нижняя навигация -->
+    <string name="nav_home">ГЛАВНАЯ</string>
+    <string name="nav_academy">АКАДЕМИЯ</string>
+    <string name="nav_play">ИГРА</string>
+    <string name="nav_stats">СТАТИСТИКА</string>
+
+    <!-- Уровни -->
+    <string name="level_title_rookie">НОВИЧОК</string>
+    <string name="level_title_challenger">УЧЕНИК</string>
+    <string name="level_title_competitor">ИГРОК</string>
+    <string name="level_title_playmaker">ТАКТИК</string>
+    <string name="level_title_strategist">СТРАТЕГ</string>
+    <string name="level_title_ace">АС</string>
+    <string name="level_title_pro">ПРОФИ</string>
+    <string name="level_title_elite">ЭЛИТА</string>
+    <string name="level_title_master">МАСТЕР</string>
+    <string name="level_title_legend">ЛЕГЕНДА</string>
+    <string name="level_badge_format">УРОВЕНЬ %1$d · %2$s</string>
+    <string name="xp_progress_format">%1$d / %2$d XP</string>
+    <string name="xp_total_format">%1$d XP</string>
+    <plurals name="streak_days_format">
+        <item quantity="one">СЕРИЯ %1$d ДЕНЬ</item>
+        <item quantity="few">СЕРИЯ %1$d ДНЯ</item>
+        <item quantity="many">СЕРИЯ %1$d ДНЕЙ</item>
+        <item quantity="other">СЕРИЯ %1$d ДН.</item>
+    </plurals>
+    <string name="streak_win_short_format">В%1$d</string>
+    <string name="streak_loss_short_format">П%1$d</string>
+    <plurals name="points_count_format">
+        <item quantity="one">%1$d очко</item>
+        <item quantity="few">%1$d очка</item>
+        <item quantity="many">%1$d очков</item>
+        <item quantity="other">%1$d очков</item>
+    </plurals>
+
+    <!-- Форматы матчей и карточки -->
+    <string name="match_format_singles">Одиночный (1×1)</string>
+    <string name="match_format_doubles">Парный (2×2)</string>
+    <string name="match_format_singles_short">Одиночный</string>
+    <string name="match_format_doubles_short">Парный</string>
+    <string name="match_card_teams_vs_format">%1$s против %2$s</string>
+    <string name="match_card_meta_format">%1$s · %2$s</string>
+
+    <!-- Экран 01: Онбординг -->
+    <string name="onboarding_feature_learn_title">УЧИСЬ</string>
+    <string name="onboarding_feature_learn_desc">Курсы по правилам и тактике</string>
+    <string name="onboarding_feature_play_title">ИГРАЙ</string>
+    <string name="onboarding_feature_play_desc">Удобный счётчик матчей</string>
+    <string name="onboarding_feature_track_title">АНАЛИЗИРУЙ</string>
+    <string name="onboarding_feature_track_desc">Честная статистика прогресса</string>
+    <string name="onboarding_cta_get_started">НАЧАТЬ</string>
+    <string name="onboarding_cta_already_play">Я УЖЕ ИГРАЮ В ПАДЕЛ</string>
+    <string name="onboarding_step2_title">СОЗДАН ДЛЯ КОРТА</string>
+    <string name="onboarding_step2_subtitle">Всё для любительской и клубной игры — всегда под рукой.</string>
+    <string name="onboarding_step2_p1_title">Правила FIP 2026 и тактика</string>
+    <string name="onboarding_step2_p1_desc">Изучайте счёт, подачу, игру от стекла и позиции пары в своём темпе.</string>
+    <string name="onboarding_step2_p2_title">Живое табло для одной руки</string>
+    <string name="onboarding_step2_p2_desc">Ведите одиночные и парные матчи: больше/меньше, золотой мяч или звёздный мяч.</string>
+    <string name="onboarding_step2_p3_title">100% честная аналитика</string>
+    <string name="onboarding_step2_p3_desc">Процент побед, серии и графики считаются строго по вашим матчам.</string>
+    <string name="onboarding_profile_title">СОЗДАНИЕ ПРОФИЛЯ</string>
+    <string name="onboarding_profile_subtitle">Хранится локально на устройстве. Регистрация не нужна.</string>
+    <string name="onboarding_name_label">ИМЯ ИГРОКА</string>
+    <string name="onboarding_name_hint">Введите имя (до 20 символов)</string>
+    <string name="onboarding_name_counter">%1$d/20</string>
+    <string name="onboarding_avatar_label">ВЫБЕРИТЕ АВАТАР</string>
+    <string name="onboarding_format_label">ПРЕДПОЧТИТЕЛЬНЫЙ ФОРМАТ</string>
+    <string name="onboarding_cta_finish">ВОЙТИ В PADEL PRO</string>
+
+    <!-- Экран 02: Главная -->
+    <string name="home_greeting_morning">ДОБРОЕ УТРО,</string>
+    <string name="home_greeting_afternoon">ДОБРЫЙ ДЕНЬ,</string>
+    <string name="home_greeting_evening">ДОБРЫЙ ВЕЧЕР,</string>
+    <string name="home_action_start_match">НАЧАТЬ МАТЧ</string>
+    <string name="home_action_start_match_sub">Одиночный (1×1) или парный (2×2)</string>
+    <string name="home_action_continue_learning">ПРОДОЛЖИТЬ ОБУЧЕНИЕ</string>
+    <string name="home_action_continue_learning_sub">Открыть Академию падела</string>
+    <string name="home_section_academy_progress">ПРОГРЕСС АКАДЕМИИ</string>
+    <plurals name="home_academy_progress_format">
+        <item quantity="one">%1$d%% пройдено · %2$d/%3$d урок</item>
+        <item quantity="few">%1$d%% пройдено · %2$d/%3$d урока</item>
+        <item quantity="many">%1$d%% пройдено · %2$d/%3$d уроков</item>
+        <item quantity="other">%1$d%% пройдено · %2$d/%3$d уроков</item>
+    </plurals>
+    <string name="home_section_recent_match">ПОСЛЕДНИЙ МАТЧ</string>
+    <string name="home_recent_match_empty_title">Пока нет матчей</string>
+    <string name="home_recent_match_empty_sub">Сыграйте первый матч, чтобы увидеть результат здесь</string>
+    <string name="home_section_performance">СТАТИСТИКА</string>
+    <string name="home_stat_matches_label">МАТЧИ</string>
+    <string name="home_stat_win_rate_label">ПОБЕДЫ</string>
+    <string name="home_stat_streak_label">СЕРИЯ</string>
+    <string name="home_resume_match_title">МАТЧ В ПРОЦЕССЕ</string>
+    <string name="home_resume_cta">ПРОДОЛЖИТЬ</string>
+
+    <!-- Экран 03: Академия -->
+    <string name="academy_title">АКАДЕМИЯ</string>
+    <string name="academy_rulebook_btn">ПРАВИЛА</string>
+    <string name="academy_progress_summary_format">ПРОГРЕСС %1$d%%</string>
+    <string name="academy_chip_all">ВСЕ</string>
+    <string name="academy_chip_fundamentals">ОСНОВЫ</string>
+    <string name="academy_chip_rules">ПРАВИЛА</string>
+    <string name="academy_chip_serving">ПОДАЧА</string>
+    <string name="academy_chip_technique">ТЕХНИКА</string>
+    <string name="academy_chip_tactics">ТАКТИКА</string>
+    <plurals name="academy_course_meta_format">
+        <item quantity="one">%1$d урок · %2$d мин</item>
+        <item quantity="few">%1$d урока · %2$d мин</item>
+        <item quantity="many">%1$d уроков · %2$d мин</item>
+        <item quantity="other">%1$d уроков · %2$d мин</item>
+    </plurals>
+    <string name="academy_status_completed">ПРОЙДЕН</string>
+    <string name="academy_status_continue">ПРОДОЛЖИТЬ</string>
+    <string name="academy_status_start">НАЧАТЬ</string>
+    <string name="academy_status_locked">ЗАБЛОКИРОВАНО</string>
+    <string name="academy_locked_sheet_title">Курс заблокирован</string>
+    <string name="academy_locked_sheet_body">Завершите предыдущий курс и пройдите его тесты, чтобы открыть этот модуль.</string>
+    <string name="academy_locked_sheet_ok">ПОНЯТНО</string>
+    <string name="course_1_title">Основы падела</string>
+    <string name="course_1_desc">Изучите базовые принципы падела, игру от стеклянных стен, счёт и логику розыгрыша.</string>
+    <string name="course_2_title">Корт и инвентарь</string>
+    <string name="course_2_desc">Размеры корта, сетка, стекло и металлическая сетка, выбор ракетки и официальных мячей.</string>
+    <string name="course_3_title">Правила и счёт</string>
+    <string name="course_3_desc">Теннисный счёт, режимы ровно, тай-брейки и порядок определения победителя в сетах.</string>
+    <string name="course_4_title">Подача</string>
+    <string name="course_4_desc">Техника подачи снизу, диагональные зоны, заступ, переподача и порядок смены подающих.</string>
+    <string name="course_5_title">Техника ударов</string>
+    <string name="course_5_desc">Ключевые удары: форхенд, бэкхенд, бандеха, вибора, слёта, свеча и бахада.</string>
+    <string name="course_6_title">Позиции на корте</string>
+    <string name="course_6_desc">Синхронное движение пары между защитой у заднего стекла и давлением у сетки.</string>
+    <string name="course_7_title">Стратегия пары</string>
+    <string name="course_7_desc">Коммуникация на корте, закрытие центра, возврат к сетке свечой и выбор целей.</string>
+    <string name="course_8_title">Продвинутая тактика</string>
+    <string name="course_8_desc">Контроль темпа матча, игра от двойного стекла, чикита и розыгрыш решающих мячей.</string>
+
+    <!-- Экран 04: Детали курса -->
+    <plurals name="course_meta_lessons_format">
+        <item quantity="one">%1$d УРОК</item>
+        <item quantity="few">%1$d УРОКА</item>
+        <item quantity="many">%1$d УРОКОВ</item>
+        <item quantity="other">%1$d УРОКОВ</item>
+    </plurals>
+    <string name="course_meta_min_format">%1$d МИН</string>
+    <string name="course_meta_xp_format">+%1$d XP</string>
+    <string name="course_progress_complete_format">%1$d%% ПРОЙДЕНО</string>
+    <plurals name="course_lessons_count_format">
+        <item quantity="one">%1$d/%2$d урок</item>
+        <item quantity="few">%1$d/%2$d урока</item>
+        <item quantity="many">%1$d/%2$d уроков</item>
+        <item quantity="other">%1$d/%2$d уроков</item>
+    </plurals>
+    <string name="course_section_lessons">УРОКИ</string>
+    <string name="course_cta_continue">ПРОДОЛЖИТЬ КУРС</string>
+    <string name="course_lesson_placeholder_title">Урок %1$d · В пакете контента</string>
+    <string name="course_lesson_placeholder_meta">5 мин · С тестом</string>
+    <string name="course_lesson_xp_format">+%1$d XP</string>
+    <string name="course_content_pending_note">Интерактивные уроки и тесты откроются в обновлении Академии.</string>
+
+    <!-- Экран 05: Интерактивный урок -->
+    <string name="lesson_header_meta_format">%1$s · УРОК %2$d</string>
+    <string name="lesson_page_counter_format">%1$d/%2$d</string>
+    <string name="lesson_key_facts">ГЛАВНОЕ</string>
+    <string name="lesson_btn_previous">НАЗАД</string>
+    <string name="lesson_btn_take_quiz">ПРОЙТИ ТЕСТ</string>
+    <string name="lesson_empty_title">Материалы урока готовятся</string>
+    <string name="lesson_empty_body">Структурированные блоки урока и схемы корта появятся в обновлении контента Академии.</string>
+    <string name="lesson_exit_title">Выйти из урока?</string>
+    <string name="lesson_exit_body">Текущая позиция чтения останется сохранённой.</string>
+    <string name="lesson_exit_confirm">ВЫЙТИ</string>
+
+    <!-- Экран 06: Тест -->
+    <string name="quiz_question_counter_format">ВОПРОС %1$d/%2$d</string>
+    <string name="quiz_xp_hint">+5 XP за каждый верный ответ (с первой попытки)</string>
+    <string name="quiz_btn_check">ПРОВЕРИТЬ</string>
+    <string name="quiz_btn_next">ДАЛЕЕ</string>
+    <string name="quiz_btn_see_results">РЕЗУЛЬТАТЫ</string>
+    <string name="quiz_feedback_correct">ВЕРНО</string>
+    <string name="quiz_feedback_incorrect">НЕВЕРНО</string>
+    <string name="quiz_empty_title">Тест ещё не загружен</string>
+    <string name="quiz_empty_body">Интерактивные вопросы появятся после активации модуля контента Академии.</string>
+    <string name="quiz_exit_title">Выйти из теста?</string>
+    <string name="quiz_exit_body">Прогресс этой попытки теста будет потерян.</string>
+    <string name="quiz_exit_confirm">ВЫЙТИ</string>
+
+    <!-- Экран 07: Завершение урока -->
+    <string name="completion_title">УРОК ПРОЙДЕН</string>
+    <string name="completion_xp_gained_format">+%1$d XP</string>
+    <string name="completion_breakdown_lesson_format">Урок +%1$d</string>
+    <string name="completion_breakdown_quiz_format">Тест %1$d/%2$d верно +%3$d</string>
+    <string name="completion_stat_quiz_score">РЕЗУЛЬТАТ ТЕСТА</string>
+    <string name="completion_stat_course_lessons">УРОКИ КУРСА</string>
+    <string name="completion_stat_ratio_format">%1$d/%2$d</string>
+    <string name="completion_achievement_label">ДОСТИЖЕНИЕ ПОЛУЧЕНО</string>
+    <string name="completion_btn_return_academy">В АКАДЕМИЮ</string>
+    <string name="completion_empty_subtitle">Пройдите урок и тест, чтобы получить XP и отслеживать прогресс.</string>
+
+    <!-- Экран 08: Справочник правил -->
+    <string name="rulebook_title">СПРАВОЧНИК ПРАВИЛ</string>
+    <string name="rulebook_search_hint">Поиск правил…</string>
+    <string name="rulebook_cat_all">ВСЕ</string>
+    <string name="rulebook_cat_court">КОРТ</string>
+    <string name="rulebook_cat_equipment">ИНВЕНТАРЬ</string>
+    <string name="rulebook_cat_scoring">СЧЁТ</string>
+    <string name="rulebook_cat_serving">ПОДАЧА</string>
+    <string name="rulebook_cat_walls">СТЕНЫ</string>
+    <string name="rulebook_cat_fouls">НАРУШЕНИЯ</string>
+    <string name="rulebook_cat_favorites">ИЗБРАННОЕ</string>
+    <string name="rulebook_empty_title">Правила пока не загружены</string>
+    <string name="rulebook_empty_body">Официальный справочник правил FIP 2026 появится в обновлении контента Академии.</string>
+    <string name="rulebook_empty_search">По вашему запросу правила не найдены</string>
+
+    <!-- Экран 09: Центр матчей -->
+    <string name="match_center_title">ИГРА</string>
+    <string name="match_center_start_new">НОВЫЙ МАТЧ</string>
+    <string name="match_center_start_sub">Выберите игроков, формат и правила счёта</string>
+    <string name="match_center_singles">ОДИНОЧНЫЙ</string>
+    <string name="match_center_singles_meta">1×1</string>
+    <string name="match_center_doubles">ПАРНЫЙ</string>
+    <string name="match_center_doubles_meta">2×2</string>
+    <string name="match_center_most_popular">ПОПУЛЯРНЫЙ</string>
+    <string name="match_center_recent_matches">НЕДАВНИЕ МАТЧИ</string>
+    <string name="match_center_view_all">ВСЕ</string>
+    <string name="match_center_empty_recent">Пока нет матчей. Ваша история начинается здесь.</string>
+    <string name="match_center_format_sheet_title">Выберите формат матча</string>
+
+    <!-- Экран 10: Настройка матча -->
+    <string name="match_setup_title">НАСТРОЙКА МАТЧА</string>
+    <string name="match_setup_team_a">КОМАНДА A</string>
+    <string name="match_setup_team_b">КОМАНДА B</string>
+    <string name="match_setup_slot_empty">Нажмите, чтобы выбрать игрока</string>
+    <string name="match_setup_first_server">ПЕРВАЯ ПОДАЧА</string>
+    <string name="match_setup_scoring">ПРАВИЛА СЧЁТА</string>
+    <string name="match_setup_deuce_advantage">Больше / меньше (классика)</string>
+    <string name="match_setup_deuce_golden">Золотой мяч (при 40-40)</string>
+    <string name="match_setup_deuce_star">Звёздный мяч (2 преимущества, затем решающий)</string>
+    <string name="match_setup_fip_tag">FIP 2026</string>
+    <string name="match_setup_decider_hint">Принимающая сторона выбирает квадрат на решающем мяче.</string>
+    <string name="match_setup_start_btn">НАЧАТЬ МАТЧ</string>
+    <string name="match_setup_engine_note">Запуск и подсчёт живых матчей откроются в обновлении модуля «Игра».</string>
+    <string name="match_setup_picker_title">Выбор игрока</string>
+    <string name="match_setup_picker_subtitle">Выберите сохранённого игрока или добавьте нового</string>
+    <string name="match_setup_add_friend_btn">ДОБАВИТЬ ИГРОКА</string>
+    <string name="match_setup_new_friend_title">Новый игрок</string>
+    <string name="match_setup_edit_friend_title">Редактировать игрока</string>
+    <string name="match_setup_friend_name_hint">Имя игрока (до 20 символов)</string>
+    <string name="match_setup_delete_friend_title">Удалить игрока?</string>
+    <string name="match_setup_delete_friend_body">Профиль «%1$s» будет удалён из списка друзей.</string>
+    <string name="match_setup_friend_in_use">Игрок участвовал в матчах и не может быть удалён</string>
+    <string name="match_setup_already_selected">В составе</string>
+    <string name="match_setup_fill_all_hint">Заполните все слоты игроков, чтобы начать матч</string>
+    <string name="match_setup_ready_hint">Готово к запуску · 3 сета · FIP 2026</string>
+    <string name="match_setup_active_conflict_title">Есть незавершённый матч</string>
+    <string name="match_setup_active_conflict_body">У вас уже есть активный матч. Продолжить его или отменить и начать новый?</string>
+    <string name="match_setup_replace_active_confirm">НАЧАТЬ НОВЫЙ</string>
+    <string name="match_setup_resume_existing_btn">ПРОДОЛЖИТЬ ТЕКУЩИЙ</string>
+    <string name="match_setup_no_friends_yet">Друзей пока нет — добавьте партнёра или соперника ниже</string>
+    <string name="match_setup_friend_tag">ДРУГ</string>
+    <string name="match_setup_server_slot_placeholder">Игрок %1$d</string>
+
+    <!-- Экран 11: Живое табло -->
+    <string name="live_match_header_placeholder">СЕТ 1 · ПАРНЫЙ · ЗОЛОТОЙ МЯЧ</string>
+    <string name="live_match_header_format">СЕТ %1$d · %2$s · %3$s</string>
+    <string name="live_match_games_label">ГЕЙМЫ</string>
+    <string name="live_match_team_a_placeholder">КОМАНДА A</string>
+    <string name="live_match_team_b_placeholder">КОМАНДА B</string>
+    <string name="live_match_undo">ОТМЕНИТЬ</string>
+    <string name="live_match_finish">ЗАВЕРШИТЬ</string>
+    <string name="live_match_pause">Пауза</string>
+    <string name="live_match_pause_desc">Поставить на паузу</string>
+    <string name="live_match_resume_desc">Снять с паузы</string>
+    <string name="live_match_settings">Настройки матча</string>
+    <string name="live_match_settings_sheet_title">Настройки табло</string>
+    <string name="live_match_no_active">Нет активного матча</string>
+    <string name="live_match_point_cta">+ ОЧКО</string>
+    <string name="live_score_advantage_short">БОЛ</string>
+    <string name="live_match_deuce_banner">РОВНО</string>
+    <string name="live_match_advantage_banner">ПРЕИМУЩЕСТВО · %1$s</string>
+    <string name="live_match_set_point_banner">СЕТ-БОЛ · %1$s</string>
+    <string name="live_match_match_point_banner">МАТЧ-БОЛ · %1$s</string>
+    <string name="live_match_tiebreak_banner">ТАЙ-БРЕЙК ДО 7</string>
+    <string name="live_match_golden_banner">ЗОЛОТОЙ МЯЧ · ВЫБОР КВАДРАТА</string>
+    <string name="live_match_star_banner">ЗВЁЗДНЫЙ МЯЧ · ВЫБОР КВАДРАТА</string>
+    <string name="live_match_change_ends">СМЕНА СТОРОН</string>
+    <string name="live_match_paused_banner">МАТЧ НА ПАУЗЕ</string>
+    <string name="live_match_resume_btn">ПРОДОЛЖИТЬ</string>
+    <string name="live_match_restored_banner">Матч восстановлен</string>
+    <string name="live_match_serve_player_format">Подача: %1$s · %2$s</string>
+    <string name="live_match_serve_right">правый квадрат</string>
+    <string name="live_match_serve_left">левый квадрат</string>
+    <string name="live_match_set_chip_format">С%1$d</string>
+    <string name="live_match_sets_won_format">СЕТЫ %1$d:%2$d</string>
+    <string name="live_match_games_score_format">%1$d — %2$d</string>
+    <string name="live_match_end_early_title">Завершить досрочно?</string>
+    <string name="live_match_end_early_body">Незавершённые матчи не сохраняются и не влияют на статистику.</string>
+    <string name="live_match_end_early_confirm">ЗАВЕРШИТЬ</string>
+    <string name="live_match_return_center">В ЦЕНТР МАТЧЕЙ</string>
+    <string name="live_match_deuce_short_adv">БОЛЬШЕ/МЕНЬШЕ</string>
+    <string name="live_match_deuce_short_golden">ЗОЛОТОЙ МЯЧ</string>
+    <string name="live_match_deuce_short_star">ЗВЁЗДНЫЙ МЯЧ</string>
+
+    <!-- Экран 12: Итоги матча -->
+    <string name="results_completed_label">МАТЧ ЗАВЕРШЁН</string>
+    <string name="results_win_title">ПОБЕДА!</string>
+    <string name="results_loss_title">МАТЧ ЗАВЕРШЁН</string>
+    <string name="results_winner_team_a">Победила Команда A</string>
+    <string name="results_winner_team_b">Победила Команда B</string>
+    <string name="results_winners_label">ПОБЕДИТЕЛИ</string>
+    <string name="results_runners_up_label">СОПЕРНИКИ</string>
+    <string name="results_duration_label">ДЛИТЕЛЬНОСТЬ</string>
+    <string name="results_date_label">ДАТА</string>
+    <string name="results_format_label">ФОРМАТ</string>
+    <string name="results_scoring_label">ПРАВИЛА СЧЁТА</string>
+    <string name="results_sets_section">СЧЁТ ПО СЕТАМ</string>
+    <string name="results_players_section">УЧАСТНИКИ</string>
+    <string name="results_xp_earned_format">+%1$d XP</string>
+    <string name="results_xp_breakdown_win">Участие +30 XP · Победа +20 XP</string>
+    <string name="results_xp_breakdown_participation">Участие +30 XP</string>
+    <string name="results_duration_sec_format">%1$d сек</string>
+    <string name="results_duration_min_sec_format">%1$d мин %2$02d сек</string>
+    <string name="results_duration_hour_min_format">%1$d ч %2$02d мин</string>
+    <string name="results_btn_view_stats">СМОТРЕТЬ СТАТИСТИКУ</string>
+    <string name="results_btn_match_details">ДЕТАЛИ МАТЧА</string>
+    <string name="results_btn_return_home">НА ГЛАВНУЮ</string>
+    <string name="results_empty_title">Нет результата матча</string>
+    <string name="results_empty_body">Завершите живой матч, чтобы увидеть итоговый счёт и полученный XP.</string>
+
+    <!-- Экран 13: История матчей -->
+    <string name="history_title">ИСТОРИЯ МАТЧЕЙ</string>
+    <plurals name="history_count_format">
+        <item quantity="one">%1$d МАТЧ</item>
+        <item quantity="few">%1$d МАТЧА</item>
+        <item quantity="many">%1$d МАТЧЕЙ</item>
+        <item quantity="other">%1$d МАТЧЕЙ</item>
+    </plurals>
+    <string name="history_search_hint">Поиск по игроку…</string>
+    <string name="history_filter_all">ВСЕ</string>
+    <string name="history_filter_wins">ПОБЕДЫ</string>
+    <string name="history_filter_losses">ПОРАЖЕНИЯ</string>
+    <string name="history_filter_singles">ОДИНОЧНЫЙ</string>
+    <string name="history_filter_doubles">ПАРНЫЙ</string>
+    <string name="history_chip_win">ПОБЕДА</string>
+    <string name="history_chip_loss">ПОРАЖЕНИЕ</string>
+    <string name="history_empty_title">Пока нет матчей</string>
+    <string name="history_empty_body">Сыграйте первый матч, чтобы начать собирать архив результатов.</string>
+    <string name="history_empty_filter_title">По фильтрам ничего не найдено</string>
+
+    <!-- Экран 14: Детали матча -->
+    <string name="details_title">ДЕТАЛИ МАТЧА</string>
+    <string name="details_table_team">КОМАНДА</string>
+    <string name="details_table_set1">СЕТ 1</string>
+    <string name="details_table_set2">СЕТ 2</string>
+    <string name="details_table_set3">СЕТ 3</string>
+    <string name="details_section_teams">СОСТАВЫ</string>
+    <string name="details_section_stats">СТАТИСТИКА МАТЧА</string>
+    <string name="details_total_points">ВСЕГО ОЧКОВ</string>
+    <string name="details_points_won">ВЫИГРАНО ОЧКОВ</string>
+    <string name="details_longest_set">САМЫЙ ДОЛГИЙ СЕТ</string>
+    <string name="details_delete_btn">УДАЛИТЬ МАТЧ</string>
+    <string name="details_delete_confirm_title">Удалить этот матч?</string>
+    <string name="details_delete_confirm_body">Статистика будет пересчитана. Это действие нельзя отменить.</string>
+    <string name="details_empty_title">Матч не найден</string>
+    <string name="details_empty_body">Запись о матче недоступна или была удалена.</string>
+
+    <!-- Экран 15: Аналитика -->
+    <string name="performance_title">СТАТИСТИКА</string>
+    <string name="performance_win_rate_label">ПОБЕДЫ</string>
+    <plurals name="performance_wins_format">
+        <item quantity="one">%1$d ПОБЕДА</item>
+        <item quantity="few">%1$d ПОБЕДЫ</item>
+        <item quantity="many">%1$d ПОБЕД</item>
+        <item quantity="other">%1$d ПОБЕД</item>
+    </plurals>
+    <plurals name="performance_losses_format">
+        <item quantity="one">%1$d ПОРАЖЕНИЕ</item>
+        <item quantity="few">%1$d ПОРАЖЕНИЯ</item>
+        <item quantity="many">%1$d ПОРАЖЕНИЙ</item>
+        <item quantity="other">%1$d ПОРАЖЕНИЙ</item>
+    </plurals>
+    <string name="performance_kpi_matches">МАТЧИ</string>
+    <string name="performance_kpi_current_streak">ТЕКУЩАЯ СЕРИЯ</string>
+    <string name="performance_kpi_best_streak">ЛУЧШАЯ СЕРИЯ</string>
+    <string name="performance_section_monthly">АКТИВНОСТЬ ПО МЕСЯЦАМ</string>
+    <string name="performance_last_6_months">За 6 месяцев</string>
+    <string name="performance_section_format_split">ОДИНОЧНЫЙ И ПАРНЫЙ</string>
+    <plurals name="performance_format_meta_format">
+        <item quantity="one">%1$d матч · %2$s</item>
+        <item quantity="few">%1$d матча · %2$s</item>
+        <item quantity="many">%1$d матчей · %2$s</item>
+        <item quantity="other">%1$d матчей · %2$s</item>
+    </plurals>
+    <string name="performance_section_recent_form">ПОСЛЕДНЯЯ ФОРМА</string>
+    <string name="performance_last_5_matches">Последние 5 матчей</string>
+    <string name="performance_view_history">ИСТОРИЯ МАТЧЕЙ →</string>
+    <string name="performance_empty_cta_text">Сыграйте первый матч, чтобы открыть аналитику</string>
+    <string name="performance_form_w">В</string>
+    <string name="performance_form_l">П</string>
+
+    <!-- Экран 16: Профиль игрока -->
+    <string name="profile_title">ПРОФИЛЬ</string>
+    <string name="profile_member_since_format">В PADEL PRO с %1$s</string>
+    <string name="profile_stat_matches">МАТЧИ</string>
+    <string name="profile_stat_win_rate">ПОБЕДЫ</string>
+    <string name="profile_stat_lessons">УРОКИ</string>
+    <string name="profile_section_preferred_format">ПРЕДПОЧТИТЕЛЬНЫЙ ФОРМАТ</string>
+    <string name="profile_section_achievements">ДОСТИЖЕНИЯ</string>
+    <string name="profile_achievements_count_format">%1$d/%2$d</string>
+    <string name="profile_section_players">ИГРОКИ</string>
+    <string name="profile_players_empty">Сохранённых игроков пока нет. Партнёры и соперники появятся в обновлении модуля «Игра».</string>
+    <string name="profile_add_player">ДОБАВИТЬ ИГРОКА</string>
+    <string name="profile_section_settings">НАСТРОЙКИ</string>
+    <string name="profile_setting_haptics">Виброотклик</string>
+    <string name="profile_setting_keep_screen_on">Не гасить экран во время матча</string>
+    <string name="profile_setting_default_scoring">Режим счёта по умолчанию</string>
+    <string name="profile_section_data">ДАННЫЕ</string>
+    <string name="profile_data_export">Экспорт данных (JSON)</string>
+    <string name="profile_data_import">Импорт данных</string>
+    <string name="profile_section_danger">ОПАСНАЯ ЗОНА</string>
+    <string name="profile_reset_btn">СБРОСИТЬ ПРОГРЕСС</string>
+    <string name="profile_reset_step1_title">Сбросить весь прогресс?</string>
+    <string name="profile_reset_step1_body">Это удалит ваш локальный профиль, XP и настройки.</string>
+    <string name="profile_reset_step2_title">Вы точно уверены?</string>
+    <string name="profile_reset_step2_body">Удалить все матчи, XP и прогресс? Это действие нельзя отменить.</string>
+    <string name="profile_reset_confirm">СБРОСИТЬ</string>
+    <string name="profile_edit_sheet_title">Редактировать профиль</string>
+    <string name="profile_scoring_sheet_title">Режим счёта по умолчанию</string>
+    <string name="profile_default_player_name">Игрок</string>
+
+    <!-- Достижения (14 шт.) -->
+    <string name="ach_first_lesson_title">ПЕРВЫЙ ШАГ</string>
+    <string name="ach_first_lesson_desc">Завершите первый урок</string>
+    <string name="ach_first_course_title">ВЫПУСКНИК</string>
+    <string name="ach_first_course_desc">Пройдите целый курс</string>
+    <string name="ach_perfect_quiz_title">БЕЗ ОШИБОК</string>
+    <string name="ach_perfect_quiz_desc">Наберите 100% в любом тесте</string>
+    <string name="ach_streak_3_title">СЕРИЯ 3 ДНЯ</string>
+    <string name="ach_streak_3_desc">Учитесь 3 дня подряд</string>
+    <string name="ach_streak_7_title">СЕРИЯ 7 ДНЕЙ</string>
+    <string name="ach_streak_7_desc">Учитесь 7 дней подряд</string>
+    <string name="ach_first_match_title">ДЕБЮТ</string>
+    <string name="ach_first_match_desc">Сыграйте первый матч</string>
+    <string name="ach_first_win_title">ПЕРВАЯ ПОБЕДА</string>
+    <string name="ach_first_win_desc">Выиграйте первый матч</string>
+    <string name="ach_win_streak_3_title">В УДАРЕ</string>
+    <string name="ach_win_streak_3_desc">Выиграйте 3 матча подряд</string>
+    <string name="ach_singles_5_title">СОЛО-АС</string>
+    <string name="ach_singles_5_desc">Выиграйте 5 одиночных матчей</string>
+    <string name="ach_doubles_5_title">ИДЕАЛЬНАЯ ПАРА</string>
+    <string name="ach_doubles_5_desc">Выиграйте 5 парных матчей</string>
+    <string name="ach_matches_10_title">ПОСТОЯННЫЙ ИГРОК</string>
+    <string name="ach_matches_10_desc">Сыграйте 10 матчей</string>
+    <string name="ach_matches_25_title">ВЕТЕРАН</string>
+    <string name="ach_matches_25_desc">Сыграйте 25 матчей</string>
+    <string name="ach_level_5_title">СТРАТЕГ</string>
+    <string name="ach_level_5_desc">Достигните 5-го уровня</string>
+    <string name="ach_golden_win_title">ЖЕЛЕЗНЫЕ НЕРВЫ</string>
+    <string name="ach_golden_win_desc">Выиграйте матч с золотым мячом</string>
+</resources>
