@@ -102,6 +102,8 @@
     <string name="home_action_start_match_sub">Одиночный (1×1) или парный (2×2)</string>
     <string name="home_action_continue_learning">ПРОДОЛЖИТЬ ОБУЧЕНИЕ</string>
     <string name="home_action_continue_learning_sub">Открыть Академию падела</string>
+    <string name="home_action_continue_learning_next">Следующий урок готов</string>
+    <string name="home_action_continue_learning_all_done">Все уроки пройдены!</string>
     <string name="home_section_academy_progress">ПРОГРЕСС АКАДЕМИИ</string>
     <plurals name="home_academy_progress_format">
         <item quantity="one">%1$d%% пройдено · %2$d/%3$d урок</item>
@@ -177,31 +179,53 @@
     </plurals>
     <string name="course_section_lessons">УРОКИ</string>
     <string name="course_cta_continue">ПРОДОЛЖИТЬ КУРС</string>
+    <string name="course_cta_review">ПОВТОРИТЬ КУРС</string>
     <string name="course_lesson_placeholder_title">Урок %1$d · В пакете контента</string>
     <string name="course_lesson_placeholder_meta">5 мин · С тестом</string>
+    <plurals name="course_lesson_meta_format">
+        <item quantity="one">%1$d мин · %2$d вопрос</item>
+        <item quantity="few">%1$d мин · %2$d вопроса</item>
+        <item quantity="many">%1$d мин · %2$d вопросов</item>
+        <item quantity="other">%1$d мин · %2$d вопросов</item>
+    </plurals>
+    <string name="course_lesson_best_score_format">Лучший тест: %1$d%%</string>
     <string name="course_lesson_xp_format">+%1$d XP</string>
+    <string name="course_lesson_done_badge">ПРОЙДЕН</string>
     <string name="course_content_pending_note">Интерактивные уроки и тесты откроются в обновлении Академии.</string>
+    <string name="course_locked_lesson_hint">Завершите предыдущий урок, чтобы открыть этот.</string>
 
     <!-- Экран 05: Интерактивный урок -->
     <string name="lesson_header_meta_format">%1$s · УРОК %2$d</string>
     <string name="lesson_page_counter_format">%1$d/%2$d</string>
     <string name="lesson_key_facts">ГЛАВНОЕ</string>
     <string name="lesson_btn_previous">НАЗАД</string>
+    <string name="lesson_btn_next">ДАЛЕЕ</string>
     <string name="lesson_btn_take_quiz">ПРОЙТИ ТЕСТ</string>
+    <string name="lesson_block_fact_badge">ВАЖНЫЙ ФАКТ</string>
+    <string name="lesson_block_diagram_badge">СХЕМА КОРТА</string>
+    <string name="lesson_loading_title">Загрузка урока…</string>
     <string name="lesson_empty_title">Материалы урока готовятся</string>
     <string name="lesson_empty_body">Структурированные блоки урока и схемы корта появятся в обновлении контента Академии.</string>
     <string name="lesson_exit_title">Выйти из урока?</string>
-    <string name="lesson_exit_body">Текущая позиция чтения останется сохранённой.</string>
+    <string name="lesson_exit_body">Вы сможете вернуться к чтению в любой момент.</string>
     <string name="lesson_exit_confirm">ВЫЙТИ</string>
+    <string name="lesson_diagram_caption_overview">Разметка корта 20×10 м: сетка, линии подачи, стены и металлическая сетка.</string>
+    <string name="lesson_diagram_caption_service_boxes">Зоны подачи (6,95 м от сетки) и центральная разделительная линия.</string>
+    <string name="lesson_diagram_caption_diagonal_serve">Диагональная подача: мяч должен приземлиться в противоположный квадрат.</string>
+    <string name="lesson_diagram_caption_glass_rebound">Игра от стекла: мяч отскакивает от корта, затем от стекла и возвращается в игру.</string>
+    <string name="lesson_diagram_caption_net_zone">Атакующая позиция у сетки: контроль воллеев и перекрытие центра.</string>
 
     <!-- Экран 06: Тест -->
     <string name="quiz_question_counter_format">ВОПРОС %1$d/%2$d</string>
     <string name="quiz_xp_hint">+5 XP за каждый верный ответ (с первой попытки)</string>
+    <string name="quiz_review_mode_hint">Повторное прохождение · XP за этот тест уже начислен</string>
     <string name="quiz_btn_check">ПРОВЕРИТЬ</string>
     <string name="quiz_btn_next">ДАЛЕЕ</string>
     <string name="quiz_btn_see_results">РЕЗУЛЬТАТЫ</string>
+    <string name="quiz_btn_saving">СОХРАНЕНИЕ…</string>
     <string name="quiz_feedback_correct">ВЕРНО</string>
     <string name="quiz_feedback_incorrect">НЕВЕРНО</string>
+    <string name="quiz_explanation_label">ПОЯСНЕНИЕ</string>
     <string name="quiz_empty_title">Тест ещё не загружен</string>
     <string name="quiz_empty_body">Интерактивные вопросы появятся после активации модуля контента Академии.</string>
     <string name="quiz_exit_title">Выйти из теста?</string>
@@ -213,11 +237,16 @@
     <string name="completion_xp_gained_format">+%1$d XP</string>
     <string name="completion_breakdown_lesson_format">Урок +%1$d</string>
     <string name="completion_breakdown_quiz_format">Тест %1$d/%2$d верно +%3$d</string>
+    <string name="completion_breakdown_course_bonus_format">Бонус курса +%1$d</string>
+    <string name="completion_review_badge">Повторное прохождение · XP уже начислен ранее</string>
     <string name="completion_stat_quiz_score">РЕЗУЛЬТАТ ТЕСТА</string>
     <string name="completion_stat_course_lessons">УРОКИ КУРСА</string>
     <string name="completion_stat_ratio_format">%1$d/%2$d</string>
     <string name="completion_achievement_label">ДОСТИЖЕНИЕ ПОЛУЧЕНО</string>
     <string name="completion_btn_return_academy">В АКАДЕМИЮ</string>
+    <string name="completion_lesson_completed_subtitle">Урок «%1$s» успешно завершён</string>
+    <string name="completion_course_finished_subtitle">Курс завершён! Открыт следующий модуль</string>
+    <string name="completion_all_courses_finished_subtitle">Поздравляем! Вы прошли всю программу Академии</string>
     <string name="completion_empty_subtitle">Пройдите урок и тест, чтобы получить XP и отслеживать прогресс.</string>
 
     <!-- Экран 08: Справочник правил -->
@@ -231,8 +260,15 @@
     <string name="rulebook_cat_walls">СТЕНЫ</string>
     <string name="rulebook_cat_fouls">НАРУШЕНИЯ</string>
     <string name="rulebook_cat_favorites">ИЗБРАННОЕ</string>
+    <string name="rulebook_fip_ref_format">FIP %1$s</string>
+    <string name="rulebook_cd_favorite_add">Добавить в избранное</string>
+    <string name="rulebook_cd_favorite_remove">Убрать из избранного</string>
+    <string name="rulebook_cd_expand">Показать текст правила</string>
+    <string name="rulebook_cd_collapse">Свернуть текст правила</string>
+    <string name="rulebook_favorites_empty_title">В избранном пока пусто</string>
+    <string name="rulebook_favorites_empty_body">Нажмите на звёздочку рядом с правилом, чтобы закрепить его здесь.</string>
     <string name="rulebook_empty_title">Правила пока не загружены</string>
-    <string name="rulebook_empty_body">Официальный справочник правил FIP 2026 появится в обновлении контента Академии.</string>
+    <string name="rulebook_empty_body">Попробуйте изменить запрос или сбросить фильтр категорий.</string>
     <string name="rulebook_empty_search">По вашему запросу правила не найдены</string>
 
     <!-- Экран 09: Центр матчей -->

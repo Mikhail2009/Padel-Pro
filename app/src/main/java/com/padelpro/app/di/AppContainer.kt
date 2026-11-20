@@ -8,15 +8,21 @@ import com.padelpro.app.core.common.SystemTimeProvider
 import com.padelpro.app.core.common.TimeProvider
 import com.padelpro.app.core.database.PadelProDatabase
 import com.padelpro.app.core.datastore.SettingsRepository
+import com.padelpro.app.data.content.AssetAcademyContentLoader
 import com.padelpro.app.data.repository.AcademyRepositoryImpl
 import com.padelpro.app.data.repository.MatchRepositoryImpl
 import com.padelpro.app.data.repository.PlayerRepositoryImpl
 import com.padelpro.app.data.repository.StatsRepositoryImpl
+import com.padelpro.app.domain.academy.ContentPack
 import com.padelpro.app.domain.repository.AcademyRepository
 import com.padelpro.app.domain.repository.MatchRepository
 import com.padelpro.app.domain.repository.PlayerRepository
 import com.padelpro.app.domain.repository.StatsRepository
 import com.padelpro.app.feature.academy.AcademyViewModel
+import com.padelpro.app.feature.academy.CompletionViewModel
+import com.padelpro.app.feature.academy.CourseDetailViewModel
+import com.padelpro.app.feature.academy.LessonViewModel
+import com.padelpro.app.feature.academy.QuizViewModel
 import com.padelpro.app.feature.history.HistoryViewModel
 import com.padelpro.app.feature.home.HomeViewModel
 import com.padelpro.app.feature.main.AppEntryViewModel
@@ -39,19 +45,30 @@ class AppContainer(context: Context) {
 
     val settingsRepository: SettingsRepository = SettingsRepository(context.applicationContext)
 
+    val academyContentLoader = AssetAcademyContentLoader(context.applicationContext)
+
+    val contentPack: ContentPack by lazy {
+        academyContentLoader.load()
+    }
+
     val playerRepository: PlayerRepository = PlayerRepositoryImpl(
         database = database,
         settingsRepository = settingsRepository,
         timeProvider = timeProvider
     )
 
-    val academyRepository: AcademyRepository = AcademyRepositoryImpl(
-        academyDao = database.academyDao()
-    )
+    val academyRepository: AcademyRepository by lazy {
+        AcademyRepositoryImpl(
+            database = database,
+            contentPack = contentPack,
+            timeProvider = timeProvider
+        )
+    }
 
     val matchRepository: MatchRepository = MatchRepositoryImpl(
         database = database,
-        timeProvider = timeProvider
+        timeProvider = timeProvider,
+        contentPackProvider = { contentPack }
     )
 
     val statsRepository: StatsRepository = StatsRepositoryImpl(
@@ -79,6 +96,14 @@ class AppContainer(context: Context) {
                         playerRepository = playerRepository,
                         academyRepository = academyRepository
                     ) as T
+                modelClass.isAssignableFrom(CourseDetailViewModel::class.java) ->
+                    CourseDetailViewModel(academyRepository = academyRepository) as T
+                modelClass.isAssignableFrom(LessonViewModel::class.java) ->
+                    LessonViewModel(academyRepository = academyRepository) as T
+                modelClass.isAssignableFrom(QuizViewModel::class.java) ->
+                    QuizViewModel(academyRepository = academyRepository) as T
+                modelClass.isAssignableFrom(CompletionViewModel::class.java) ->
+                    CompletionViewModel(academyRepository = academyRepository) as T
                 modelClass.isAssignableFrom(MatchViewModel::class.java) ->
                     MatchViewModel(
                         playerRepository = playerRepository,

@@ -33,9 +33,13 @@ import com.padelpro.app.core.designsystem.theme.PpBackground
 import com.padelpro.app.feature.academy.AcademyScreen
 import com.padelpro.app.feature.academy.AcademyViewModel
 import com.padelpro.app.feature.academy.CompletionScreen
+import com.padelpro.app.feature.academy.CompletionViewModel
 import com.padelpro.app.feature.academy.CourseDetailScreen
+import com.padelpro.app.feature.academy.CourseDetailViewModel
 import com.padelpro.app.feature.academy.LessonScreen
+import com.padelpro.app.feature.academy.LessonViewModel
 import com.padelpro.app.feature.academy.QuizScreen
+import com.padelpro.app.feature.academy.QuizViewModel
 import com.padelpro.app.feature.academy.RulebookScreen
 import com.padelpro.app.feature.history.HistoryViewModel
 import com.padelpro.app.feature.history.MatchDetailsScreen
@@ -183,7 +187,13 @@ private fun PadelProNavGraph(
                     listState = homeListState,
                     onOpenProfile = { navController.navigate(AppRoute.Profile) },
                     onStartMatch = { navigateToTab(BottomTab.PLAY) },
-                    onContinueLearning = { navigateToTab(BottomTab.ACADEMY) },
+                    onContinueLearning = { nextLessonId ->
+                        if (nextLessonId != null) {
+                            navController.navigate(AppRoute.Lesson(nextLessonId))
+                        } else {
+                            navigateToTab(BottomTab.ACADEMY)
+                        }
+                    },
                     onOpenMatchDetails = { id -> navController.navigate(AppRoute.MatchDetails(id)) },
                     onResumeMatch = { navController.navigate(AppRoute.LiveMatch) },
                     onOpenPerformance = { navigateToTab(BottomTab.STATS) }
@@ -204,7 +214,7 @@ private fun PadelProNavGraph(
             // 04 Course Detail
             composable<AppRoute.CourseDetail> { entry ->
                 val args = entry.toRoute<AppRoute.CourseDetail>()
-                val vm: AcademyViewModel = viewModel(factory = viewModelFactory)
+                val vm: CourseDetailViewModel = viewModel(factory = viewModelFactory)
                 CourseDetailScreen(
                     courseId = args.courseId,
                     viewModel = vm,
@@ -216,8 +226,10 @@ private fun PadelProNavGraph(
             // 05 Interactive Lesson
             composable<AppRoute.Lesson> { entry ->
                 val args = entry.toRoute<AppRoute.Lesson>()
+                val vm: LessonViewModel = viewModel(factory = viewModelFactory)
                 LessonScreen(
                     lessonId = args.lessonId,
+                    viewModel = vm,
                     onExit = { navController.popBackStack() },
                     onStartQuiz = { lessonId -> navController.navigate(AppRoute.Quiz(lessonId)) }
                 )
@@ -226,12 +238,15 @@ private fun PadelProNavGraph(
             // 06 Knowledge Quiz
             composable<AppRoute.Quiz> { entry ->
                 val args = entry.toRoute<AppRoute.Quiz>()
+                val vm: QuizViewModel = viewModel(factory = viewModelFactory)
                 QuizScreen(
                     lessonId = args.lessonId,
+                    viewModel = vm,
                     onExit = { navController.popBackStack() },
                     onCompleteQuiz = { lessonId ->
                         navController.navigate(AppRoute.Completion(lessonId)) {
-                            popUpTo(AppRoute.CourseDetail::class) { inclusive = false }
+                            popUpTo<AppRoute.Lesson> { inclusive = true }
+                            launchSingleTop = true
                         }
                     }
                 )
@@ -240,11 +255,21 @@ private fun PadelProNavGraph(
             // 07 Lesson Completion
             composable<AppRoute.Completion> { entry ->
                 val args = entry.toRoute<AppRoute.Completion>()
+                val vm: CompletionViewModel = viewModel(factory = viewModelFactory)
                 CompletionScreen(
                     lessonId = args.lessonId,
-                    onContinueNext = { navController.popBackStack() },
+                    viewModel = vm,
+                    onContinueNext = { nextLessonId ->
+                        navController.navigate(AppRoute.Lesson(nextLessonId)) {
+                            popUpTo<AppRoute.Completion> { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    },
                     onReturnToAcademy = {
-                        navController.popBackStack(AppRoute.Academy, inclusive = false)
+                        val popped = navController.popBackStack(AppRoute.Academy, inclusive = false)
+                        if (!popped) {
+                            navigateToTab(BottomTab.ACADEMY)
+                        }
                     }
                 )
             }

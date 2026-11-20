@@ -861,4 +861,45 @@ class MatchEngineTest {
             assertEquals(2, setsWinnerCount)
         }
     }
+
+    @Test fun test62_completedMatchWithoutPausesAccumulatesFullPlayDuration() {
+        val cfg = config() // startedAtMillis = 1_000L
+        var s = MatchEngine.initialState(cfg)
+        var ts = 1_000L
+        // 48 points, each 60 seconds apart -> total duration 48 minutes
+        repeat(48) {
+            ts += 60_000L
+            s = step(s, TeamSide.A, ts = ts)
+        }
+        assertEquals(MatchStatus.COMPLETED, s.status)
+        assertNull(s.activeSegmentStartedAtMillis)
+        assertEquals(48 * 60_000L, s.accumulatedPlayMs)
+        // Elapsed after completion must stay constant and reflect full play time
+        assertEquals(48 * 60_000L, s.elapsedDurationMillis(ts))
+        assertEquals(48 * 60_000L, s.elapsedDurationMillis(ts + 3_600_000L))
+    }
+
+    @Test fun test63_completedMatchWithPauseExcludesPauseFromFinalDuration() {
+        val cfg = config() // startedAtMillis = 1_000L
+        var s = MatchEngine.initialState(cfg)
+        var ts = 1_000L
+        // Play 24 points (set 1) at 30s intervals = 12 minutes
+        repeat(24) {
+            ts += 30_000L
+            s = step(s, TeamSide.A, ts = ts)
+        }
+        assertEquals(1, s.completedSets.size)
+        // Pause for 5 minutes (300_000L)
+        s = MatchEngine.reduce(s, MatchEngineEvent.Paused(ts)).state
+        ts += 300_000L
+        s = MatchEngine.reduce(s, MatchEngineEvent.Resumed(ts)).state
+        // Play remaining 24 points (set 2) at 30s intervals = 12 minutes
+        repeat(24) {
+            ts += 30_000L
+            s = step(s, TeamSide.A, ts = ts)
+        }
+        assertEquals(MatchStatus.COMPLETED, s.status)
+        assertEquals(24 * 60_000L, s.accumulatedPlayMs)
+        assertEquals(24 * 60_000L, s.elapsedDurationMillis(ts + 500_000L))
+    }
 }

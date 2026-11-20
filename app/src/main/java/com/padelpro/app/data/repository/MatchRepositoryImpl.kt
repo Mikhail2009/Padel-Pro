@@ -9,6 +9,7 @@ import com.padelpro.app.core.database.entity.MatchParticipantEntity
 import com.padelpro.app.core.database.entity.PlayerEntity
 import com.padelpro.app.core.database.entity.SetResultEntity
 import com.padelpro.app.core.database.entity.UserProgressEntity
+import com.padelpro.app.domain.academy.ContentPack
 import com.padelpro.app.domain.engine.EngineReduceResult
 import com.padelpro.app.domain.engine.MatchConfig
 import com.padelpro.app.domain.engine.MatchEngine
@@ -40,7 +41,8 @@ import java.util.UUID
 
 class MatchRepositoryImpl(
     private val database: PadelProDatabase,
-    private val timeProvider: TimeProvider
+    private val timeProvider: TimeProvider,
+    private val contentPackProvider: () -> ContentPack? = { null }
 ) : MatchRepository {
 
     private val matchDao = database.matchDao()
@@ -357,6 +359,14 @@ class MatchRepositoryImpl(
                     )
                 }
             }
+        }
+
+        contentPackProvider()?.let { pack ->
+            AchievementSyncHelper.evaluateAndUnlock(
+                database = database,
+                contentPack = pack,
+                unlockedAtMillis = nowMillis
+            )
         }
 
         return MatchCompletionResult(

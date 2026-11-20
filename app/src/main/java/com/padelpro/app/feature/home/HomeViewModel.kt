@@ -32,6 +32,7 @@ data class HomeUiState(
     val streakDays: Int = 0,
     val completedLessons: Int = 0,
     val totalLessons: Int = 32,
+    val nextUnlockedLessonId: String? = null,
     val activeMatch: MatchSummary? = null,
     val recentMatch: MatchSummary? = null,
     val totalMatches: Int = 0,
@@ -56,6 +57,7 @@ class HomeViewModel(
         playerRepository.observeUserProfile(),
         playerRepository.observeUserProgress(),
         academyRepository.observeCompletedLessonsCount(),
+        academyRepository.observeNextUnlockedLessonId(),
         matchRepository.observeActiveMatch(),
         matchRepository.observeRecentMatches(limit = 1),
         statsRepository.observePerformanceSummary()
@@ -63,10 +65,11 @@ class HomeViewModel(
         val profile = values[0] as? com.padelpro.app.domain.model.Player
         val progress = values[1] as? com.padelpro.app.domain.model.UserProgress
         val completedLessons = values[2] as Int
-        val activeMatch = values[3] as? MatchSummary
+        val nextLessonId = values[3] as? String
+        val activeMatch = values[4] as? MatchSummary
         @Suppress("UNCHECKED_CAST")
-        val recentMatches = values[4] as List<MatchSummary>
-        val perf = values[5] as com.padelpro.app.domain.model.PerformanceSummary
+        val recentMatches = values[5] as List<MatchSummary>
+        val perf = values[6] as com.padelpro.app.domain.model.PerformanceSummary
 
         val xp = progress?.totalXp ?: 0
         val level = LevelUtils.calculateLevel(xp)
@@ -89,6 +92,7 @@ class HomeViewModel(
             streakDays = progress?.streakCount ?: 0,
             completedLessons = completedLessons,
             totalLessons = academyRepository.observeTotalLessonsCount(),
+            nextUnlockedLessonId = nextLessonId,
             activeMatch = activeMatch,
             recentMatch = recentMatches.firstOrNull(),
             totalMatches = perf.totalMatches,

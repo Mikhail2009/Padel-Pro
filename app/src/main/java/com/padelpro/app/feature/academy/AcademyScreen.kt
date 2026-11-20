@@ -2,14 +2,12 @@ package com.padelpro.app.feature.academy
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -53,7 +51,6 @@ import com.padelpro.app.core.designsystem.components.levelTitleRes
 import com.padelpro.app.core.designsystem.theme.PpPrimary
 import com.padelpro.app.core.designsystem.theme.PpSpacing
 import com.padelpro.app.core.designsystem.theme.PpTextStyles
-import com.padelpro.app.domain.model.AcademyCourse
 import com.padelpro.app.domain.model.CourseCategory
 
 @Composable
@@ -153,7 +150,8 @@ fun AcademyScreen(
                         PpFilterChip(
                             label = stringResource(categoryLabelRes(category)),
                             selected = state.selectedCategory == category,
-                            onClick = { viewModel.selectCategory(category) }
+                            onClick = { viewModel.selectCategory(category) },
+                            modifier = Modifier.testTag("academy_filter_${category.name.lowercase()}")
                         )
                     }
                 }
@@ -168,7 +166,7 @@ fun AcademyScreen(
                 }
                 val progressPercent = (course.progressFraction * 100f).toInt()
                 PpCourseCard(
-                    title = courseTitle(course.order),
+                    title = course.title.ifBlank { courseTitle(course.order) },
                     meta = pluralStringResource(
                         R.plurals.academy_course_meta_format,
                         course.lessonCount,
@@ -181,7 +179,7 @@ fun AcademyScreen(
                     icon = courseIcon(course.order),
                     isUnlocked = course.isUnlocked,
                     isCompleted = course.isCompleted,
-                    isHighlighted = course.isUnlocked && !course.isCompleted && course.order == 1,
+                    isHighlighted = course.id == state.highlightedCourseId,
                     onClick = {
                         if (course.isUnlocked) {
                             onOpenCourse(course.id)
@@ -208,7 +206,8 @@ fun AcademyScreen(
             Spacer(Modifier.height(PpSpacing.xl))
             PpPrimaryButton(
                 text = stringResource(R.string.academy_locked_sheet_ok),
-                onClick = { showLockedSheet = false }
+                onClick = { showLockedSheet = false },
+                modifier = Modifier.testTag("academy_locked_ok_button")
             )
         }
     }

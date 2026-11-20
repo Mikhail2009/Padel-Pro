@@ -62,7 +62,7 @@ fun HomeScreen(
     listState: LazyListState,
     onOpenProfile: () -> Unit,
     onStartMatch: () -> Unit,
-    onContinueLearning: () -> Unit,
+    onContinueLearning: (String?) -> Unit,
     onOpenMatchDetails: (String) -> Unit,
     onResumeMatch: () -> Unit,
     onOpenPerformance: () -> Unit,
@@ -173,6 +173,13 @@ fun HomeScreen(
             }
 
             item {
+                val learningSub = when {
+                    state.totalLessons > 0 && state.completedLessons >= state.totalLessons ->
+                        stringResource(R.string.home_action_continue_learning_all_done)
+                    state.nextUnlockedLessonId != null ->
+                        stringResource(R.string.home_action_continue_learning_next)
+                    else -> stringResource(R.string.home_action_continue_learning_sub)
+                }
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(PpSpacing.md)
@@ -189,10 +196,10 @@ fun HomeScreen(
                     )
                     QuickActionCard(
                         title = stringResource(R.string.home_action_continue_learning),
-                        subtitle = stringResource(R.string.home_action_continue_learning_sub),
+                        subtitle = learningSub,
                         icon = Icons.Rounded.School,
                         accent = false,
-                        onClick = onContinueLearning,
+                        onClick = { onContinueLearning(state.nextUnlockedLessonId) },
                         modifier = Modifier
                             .weight(1f)
                             .testTag("home_continue_learning_card")
@@ -205,7 +212,7 @@ fun HomeScreen(
                 Spacer(Modifier.height(PpSpacing.sm))
                 PpCard(
                     modifier = Modifier.fillMaxWidth(),
-                    onClick = onContinueLearning
+                    onClick = { onContinueLearning(state.nextUnlockedLessonId) }
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),

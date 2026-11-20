@@ -21,6 +21,12 @@ interface MatchDao {
     @Query("SELECT * FROM matches WHERE status = 'COMPLETED' ORDER BY COALESCE(ended_at, started_at) DESC")
     fun observeCompletedMatches(): Flow<List<MatchEntity>>
 
+    @Query("SELECT * FROM matches WHERE status = 'COMPLETED' ORDER BY COALESCE(ended_at, started_at) ASC")
+    suspend fun getCompletedMatchesOnce(): List<MatchEntity>
+
+    @Query("SELECT * FROM match_participants WHERE is_user = 1")
+    suspend fun getAllUserParticipationsOnce(): List<MatchParticipantEntity>
+
     @Query("SELECT * FROM matches WHERE id = :matchId LIMIT 1")
     fun observeMatchById(matchId: String): Flow<MatchEntity?>
 

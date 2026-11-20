@@ -355,4 +355,73 @@ class MatchPersistenceRobolectricTest {
         assertEquals(0, afterUndo.state.gamesA)
         assertEquals("40", afterUndo.state.displayScoreA())
     }
+
+    @Test
+    fun `completed match persists full duration_ms without pauses and ignores duplicate completion`() = runTest {
+        val user = playerRepo.createLocalProfile("Алекс", 0, MatchFormat.SINGLES)
+        val opp = playerRepo.createFriend("Марк", 1)
+
+        val started = matchRepo.startMatch(
+            StartMatchRequest(
+                format = MatchFormat.SINGLES,
+                deuceMode = DeuceMode.GOLDEN_POINT,
+                firstServerTeam = TeamSide.A,
+                participants = listOf(
+                    StartMatchParticipant(user.id, TeamSide.A, 0, isUser = true),
+                    StartMatchParticipant(opp.id, TeamSide.B, 0, isUser = false)
+                )
+            )
+        ) as StartMatchResult.Started
+
+        repeat(48) {
+            timeProvider.currentNow += 60_000L
+            matchRepo.addPoint(TeamSide.A)
+        }
+
+        val summary = matchRepo.observeMatchById(started.matchId).first()
+        assertNotNull(summary)
+        assertEquals(MatchStatus.COMPLETED, summary!!.status)
+        assertEquals(48 * 60_000L, summary.durationMs)
+
+        // Advance clock and call completeMatchIfFinished again — duration_ms must NOT change
+        timeProvider.currentNow += 10_000_000L
+        val dup = matchRepo.completeMatchIfFinished(started.matchId)
+        assertTrue(dup!!.alreadyCompleted)
+        val afterDup = matchRepo.observeMatchById(started.matchId).first()
+        assertEquals(48 * 60_000L, afterDup?.durationMs)
+    }
+
+    @Test
+    fun `completed match with 5 minute pause persists active play duration only`() = runTest {
+        val user = playerRepo.createLocalProfile("Алекс", 0, MatchFormat.SINGLES)
+        val opp = playerRepo.createFriend("Марк", 1)
+
+        val started = matchRepo.startMatch(
+            StartMatchRequest(
+                format = MatchFormat.SINGLES,
+                deuceMode = DeuceMode.GOLDEN_POINT,
+                firstServerTeam = TeamSide.A,
+                participants = listOf(
+                    StartMatchParticipant(user.id, TeamSide.A, 0, isUser = true),
+                    StartMatchParticipant(opp.id, TeamSide.B, 0, isUser = false)
+                )
+            )
+        ) as StartMatchResult.Started
+
+        repeat(24) {
+            timeProvider.currentNow += 30_000L
+            matchRepo.addPoint(TeamSide.A)
+        }
+        assertTrue(matchRepo.pauseActiveMatch())
+        timeProvider.currentNow += 300_000L // 5 min pause excluded
+        assertTrue(matchRepo.resumeActiveMatch())
+        repeat(24) {
+            timeProvider.currentNow += 30_000L
+            matchRepo.addPoint(TeamSide.A)
+        }
+
+        val summary = matchRepo.observeMatchById(started.matchId).first()
+        assertNotNull(summary)
+        assertEquals(24 * 60_000L, summary!!.durationMs)
+    }
 }

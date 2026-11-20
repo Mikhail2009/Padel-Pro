@@ -3,7 +3,6 @@ package com.padelpro.app.feature.academy
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,17 +14,23 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -43,25 +48,39 @@ import com.padelpro.app.core.designsystem.theme.PpBackground
 import com.padelpro.app.core.designsystem.theme.PpPrimary
 import com.padelpro.app.core.designsystem.theme.PpSpacing
 import com.padelpro.app.core.designsystem.theme.PpTextStyles
+import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 @Composable
 fun CourseDetailScreen(
     courseId: String,
-    viewModel: AcademyViewModel,
+    viewModel: CourseDetailViewModel,
     onBack: () -> Unit,
     onOpenLesson: (String) -> Unit
 ) {
+    LaunchedEffect(courseId) {
+        viewModel.loadCourse(courseId)
+    }
+
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    val course = state.courses.firstOrNull { it.id == courseId } ?: state.courses.firstOrNull()
+    val detail = state.detail
+    val course = detail?.course
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val lockedLessonHint = stringResource(R.string.course_locked_lesson_hint)
+
     val order = course?.order ?: 1
     val lessonCount = course?.lessonCount ?: 4
     val completedCount = course?.completedLessons ?: 0
-    val progressPercent = ((course?.progressFraction ?: 0f) * 100f).toInt()
+    val progressPercent = ((course?.progressFraction ?: 0f) * 100f).roundToInt()
 
     Scaffold(
         containerColor = PpBackground,
         contentWindowInsets = WindowInsets.safeDrawing,
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         bottomBar = {
+            val nextLessonId = detail?.nextActionLessonId
+            val isCourseFinished = course?.isCompleted == true
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -71,10 +90,16 @@ fun CourseDetailScreen(
                 contentAlignment = Alignment.Center
             ) {
                 PpPrimaryButton(
-                    text = stringResource(R.string.course_cta_continue),
-                    onClick = { onOpenLesson("${courseId}_l1") },
-                    enabled = false,
-                    modifier = Modifier.widthIn(max = 600.dp)
+                    text = if (isCourseFinished) {
+                        stringResource(R.string.course_cta_review)
+                    } else {
+                        stringResource(R.string.course_cta_continue)
+                    },
+                    onClick = { nextLessonId?.let(onOpenLesson) },
+                    enabled = nextLessonId != null && course?.isUnlocked == true,
+                    modifier = Modifier
+                        .widthIn(max = 600.dp)
+                        .testTag("course_detail_continue_button")
                 )
             }
         }
@@ -96,13 +121,21 @@ fun CourseDetailScreen(
                     PpIconButton(
                         icon = Icons.AutoMirrored.Rounded.ArrowBack,
                         contentDescription = stringResource(R.string.action_back),
-                        onClick = onBack
+                        onClick = onBack,
+                        modifier = Modifier.testTag("course_detail_back_button")
                     )
                 }
 
                 item {
                     PpCard(modifier = Modifier.fillMaxWidth()) {
                         PpCourtGraphic(
+                            diagramId = when (order) {
+                                2 -> "court_overview"
+                                4 -> "diagonal_serve"
+                                6 -> "net_zone"
+                                8 -> "glass_rebound"
+                                else -> null
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(120.dp)
@@ -112,13 +145,13 @@ fun CourseDetailScreen(
 
                 item {
                     Text(
-                        text = courseTitle(order),
+                        text = course?.title?.ifBlank { courseTitle(order) } ?: courseTitle(order),
                         style = PpTextStyles.H1,
                         color = MaterialTheme.colorScheme.onBackground
                     )
                     Spacer(Modifier.height(PpSpacing.xs))
                     Text(
-                        text = courseDescription(order),
+                        text = course?.description?.ifBlank { courseDescription(order) } ?: courseDescription(order),
                         style = PpTextStyles.Body,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -169,12 +202,6 @@ fun CourseDetailScreen(
                             progress = course?.progressFraction ?: 0f,
                             modifier = Modifier.fillMaxWidth()
                         )
-                        Spacer(Modifier.height(PpSpacing.sm))
-                        Text(
-                            text = stringResource(R.string.course_content_pending_note),
-                            style = PpTextStyles.Label,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
                     }
                 }
 
@@ -182,18 +209,46 @@ fun CourseDetailScreen(
                     PpSectionHeader(title = stringResource(R.string.course_section_lessons))
                 }
 
-                items(lessonCount) { idx ->
-                    val lessonNumber = idx + 1
+                items(detail?.lessons.orEmpty(), key = { it.id }) { lesson ->
+                    val bestPercent = lesson.bestQuizScore?.let { (it * 100f).roundToInt() }
+                    val metaText = buildString {
+                        append(
+                            pluralStringResource(
+                                R.plurals.course_lesson_meta_format,
+                                lesson.quizQuestionCount,
+                                lesson.estimatedMinutes,
+                                lesson.quizQuestionCount
+                            )
+                        )
+                        if (lesson.isCompleted && bestPercent != null) {
+                            append(" · ")
+                            append(stringResource(R.string.course_lesson_best_score_format, bestPercent))
+                        }
+                    }
+                    val xpBadge = if (lesson.isCompleted) {
+                        stringResource(R.string.course_lesson_done_badge)
+                    } else {
+                        stringResource(R.string.course_lesson_xp_format, lesson.xpReward)
+                    }
                     PpLessonRow(
-                        index = lessonNumber,
-                        title = stringResource(R.string.course_lesson_placeholder_title, lessonNumber),
-                        meta = stringResource(R.string.course_lesson_placeholder_meta),
-                        xpLabel = stringResource(R.string.course_lesson_xp_format, 20),
-                        isCompleted = false,
-                        isCurrent = lessonNumber == 1,
-                        isUnlocked = lessonNumber == 1,
-                        enabled = false,
-                        onClick = { onOpenLesson("${courseId}_l$lessonNumber") }
+                        index = lesson.order,
+                        title = lesson.title,
+                        meta = metaText,
+                        xpLabel = xpBadge,
+                        isCompleted = lesson.isCompleted,
+                        isCurrent = lesson.isCurrent,
+                        isUnlocked = lesson.isUnlocked,
+                        enabled = true,
+                        onClick = {
+                            if (lesson.isUnlocked) {
+                                onOpenLesson(lesson.id)
+                            } else {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar(lockedLessonHint)
+                                }
+                            }
+                        },
+                        modifier = Modifier.testTag("lesson_row_${lesson.id}")
                     )
                 }
             }

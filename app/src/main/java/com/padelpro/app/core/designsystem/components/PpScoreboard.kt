@@ -48,7 +48,8 @@ import com.padelpro.app.core.designsystem.theme.PpTextStyles
 fun PpCourtGraphic(
     modifier: Modifier = Modifier,
     highlightServiceBoxes: Boolean = false,
-    showTrajectory: Boolean = true
+    showTrajectory: Boolean = true,
+    diagramId: String? = null
 ) {
     val cd = stringResource(R.string.cd_court_diagram)
     Canvas(
@@ -62,34 +63,62 @@ fun PpCourtGraphic(
         val cw = w - padX * 2
         val ch = h - padY * 2
 
+        val leftServiceX = padX + cw * 0.18f
+        val rightServiceX = padX + cw * 0.82f
+        val netX = padX + cw * 0.5f
+        val centerY = padY + ch * 0.5f
+
         // Outer glass court rectangle
         drawRect(
-            color = PpOutline,
+            color = if (diagramId == "glass_rebound") PpPrimary.copy(alpha = 0.7f) else PpOutline,
             topLeft = Offset(padX, padY),
             size = Size(cw, ch),
-            style = Stroke(width = 2.dp.toPx())
+            style = Stroke(width = if (diagramId == "glass_rebound") 2.5.dp.toPx() else 2.dp.toPx())
         )
 
-        // Optional service box highlight
-        if (highlightServiceBoxes) {
-            drawRect(
-                color = PpPrimary.copy(alpha = 0.10f),
-                topLeft = Offset(padX, padY + ch * 0.18f),
-                size = Size(cw, ch * 0.64f)
-            )
+        when {
+            diagramId == "service_boxes" || highlightServiceBoxes -> {
+                drawRect(
+                    color = PpPrimary.copy(alpha = 0.12f),
+                    topLeft = Offset(leftServiceX, padY),
+                    size = Size(rightServiceX - leftServiceX, ch)
+                )
+            }
+            diagramId == "diagonal_serve" -> {
+                // Highlight opposite receiving box (top-right quadrant between net and right service line)
+                drawRect(
+                    color = PpPrimary.copy(alpha = 0.14f),
+                    topLeft = Offset(netX, padY),
+                    size = Size(rightServiceX - netX, ch * 0.5f)
+                )
+            }
+            diagramId == "net_zone" -> {
+                // Highlight attacking zone near net
+                drawRect(
+                    color = PpPrimary.copy(alpha = 0.14f),
+                    topLeft = Offset(padX + cw * 0.36f, padY),
+                    size = Size(cw * 0.28f, ch)
+                )
+            }
+            diagramId == "glass_rebound" -> {
+                // Highlight back glass bounce zone on right
+                drawRect(
+                    color = PpPrimary.copy(alpha = 0.12f),
+                    topLeft = Offset(rightServiceX, padY),
+                    size = Size(padX + cw - rightServiceX, ch)
+                )
+            }
         }
 
         // Service lines
-        val leftServiceX = padX + cw * 0.18f
-        val rightServiceX = padX + cw * 0.82f
         drawLine(
-            color = PpOutline,
+            color = if (diagramId == "service_boxes") PpPrimary.copy(alpha = 0.7f) else PpOutline,
             start = Offset(leftServiceX, padY),
             end = Offset(leftServiceX, padY + ch),
             strokeWidth = 1.5.dp.toPx()
         )
         drawLine(
-            color = PpOutline,
+            color = if (diagramId == "service_boxes") PpPrimary.copy(alpha = 0.7f) else PpOutline,
             start = Offset(rightServiceX, padY),
             end = Offset(rightServiceX, padY + ch),
             strokeWidth = 1.5.dp.toPx()
@@ -97,42 +126,89 @@ fun PpCourtGraphic(
 
         // Center service line
         drawLine(
-            color = PpOutline,
-            start = Offset(leftServiceX, padY + ch * 0.5f),
-            end = Offset(rightServiceX, padY + ch * 0.5f),
+            color = if (diagramId == "service_boxes") PpPrimary.copy(alpha = 0.7f) else PpOutline,
+            start = Offset(leftServiceX, centerY),
+            end = Offset(rightServiceX, centerY),
             strokeWidth = 1.5.dp.toPx()
         )
 
         // Net line
         drawLine(
             color = PpPrimary.copy(alpha = 0.65f),
-            start = Offset(padX + cw * 0.5f, padY - 4.dp.toPx()),
-            end = Offset(padX + cw * 0.5f, padY + ch + 4.dp.toPx()),
+            start = Offset(netX, padY - 4.dp.toPx()),
+            end = Offset(netX, padY + ch + 4.dp.toPx()),
             strokeWidth = 2.dp.toPx(),
             pathEffect = PathEffect.dashPathEffect(floatArrayOf(8f, 6f), 0f)
         )
 
-        // Subtle lime ball trajectory arc
-        if (showTrajectory) {
-            val arc = Path().apply {
-                moveTo(padX + cw * 0.14f, padY + ch * 0.72f)
-                quadraticTo(
-                    padX + cw * 0.52f,
-                    padY + ch * 0.22f,
-                    padX + cw * 0.84f,
-                    padY + ch * 0.34f
+        when (diagramId) {
+            "diagonal_serve" -> {
+                val serveStart = Offset(leftServiceX - cw * 0.08f, padY + ch * 0.75f)
+                val serveEnd = Offset(netX + (rightServiceX - netX) * 0.58f, padY + ch * 0.24f)
+                drawLine(
+                    color = PpPrimary,
+                    start = serveStart,
+                    end = serveEnd,
+                    strokeWidth = 2.5.dp.toPx(),
+                    cap = StrokeCap.Round
+                )
+                drawCircle(color = PpPrimary, radius = 4.dp.toPx(), center = serveStart)
+                drawCircle(color = PpPrimary, radius = 5.dp.toPx(), center = serveEnd)
+            }
+            "glass_rebound" -> {
+                val p1 = Offset(padX + cw * 0.22f, padY + ch * 0.30f)
+                val bounce = Offset(padX + cw * 0.87f, padY + ch * 0.66f)
+                val wall = Offset(padX + cw, padY + ch * 0.56f)
+                val rebound = Offset(padX + cw * 0.78f, padY + ch * 0.42f)
+                val path = Path().apply {
+                    moveTo(p1.x, p1.y)
+                    lineTo(bounce.x, bounce.y)
+                    lineTo(wall.x, wall.y)
+                    lineTo(rebound.x, rebound.y)
+                }
+                drawPath(
+                    path = path,
+                    color = PpPrimary,
+                    style = Stroke(width = 2.5.dp.toPx(), cap = StrokeCap.Round)
+                )
+                drawCircle(color = PpPrimary, radius = 4.5.dp.toPx(), center = rebound)
+            }
+            "net_zone" -> {
+                val player1 = Offset(padX + cw * 0.41f, padY + ch * 0.28f)
+                val player2 = Offset(padX + cw * 0.41f, padY + ch * 0.72f)
+                drawCircle(color = PpPrimary, radius = 5.dp.toPx(), center = player1)
+                drawCircle(color = PpPrimary, radius = 5.dp.toPx(), center = player2)
+                if (showTrajectory) {
+                    drawLine(
+                        color = PpPrimary.copy(alpha = 0.75f),
+                        start = player1,
+                        end = Offset(padX + cw * 0.86f, padY + ch * 0.68f),
+                        strokeWidth = 2.dp.toPx(),
+                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(6f, 5f), 0f)
+                    )
+                }
+            }
+            else -> if (showTrajectory) {
+                val arc = Path().apply {
+                    moveTo(padX + cw * 0.14f, padY + ch * 0.72f)
+                    quadraticTo(
+                        padX + cw * 0.52f,
+                        padY + ch * 0.22f,
+                        padX + cw * 0.84f,
+                        padY + ch * 0.34f
+                    )
+                }
+                drawPath(
+                    path = arc,
+                    color = PpPrimary,
+                    style = Stroke(width = 2.5.dp.toPx(), cap = StrokeCap.Round)
+                )
+                drawCircle(
+                    color = PpPrimary,
+                    radius = 4.5.dp.toPx(),
+                    center = Offset(padX + cw * 0.84f, padY + ch * 0.34f)
                 )
             }
-            drawPath(
-                path = arc,
-                color = PpPrimary,
-                style = Stroke(width = 2.5.dp.toPx(), cap = StrokeCap.Round)
-            )
-            drawCircle(
-                color = PpPrimary,
-                radius = 4.5.dp.toPx(),
-                center = Offset(padX + cw * 0.84f, padY + ch * 0.34f)
-            )
         }
     }
 }

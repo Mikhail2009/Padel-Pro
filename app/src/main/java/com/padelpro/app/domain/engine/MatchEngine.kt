@@ -46,7 +46,7 @@ object MatchEngine {
                 if (state.isPaused) {
                     return EngineReduceResult.Rejected(state, RejectReason.MATCH_PAUSED)
                 }
-                val nextRaw = applyPointRaw(state.toRaw(), event.team)
+                val nextRaw = applyPointRaw(state.toRaw(), event.team, event.timestampMillis)
                 EngineReduceResult.Accepted(materialize(nextRaw))
             }
 
@@ -153,7 +153,7 @@ object MatchEngine {
         activeSegmentStartedAtMillis = activeSegmentStartedAtMillis
     )
 
-    private fun applyPointRaw(raw: RawState, team: TeamSide): RawState {
+    private fun applyPointRaw(raw: RawState, team: TeamSide, timestampMillis: Long = 0L): RawState {
         if (raw.status == MatchStatus.COMPLETED) return raw
 
         val withTotals = if (team == TeamSide.A) {
@@ -163,13 +163,13 @@ object MatchEngine {
         }
 
         return if (withTotals.isTieBreak) {
-            applyTieBreakPoint(withTotals, team)
+            applyTieBreakPoint(withTotals, team, timestampMillis)
         } else {
-            applyRegularGamePoint(withTotals, team)
+            applyRegularGamePoint(withTotals, team, timestampMillis)
         }
     }
 
-    private fun applyRegularGamePoint(raw: RawState, team: TeamSide): RawState {
+    private fun applyRegularGamePoint(raw: RawState, team: TeamSide, timestampMillis: Long): RawState {
         val pA = raw.pointsA
         val pB = raw.pointsB
 
@@ -178,7 +178,7 @@ object MatchEngine {
             val nextA = if (team == TeamSide.A) pA + 1 else pA
             val nextB = if (team == TeamSide.B) pB + 1 else pB
             return if (nextA >= 4 || nextB >= 4) {
-                awardRegularGame(raw, team)
+                awardRegularGame(raw, team, timestampMillis)
             } else {
                 raw.copy(pointsA = nextA, pointsB = nextB)
             }
@@ -187,13 +187,13 @@ object MatchEngine {
         // At 40-40 (deuce) or Advantage
         return when (raw.config.deuceMode) {
             DeuceMode.GOLDEN_POINT -> {
-                awardRegularGame(raw, team)
+                awardRegularGame(raw, team, timestampMillis)
             }
 
             DeuceMode.ADVANTAGE -> {
                 when (raw.advantageTeam) {
                     null -> raw.copy(advantageTeam = team)
-                    team -> awardRegularGame(raw, team)
+                    team -> awardRegularGame(raw, team, timestampMillis)
                     else -> raw.copy(
                         advantageTeam = null,
                         deuceAdvantagesLost = raw.deuceAdvantagesLost + 1
@@ -204,11 +204,11 @@ object MatchEngine {
             DeuceMode.STAR_POINT -> {
                 if (raw.deuceAdvantagesLost >= 2) {
                     // Third time at deuce -> Star Point decider wins immediately
-                    awardRegularGame(raw, team)
+                    awardRegularGame(raw, team, timestampMillis)
                 } else {
                     when (raw.advantageTeam) {
                         null -> raw.copy(advantageTeam = team)
-                        team -> awardRegularGame(raw, team)
+                        team -> awardRegularGame(raw, team, timestampMillis)
                         else -> raw.copy(
                             advantageTeam = null,
                             deuceAdvantagesLost = raw.deuceAdvantagesLost + 1
@@ -219,7 +219,7 @@ object MatchEngine {
         }
     }
 
-    private fun awardRegularGame(raw: RawState, winner: TeamSide): RawState {
+    private fun awardRegularGame(raw: RawState, winner: TeamSide, timestampMillis: Long): RawState {
         val nextGamesA = if (winner == TeamSide.A) raw.gamesA + 1 else raw.gamesA
         val nextGamesB = if (winner == TeamSide.B) raw.gamesB + 1 else raw.gamesB
         val nextSrvA = if (raw.currentGameServerTeam == TeamSide.A) raw.teamAServiceGamesInSet + 1 else raw.teamAServiceGamesInSet
@@ -241,7 +241,7 @@ object MatchEngine {
                 tbA = null,
                 tbB = null
             )
-            return finishSet(raw, finishedSet, nextSetFirstServer = nextServerTeam)
+            return finishSet(raw, finishedSet, nextSetFirstServer = nextServerTeam, timestampMillis = timestampMillis)
         }
 
         // Check 6-6 -> Tie-Break
@@ -276,7 +276,7 @@ object MatchEngine {
         )
     }
 
-    private fun applyTieBreakPoint(raw: RawState, winner: TeamSide): RawState {
+    private fun applyTieBreakPoint(raw: RawState, winner: TeamSide, timestampMillis: Long): RawState {
         val nextTbA = if (winner == TeamSide.A) raw.tbPointsA + 1 else raw.tbPointsA
         val nextTbB = if (winner == TeamSide.B) raw.tbPointsB + 1 else raw.tbPointsB
 
@@ -297,7 +297,7 @@ object MatchEngine {
             val tbFirst = raw.tbFirstServerTeam ?: raw.currentGameServerTeam
             // First server of next set is the team that received first in the tie-break
             val nextSetFirstServer = tbFirst.other()
-            return finishSet(raw, finishedSet, nextSetFirstServer = nextSetFirstServer)
+            return finishSet(raw, finishedSet, nextSetFirstServer = nextSetFirstServer, timestampMillis = timestampMillis)
         }
 
         return raw.copy(
@@ -309,7 +309,8 @@ object MatchEngine {
     private fun finishSet(
         raw: RawState,
         finishedSet: SetScore,
-        nextSetFirstServer: TeamSide
+        nextSetFirstServer: TeamSide,
+        timestampMillis: Long
     ): RawState {
         val allSets = raw.completedSets + finishedSet
         val setsWonA = allSets.count { it.gamesA > it.gamesB }
@@ -323,6 +324,9 @@ object MatchEngine {
         }
 
         if (matchWinner != null) {
+            val finalSegmentMs = raw.activeSegmentStartedAtMillis?.let { start ->
+                (timestampMillis - start).coerceAtLeast(0L)
+            } ?: 0L
             return raw.copy(
                 status = MatchStatus.COMPLETED,
                 winnerTeam = matchWinner,
@@ -336,6 +340,7 @@ object MatchEngine {
                 isTieBreak = finishedSet.tbA != null,
                 tbPointsA = finishedSet.tbA ?: 0,
                 tbPointsB = finishedSet.tbB ?: 0,
+                accumulatedPlayMs = raw.accumulatedPlayMs + finalSegmentMs,
                 activeSegmentStartedAtMillis = null
             )
         }

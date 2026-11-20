@@ -1,5 +1,8 @@
 package com.padelpro.app.domain.model
 
+import com.padelpro.app.domain.academy.LessonBlock
+import com.padelpro.app.domain.academy.QuizQuestion
+
 enum class MatchFormat {
     SINGLES,
     DOUBLES
@@ -65,7 +68,9 @@ data class AcademyCourse(
     val estimatedMinutes: Int,
     val xpReward: Int,
     val completedLessons: Int,
-    val isUnlocked: Boolean
+    val isUnlocked: Boolean,
+    val title: String = "",
+    val description: String = ""
 ) {
     val progressFraction: Float
         get() = if (lessonCount == 0) 0f else (completedLessons.toFloat() / lessonCount.toFloat()).coerceIn(0f, 1f)
@@ -82,10 +87,77 @@ data class AcademyLessonStub(
     val isUnlocked: Boolean
 )
 
+data class CourseLessonItem(
+    val id: String,
+    val courseId: String,
+    val order: Int,
+    val title: String,
+    val estimatedMinutes: Int,
+    val xpReward: Int,
+    val quizQuestionCount: Int,
+    val isCompleted: Boolean,
+    val isCurrent: Boolean,
+    val isUnlocked: Boolean,
+    val bestQuizScore: Float?
+)
+
+data class CourseDetailData(
+    val course: AcademyCourse,
+    val lessons: List<CourseLessonItem>,
+    val nextActionLessonId: String?
+)
+
+data class LessonDetailData(
+    val id: String,
+    val courseId: String,
+    val courseOrder: Int,
+    val courseTitle: String,
+    val order: Int,
+    val title: String,
+    val estimatedMinutes: Int,
+    val xpReward: Int,
+    val blocks: List<LessonBlock>,
+    val keyFacts: List<String>,
+    val quiz: List<QuizQuestion>,
+    val isCompleted: Boolean
+)
+
+data class LessonCompletionOutcome(
+    val lessonId: String,
+    val lessonTitle: String,
+    val courseId: String,
+    val courseOrder: Int,
+    val xpLesson: Int,
+    val xpQuiz: Int,
+    val xpCourseBonus: Int,
+    val totalXpGained: Int,
+    val correctAnswers: Int,
+    val totalQuestions: Int,
+    val scorePercent: Int,
+    val courseCompletedLessons: Int,
+    val courseTotalLessons: Int,
+    val newlyUnlockedAchievements: List<AchievementItem>,
+    val nextLessonId: String?,
+    val isReviewRepeat: Boolean
+)
+
+data class RulebookItem(
+    val id: String,
+    val category: RulebookCategory,
+    val title: String,
+    val body: String,
+    val diagramId: String?,
+    val fipRef: String,
+    val isFavorite: Boolean
+)
+
 data class AchievementItem(
     val id: String,
     val isUnlocked: Boolean,
-    val unlockedAt: Long? = null
+    val unlockedAt: Long? = null,
+    val title: String = "",
+    val description: String = "",
+    val icon: String = "emoji_events"
 )
 
 data class SetScore(

@@ -2,13 +2,18 @@ package com.padelpro.app.domain.repository
 
 import com.padelpro.app.domain.model.AcademyCourse
 import com.padelpro.app.domain.model.AchievementItem
+import com.padelpro.app.domain.model.CourseDetailData
 import com.padelpro.app.domain.model.DeleteFriendResult
+import com.padelpro.app.domain.model.LessonCompletionOutcome
+import com.padelpro.app.domain.model.LessonDetailData
 import com.padelpro.app.domain.model.LiveMatchSnapshot
 import com.padelpro.app.domain.model.MatchCompletionResult
 import com.padelpro.app.domain.model.MatchFormat
 import com.padelpro.app.domain.model.MatchSummary
 import com.padelpro.app.domain.model.PerformanceSummary
 import com.padelpro.app.domain.model.Player
+import com.padelpro.app.domain.model.RulebookCategory
+import com.padelpro.app.domain.model.RulebookItem
 import com.padelpro.app.domain.model.StartMatchRequest
 import com.padelpro.app.domain.model.StartMatchResult
 import com.padelpro.app.domain.model.TeamSide
@@ -50,9 +55,22 @@ interface PlayerRepository {
 
 interface AcademyRepository {
     fun observeCourses(): Flow<List<AcademyCourse>>
+    fun observeCourseDetail(courseId: String): Flow<CourseDetailData?>
+    fun observeLesson(lessonId: String): Flow<LessonDetailData?>
+    fun observeNextUnlockedLessonId(): Flow<String?>
     fun observeCompletedLessonsCount(): Flow<Int>
     fun observeTotalLessonsCount(): Int
     fun observeAchievements(): Flow<List<AchievementItem>>
+    fun observeRulebook(searchQuery: String = "", category: RulebookCategory = RulebookCategory.ALL): Flow<List<RulebookItem>>
+
+    suspend fun completeLesson(
+        lessonId: String,
+        selectedAnswers: Map<String, Int>
+    ): LessonCompletionOutcome
+
+    suspend fun getCompletionOutcome(lessonId: String): LessonCompletionOutcome?
+
+    suspend fun toggleRuleFavorite(ruleId: String): Boolean
 }
 
 interface MatchRepository {

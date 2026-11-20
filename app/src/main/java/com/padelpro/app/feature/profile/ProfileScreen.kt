@@ -233,9 +233,10 @@ fun ProfileScreen(
                     items(state.achievements, key = { it.id }) { item ->
                         val (titleRes, descRes) = achievementStringRes(item.id)
                         PpAchievementBadge(
-                            title = stringResource(titleRes),
-                            description = stringResource(descRes),
-                            unlocked = item.isUnlocked
+                            title = item.title.ifBlank { stringResource(titleRes) },
+                            description = item.description.ifBlank { stringResource(descRes) },
+                            unlocked = item.isUnlocked,
+                            modifier = Modifier.testTag("profile_achievement_${item.id}")
                         )
                     }
                 }
