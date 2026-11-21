@@ -1,180 +1,98 @@
 package com.padelpro.app.core.designsystem.components
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.padelpro.app.R
-import com.padelpro.app.core.designsystem.theme.PpCard
-import com.padelpro.app.core.designsystem.theme.PpOutline
-import com.padelpro.app.core.designsystem.theme.PpPrimary
+import com.padelpro.app.core.designsystem.theme.LocalPpMotion
+import com.padelpro.app.core.designsystem.theme.PpChartPalette
+import com.padelpro.app.core.designsystem.theme.PpGlassCyan
+import com.padelpro.app.core.designsystem.theme.PpLime
 import com.padelpro.app.core.designsystem.theme.PpSpacing
+import com.padelpro.app.core.designsystem.theme.PpTextHigh
+import com.padelpro.app.core.designsystem.theme.PpTextMid
 import com.padelpro.app.core.designsystem.theme.PpTextStyles
-import com.padelpro.app.domain.model.MonthlyMatchCount
 
 @Composable
-fun PpChartDonut(
-    winRatePercent: Int?,
-    modifier: Modifier = Modifier,
-    size: Dp = 112.dp
-) {
-    Box(
-        modifier = modifier.size(size),
-        contentAlignment = Alignment.Center
-    ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val stroke = 10.dp.toPx()
-            val inset = stroke / 2f
-            val arcSize = Size(this.size.width - stroke, this.size.height - stroke)
-            if (winRatePercent == null) {
-                drawArc(
-                    color = PpOutline,
-                    startAngle = 0f,
-                    sweepAngle = 360f,
-                    useCenter = false,
-                    topLeft = Offset(inset, inset),
-                    size = arcSize,
-                    style = Stroke(
-                        width = stroke,
-                        cap = StrokeCap.Round,
-                        pathEffect = PathEffect.dashPathEffect(floatArrayOf(12f, 10f), 0f)
-                    )
-                )
-            } else {
-                drawArc(
-                    color = PpOutline,
-                    startAngle = 0f,
-                    sweepAngle = 360f,
-                    useCenter = false,
-                    topLeft = Offset(inset, inset),
-                    size = arcSize,
-                    style = Stroke(width = stroke)
-                )
-                val sweep = (winRatePercent.coerceIn(0, 100) / 100f) * 360f
-                drawArc(
-                    color = PpPrimary,
-                    startAngle = -90f,
-                    sweepAngle = sweep,
-                    useCenter = false,
-                    topLeft = Offset(inset, inset),
-                    size = arcSize,
-                    style = Stroke(width = stroke, cap = StrokeCap.Round)
-                )
-            }
+fun PpWinDonut(fraction: Float, centerLabel: String, modifier: Modifier = Modifier) {
+    val motion = LocalPpMotion.current
+    val f by animateFloatAsState(
+        fraction.coerceIn(0f, 1f),
+        animationSpec = if (motion.enabled) motion.glide() else snap(),
+        label = "pp-donut"
+    )
+    Box(modifier.size(148.dp), contentAlignment = Alignment.Center) {
+        Canvas(Modifier.size(148.dp)) {
+            val st = 14.dp.toPx()
+            val inset = st / 2
+            val arc = Size(size.width - st, size.height - st)
+            drawArc(Color(0x1F2C5566), 0f, 360f, false, Offset(inset, inset), arc, style = Stroke(st, cap = StrokeCap.Round))
+            drawArc(
+                Brush.sweepGradient(listOf(PpChartPalette[2], PpGlassCyan, PpLime, PpChartPalette[2])),
+                -90f, 360f * f, false, Offset(inset, inset), arc, style = Stroke(st, cap = StrokeCap.Round)
+            )
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = if (winRatePercent != null) "$winRatePercent%" else stringResource(R.string.dash_placeholder),
-                style = PpTextStyles.H1,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Text(
-                text = stringResource(R.string.performance_win_rate_label),
-                style = PpTextStyles.Micro,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Text(centerLabel, style = PpTextStyles.DisplayNum, color = PpTextHigh)
+            Text("ПОБЕД", style = PpTextStyles.Overline, color = PpTextMid)
         }
     }
 }
 
 @Composable
-fun PpChartBar(
-    items: List<MonthlyMatchCount>,
-    modifier: Modifier = Modifier
-) {
-    val maxCount = (items.maxOfOrNull { it.count } ?: 0).coerceAtLeast(1)
-    Column(modifier = modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(110.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Bottom
-        ) {
-            items.forEach { item ->
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Bottom,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = item.count.toString(),
-                        style = PpTextStyles.Label,
-                        color = if (item.count > 0 && item.isCurrentMonth) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(Modifier.height(PpSpacing.xs))
-                    val fraction = if (item.count == 0) 0.06f else (item.count.toFloat() / maxCount.toFloat()).coerceIn(0.12f, 1f)
-                    Canvas(
-                        modifier = Modifier
-                            .size(width = 22.dp, height = 74.dp)
-                    ) {
-                        val barH = size.height * fraction
-                        val barColor = when {
-                            item.count == 0 -> PpOutline
-                            item.isCurrentMonth -> PpPrimary
-                            else -> PpCard
-                        }
-                        drawRoundRect(
-                            color = barColor,
-                            topLeft = Offset(0f, size.height - barH),
-                            size = Size(size.width, barH),
-                            cornerRadius = CornerRadius(6.dp.toPx(), 6.dp.toPx())
-                        )
-                    }
-                }
+fun PpActivityBars(labels: List<String>, values: List<Int>, modifier: Modifier = Modifier) {
+    val motion = LocalPpMotion.current
+    val grow = remember { Animatable(0f) }
+    LaunchedEffect(values) {
+        if (motion.enabled) grow.animateTo(1f, motion.glide()) else grow.snapTo(1f)
+    }
+    val max = (values.maxOrNull() ?: 0).coerceAtLeast(1)
+    Column(modifier.fillMaxWidth()) {
+        Canvas(Modifier.fillMaxWidth().height(132.dp)) {
+            val n = values.size.coerceAtLeast(1)
+            val gap = 10.dp.toPx()
+            val bw = ((size.width - gap * (n - 1)) / n).coerceAtLeast(6.dp.toPx())
+            val base = size.height - 18.dp.toPx()
+            drawLine(Color(0x1F2C5566), Offset(0f, base), Offset(size.width, base), 1f)
+            values.forEachIndexed { i, v ->
+                val h = (base - 8.dp.toPx()) * (v.toFloat() / max) * grow.value
+                val c = PpChartPalette[i % PpChartPalette.size]
+                drawRoundRect(
+                    Brush.verticalGradient(listOf(c, c.copy(alpha = 0.25f))),
+                    topLeft = Offset(i * (bw + gap), base - h),
+                    size = Size(bw, h.coerceAtLeast(2.dp.toPx())),
+                    cornerRadius = CornerRadius(6.dp.toPx())
+                )
             }
         }
-        Spacer(Modifier.height(PpSpacing.xs))
-        Canvas(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-        ) {
-            drawLine(
-                color = PpOutline,
-                start = Offset(0f, 0f),
-                end = Offset(size.width, 0f),
-                strokeWidth = 1.dp.toPx()
-            )
-        }
-        Spacer(Modifier.height(PpSpacing.sm))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            items.forEach { item ->
-                Box(
-                    modifier = Modifier.weight(1f),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = item.label,
-                        style = PpTextStyles.Micro,
-                        color = if (item.isCurrentMonth) MaterialTheme.colorScheme.onBackground
-                        else MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+        Row(Modifier.fillMaxWidth().padding(top = 6.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+            labels.forEachIndexed { i, l ->
+                Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
+                    Text((values.getOrNull(i) ?: 0).toString(), style = PpTextStyles.Label, color = PpChartPalette[i % PpChartPalette.size])
+                    Text(l.uppercase(), style = PpTextStyles.Overline, color = PpTextMid, maxLines = 1)
                 }
             }
         }
@@ -182,34 +100,18 @@ fun PpChartBar(
 }
 
 @Composable
-fun PpChartLine(
-    points: List<Float>,
-    modifier: Modifier = Modifier
-) {
-    Canvas(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(64.dp)
-    ) {
-        drawLine(
-            color = PpOutline,
-            start = Offset(0f, size.height - 1.dp.toPx()),
-            end = Offset(size.width, size.height - 1.dp.toPx()),
-            strokeWidth = 1.dp.toPx()
-        )
-        if (points.size >= 2) {
-            val path = Path()
-            val stepX = size.width / (points.size - 1)
-            points.forEachIndexed { idx, value ->
-                val x = idx * stepX
-                val y = size.height - (value.coerceIn(0f, 1f) * (size.height * 0.8f) + size.height * 0.1f)
-                if (idx == 0) path.moveTo(x, y) else path.lineTo(x, y)
-            }
-            drawPath(
-                path = path,
-                color = PpPrimary,
-                style = Stroke(width = 2.dp.toPx(), cap = StrokeCap.Round)
-            )
+fun PpFormChips(results: List<Boolean>, modifier: Modifier = Modifier) {
+    Row(modifier, horizontalArrangement = Arrangement.spacedBy(PpSpacing.sm)) {
+        results.forEach { win ->
+            val c = if (win) PpLime else PpChartPalette[4]
+            Box(
+                Modifier.size(36.dp).glassPanel(
+                    radius = if (win) 18.dp else 8.dp,
+                    fill = Brush.verticalGradient(listOf(c.copy(alpha = 0.22f), Color.Transparent)),
+                    edge = Brush.linearGradient(listOf(c.copy(alpha = 0.8f), c.copy(alpha = 0.2f)))
+                ),
+                contentAlignment = Alignment.Center
+            ) { Text(if (win) "В" else "П", style = PpTextStyles.Label, color = c) }
         }
     }
 }
