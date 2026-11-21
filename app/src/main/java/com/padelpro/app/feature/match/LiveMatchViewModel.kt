@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.padelpro.app.core.common.TimeProvider
 import com.padelpro.app.core.datastore.AppSettings
 import com.padelpro.app.core.datastore.SettingsRepository
+import com.padelpro.app.domain.engine.SideSwap
 import com.padelpro.app.domain.model.LiveMatchSnapshot
 import com.padelpro.app.domain.model.MatchStatus
 import com.padelpro.app.domain.model.TeamSide
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
@@ -32,6 +34,8 @@ data class LiveMatchUiState(
     val elapsedMillis: Long = 0L,
     val hapticsEnabled: Boolean = true,
     val keepScreenOn: Boolean = true,
+    val autoSideSwap: Boolean = true,
+    val swapped: Boolean = false,
     val isMutating: Boolean = false
 )
 
@@ -43,6 +47,9 @@ class LiveMatchViewModel(
 
     private val clockMillis = MutableStateFlow(timeProvider.nowMillis())
     private val isMutating = MutableStateFlow(false)
+    private val _manualSwapTaps = MutableStateFlow(0)
+    val manualSwapTaps: StateFlow<Int> = _manualSwapTaps.asStateFlow()
+
     private val _navEvents = MutableSharedFlow<LiveMatchNavEvent>(extraBufferCapacity = 2)
     val navEvents: SharedFlow<LiveMatchNavEvent> = _navEvents.asSharedFlow()
 
@@ -59,15 +66,21 @@ class LiveMatchViewModel(
         matchRepository.observeActiveMatchLive(),
         settingsRepository.settings,
         clockMillis,
-        isMutating
-    ) { snapshot: LiveMatchSnapshot?, settings: AppSettings, now: Long, mutating: Boolean ->
+        isMutating,
+        _manualSwapTaps
+    ) { snapshot: LiveMatchSnapshot?, settings: AppSettings, now: Long, mutating: Boolean, swapTaps: Int ->
         val elapsed = snapshot?.state?.elapsedDurationMillis(now) ?: 0L
+        val swapped = snapshot?.state?.let { engineState ->
+            SideSwap.isSwapped(engineState, settings.autoSideSwap, swapTaps)
+        } ?: false
         LiveMatchUiState(
             isLoading = false,
             snapshot = snapshot,
             elapsedMillis = elapsed,
             hapticsEnabled = settings.hapticsEnabled,
             keepScreenOn = settings.keepScreenOn,
+            autoSideSwap = settings.autoSideSwap,
+            swapped = swapped,
             isMutating = mutating
         )
     }.stateIn(
@@ -133,6 +146,10 @@ class LiveMatchViewModel(
         }
     }
 
+    fun swapSidesManually() {
+        _manualSwapTaps.value += 1
+    }
+
     fun cancelMatchEarly() {
         if (isMutating.value) return
         viewModelScope.launch {
@@ -160,6 +177,12 @@ class LiveMatchViewModel(
     fun setKeepScreenOn(enabled: Boolean) {
         viewModelScope.launch {
             settingsRepository.setKeepScreenOn(enabled)
+        }
+    }
+
+    fun setAutoSideSwap(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setAutoSideSwap(enabled)
         }
     }
 }

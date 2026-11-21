@@ -38,6 +38,7 @@ data class MatchUiState(
     val recentMatches: List<MatchSummary> = emptyList(),
     val selectedFormat: MatchFormat = MatchFormat.DOUBLES,
     val selectedDeuceMode: DeuceMode = DeuceMode.GOLDEN_POINT,
+    val autoSideSwap: Boolean = true,
     val firstServerIndex: Int = 0,
     val slotPlayers: List<Player?> = listOf(null, null, null, null),
     val canStartMatch: Boolean = false,
@@ -65,7 +66,7 @@ private data class SetupDraftState(
 class MatchViewModel(
     private val playerRepository: PlayerRepository,
     private val matchRepository: MatchRepository,
-    settingsRepository: SettingsRepository,
+    private val settingsRepository: SettingsRepository,
     private val timeProvider: TimeProvider
 ) : ViewModel() {
 
@@ -124,6 +125,7 @@ class MatchViewModel(
             recentMatches = recent,
             selectedFormat = format,
             selectedDeuceMode = deuce,
+            autoSideSwap = settings.autoSideSwap,
             firstServerIndex = serverIdx,
             slotPlayers = activeSlotPlayers.let { list ->
                 if (list.size == 4) list else listOf(list[0], null, list[1], null)
@@ -150,6 +152,12 @@ class MatchViewModel(
 
     fun setDeuceMode(mode: DeuceMode) {
         draft.value = draft.value.copy(deuceOverride = mode)
+    }
+
+    fun setAutoSideSwap(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.setAutoSideSwap(enabled)
+        }
     }
 
     fun setFirstServerIndex(index: Int) {

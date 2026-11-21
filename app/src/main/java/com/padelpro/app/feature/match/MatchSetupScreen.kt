@@ -30,6 +30,8 @@ import androidx.compose.material.icons.rounded.RadioButtonChecked
 import androidx.compose.material.icons.rounded.RadioButtonUnchecked
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -64,6 +66,7 @@ import com.padelpro.app.core.designsystem.theme.PpCourtNight
 import com.padelpro.app.core.designsystem.theme.PpCourtPanel
 import com.padelpro.app.core.designsystem.theme.PpGlassCyan
 import com.padelpro.app.core.designsystem.theme.PpLime
+import com.padelpro.app.core.designsystem.theme.PpOnAccent
 import com.padelpro.app.core.designsystem.theme.PpRadius
 import com.padelpro.app.core.designsystem.theme.PpScrimVertical
 import com.padelpro.app.core.designsystem.theme.PpSpacing
@@ -384,6 +387,44 @@ fun MatchSetupScreen(
                             style = PpTextStyles.Label,
                             color = PpTextMid
                         )
+                    }
+                }
+
+                item {
+                    PpCard(modifier = Modifier.fillMaxWidth()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 48.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.match_setup_auto_side_swap_title),
+                                    style = PpTextStyles.Micro,
+                                    color = PpTextHigh
+                                )
+                                Spacer(Modifier.height(2.dp))
+                                Text(
+                                    text = stringResource(R.string.match_setup_auto_side_swap_sub),
+                                    style = PpTextStyles.Label,
+                                    color = PpTextMid
+                                )
+                            }
+                            Spacer(Modifier.width(PpSpacing.md))
+                            Switch(
+                                checked = state.autoSideSwap,
+                                onCheckedChange = viewModel::setAutoSideSwap,
+                                modifier = Modifier.testTag("match_setup_auto_side_swap_switch"),
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = PpOnAccent,
+                                    checkedTrackColor = PpLime,
+                                    uncheckedThumbColor = PpTextMid,
+                                    uncheckedTrackColor = PpCourtLine
+                                )
+                            )
+                        }
                     }
                 }
             }

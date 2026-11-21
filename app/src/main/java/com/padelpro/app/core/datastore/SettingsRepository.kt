@@ -20,6 +20,7 @@ data class AppSettings(
     val onboardingCompleted: Boolean = false,
     val hapticsEnabled: Boolean = true,
     val keepScreenOn: Boolean = true,
+    val autoSideSwap: Boolean = true,
     val defaultFormat: MatchFormat = MatchFormat.DOUBLES,
     val defaultDeuceMode: DeuceMode = DeuceMode.GOLDEN_POINT,
     val contentVersion: Int = 1,
@@ -32,6 +33,7 @@ class SettingsRepository(private val context: Context) {
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
         val HAPTICS_ENABLED = booleanPreferencesKey("haptics_enabled")
         val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
+        val AUTO_SIDE_SWAP = booleanPreferencesKey("auto_side_swap")
         val DEFAULT_FORMAT = stringPreferencesKey("default_format")
         val DEFAULT_DEUCE_MODE = stringPreferencesKey("default_deuce_mode")
         val CONTENT_VERSION = intPreferencesKey("content_version")
@@ -45,12 +47,15 @@ class SettingsRepository(private val context: Context) {
             onboardingCompleted = prefs[Keys.ONBOARDING_COMPLETED] ?: false,
             hapticsEnabled = prefs[Keys.HAPTICS_ENABLED] ?: true,
             keepScreenOn = prefs[Keys.KEEP_SCREEN_ON] ?: true,
+            autoSideSwap = prefs[Keys.AUTO_SIDE_SWAP] ?: true,
             defaultFormat = runCatching { MatchFormat.valueOf(formatStr) }.getOrDefault(MatchFormat.DOUBLES),
             defaultDeuceMode = runCatching { DeuceMode.valueOf(deuceStr) }.getOrDefault(DeuceMode.GOLDEN_POINT),
             contentVersion = prefs[Keys.CONTENT_VERSION] ?: 1,
             backupLastExportedAt = prefs[Keys.BACKUP_LAST_EXPORTED_AT]
         )
     }
+
+    val autoSideSwap: Flow<Boolean> = settings.map { it.autoSideSwap }
 
     suspend fun setOnboardingCompleted(completed: Boolean) {
         context.dataStore.edit { it[Keys.ONBOARDING_COMPLETED] = completed }
@@ -62,6 +67,10 @@ class SettingsRepository(private val context: Context) {
 
     suspend fun setKeepScreenOn(enabled: Boolean) {
         context.dataStore.edit { it[Keys.KEEP_SCREEN_ON] = enabled }
+    }
+
+    suspend fun setAutoSideSwap(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.AUTO_SIDE_SWAP] = enabled }
     }
 
     suspend fun setDefaultFormat(format: MatchFormat) {
@@ -81,6 +90,7 @@ class SettingsRepository(private val context: Context) {
             prefs[Keys.ONBOARDING_COMPLETED] = newSettings.onboardingCompleted
             prefs[Keys.HAPTICS_ENABLED] = newSettings.hapticsEnabled
             prefs[Keys.KEEP_SCREEN_ON] = newSettings.keepScreenOn
+            prefs[Keys.AUTO_SIDE_SWAP] = newSettings.autoSideSwap
             prefs[Keys.DEFAULT_FORMAT] = newSettings.defaultFormat.name
             prefs[Keys.DEFAULT_DEUCE_MODE] = newSettings.defaultDeuceMode.name
             prefs[Keys.CONTENT_VERSION] = newSettings.contentVersion

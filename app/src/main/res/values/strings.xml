@@ -319,10 +319,13 @@
     <string name="match_setup_no_friends_yet">Друзей пока нет — добавьте партнёра или соперника ниже</string>
     <string name="match_setup_friend_tag">ДРУГ</string>
     <string name="match_setup_server_slot_placeholder">Игрок %1$d</string>
+    <string name="match_setup_auto_side_swap_title">АВТОСМЕНА СТОРОН</string>
+    <string name="match_setup_auto_side_swap_sub">Менять поля автоматически по правилам FIP</string>
 
     <!-- Экран 11: Живое табло -->
     <string name="live_match_header_placeholder">СЕТ 1 · ПАРНЫЙ · ЗОЛОТОЙ МЯЧ</string>
     <string name="live_match_header_format">СЕТ %1$d · %2$s · %3$s</string>
+    <string name="live_match_set_label_format">СЕТ %1$d</string>
     <string name="live_match_games_label">ГЕЙМЫ</string>
     <string name="live_match_team_a_placeholder">КОМАНДА A</string>
     <string name="live_match_team_b_placeholder">КОМАНДА B</string>
@@ -333,6 +336,7 @@
     <string name="live_match_resume_desc">Снять с паузы</string>
     <string name="live_match_settings">Настройки матча</string>
     <string name="live_match_settings_sheet_title">Настройки табло</string>
+    <string name="live_match_setting_auto_side_swap">Автосмена сторон</string>
     <string name="live_match_no_active">Нет активного матча</string>
     <string name="live_match_point_cta">+ ОЧКО</string>
     <string name="live_score_advantage_short">БОЛ</string>
