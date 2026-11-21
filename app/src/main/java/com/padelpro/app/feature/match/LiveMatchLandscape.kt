@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -30,8 +31,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Flag
 import androidx.compose.material.icons.rounded.Pause
@@ -51,17 +50,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -73,8 +72,11 @@ import com.padelpro.app.core.designsystem.components.glassPanel
 import com.padelpro.app.core.designsystem.theme.LocalPpMotion
 import com.padelpro.app.core.designsystem.theme.PpAmberLed
 import com.padelpro.app.core.designsystem.theme.PpCourtGlass
+import com.padelpro.app.core.designsystem.theme.PpCourtLine
+import com.padelpro.app.core.designsystem.theme.PpCourtPanel
 import com.padelpro.app.core.designsystem.theme.PpGlassCyan
 import com.padelpro.app.core.designsystem.theme.PpLime
+import com.padelpro.app.core.designsystem.theme.PpOnAccent
 import com.padelpro.app.core.designsystem.theme.PpSpacing
 import com.padelpro.app.core.designsystem.theme.PpTextHigh
 import com.padelpro.app.core.designsystem.theme.PpTextLow
@@ -111,6 +113,9 @@ data class LiveRailUi(
 )
 
 private const val TAP_GUARD_MS = 220L
+
+/** Подписи рейла: обычный регистр, без широкого трекинга. */
+private val RailLabel: TextStyle = PpTextStyles.Micro.copy(fontSize = 11.sp, lineHeight = 14.sp, letterSpacing = 0.sp)
 
 @Composable
 fun LiveMatchLandscape(
@@ -195,8 +200,8 @@ private fun SideHalf(
     val pop = remember { Animatable(1f) }
     LaunchedEffect(ui.score) {
         if (!motion.enabled) { pop.snapTo(1f); return@LaunchedEffect }
-        pop.snapTo(1.13f)
-        pop.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium))
+        pop.snapTo(1.06f)
+        pop.animateTo(1f, spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessMedium))
     }
 
     val burst = remember { Animatable(1f) }
@@ -213,12 +218,8 @@ private fun SideHalf(
         modifier
             .glassPanel(
                 radius = 22.dp,
-                fill = Brush.verticalGradient(
-                    listOf(ui.accent.copy(alpha = if (ui.serving) 0.15f else 0.06f), Color(0x0A071016))
-                ),
-                edge = Brush.linearGradient(
-                    listOf(ui.accent.copy(alpha = if (ui.serving) 0.8f else 0.22f), Color(0x142C5566))
-                )
+                fill = SolidColor(if (ui.serving) ui.accent.copy(alpha = 0.10f).compositeOver(PpCourtPanel) else PpCourtPanel),
+                edge = SolidColor(if (ui.serving) ui.accent.copy(alpha = 0.55f) else PpCourtLine)
             )
             .drawWithContent {
                 drawContent()
@@ -243,10 +244,10 @@ private fun SideHalf(
     ) {
         val density = LocalDensity.current
         val tight = maxHeight < 230.dp || density.fontScale > 1.2f
-        val scoreSize = with(density) { (maxHeight * (if (tight) 0.30f else 0.34f)).toSp() }
-            .value.coerceIn(38f, 96f).sp
-        val scoreLine = with(density) { (maxHeight * (if (tight) 0.31f else 0.35f)).toSp() }
-            .value.coerceIn(40f, 98f).sp
+        val scoreSize = with(density) { (maxHeight * (if (tight) 0.32f else 0.38f)).toSp() }
+            .value.coerceIn(40f, 116f).sp
+        val scoreLine = with(density) { (maxHeight * (if (tight) 0.33f else 0.39f)).toSp() }
+            .value.coerceIn(42f, 118f).sp
 
         AnimatedContent(
             targetState = ui.teamLabel,
@@ -272,7 +273,7 @@ private fun SideHalf(
                         Spacer(Modifier.width(6.dp))
                     }
                     Text(
-                        ui.teamLabel.uppercase(),
+                        ui.teamLabel,
                         style = if (compact || tight) PpTextStyles.Label else PpTextStyles.Title,
                         color = PpTextHigh, maxLines = 1, overflow = TextOverflow.Ellipsis
                     )
@@ -286,19 +287,19 @@ private fun SideHalf(
                 Text(
                     ui.score,
                     style = PpTextStyles.ScoreDisplay.copy(fontSize = scoreSize, lineHeight = scoreLine),
-                    color = if (ui.serving) PpAmberLed else PpTextHigh,
+                    color = PpTextHigh,
                     textAlign = TextAlign.Center,
                     maxLines = 1,
                     modifier = Modifier.graphicsLayer { scaleX = pop.value; scaleY = pop.value }
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    MiniChip("ГЕЙМ ${ui.games}", ui.accent)
-                    if (!tight) MiniChip("СЕТЫ ${ui.setsWon}", PpGlassCyan)
+                    MiniChip("Гейм ${ui.games}", PpTextHigh)
+                    if (!tight) MiniChip("Сеты ${ui.setsWon}", PpTextMid)
                 }
                 if (ui.serving && !ui.serverName.isNullOrBlank() && !tight) {
                     Text(
-                        "ПОДАЁТ · ${ui.serverName.uppercase()}",
-                        style = PpTextStyles.Overline, color = PpAmberLed,
+                        "Подаёт · ${ui.serverName}",
+                        style = RailLabel, color = PpAmberLed,
                         modifier = Modifier.padding(top = 4.dp),
                         maxLines = 1, overflow = TextOverflow.Ellipsis
                     )
@@ -307,23 +308,24 @@ private fun SideHalf(
         }
 
         val flag = when {
-            ui.matchPoint -> "МАТЧ-БОЛ"
-            ui.setPoint -> "СЕТ-БОЛ"
+            ui.matchPoint -> "Матчбол"
+            ui.setPoint -> "Сетбол"
             else -> null
         }
         if (flag != null) {
             Box(
                 Modifier.align(Alignment.BottomCenter).glassPanel(
                     radius = 13.dp,
-                    fill = Brush.horizontalGradient(listOf(ui.accent.copy(alpha = 0.3f), Color(0x1A5FE3FF)))
+                    fill = SolidColor(PpLime),
+                    edge = SolidColor(PpLime)
                 ).padding(horizontal = 14.dp, vertical = 5.dp)
-            ) { Text(flag, style = PpTextStyles.Micro, color = PpTextHigh, maxLines = 1) }
+            ) { Text(flag, style = PpTextStyles.Micro, color = PpOnAccent, maxLines = 1) }
         }
 
         Text(
-            if (paused) "ПАУЗА" else "+ ОЧКО",
-            style = PpTextStyles.Overline,
-            color = if (enabled) ui.accent.copy(alpha = 0.75f) else PpAmberLed.copy(alpha = 0.8f),
+            if (paused) "Пауза" else "+ очко",
+            style = RailLabel,
+            color = if (enabled) PpTextLow else PpAmberLed,
             modifier = Modifier.align(Alignment.TopEnd)
         )
     }
@@ -332,9 +334,9 @@ private fun SideHalf(
 @Composable
 private fun MiniChip(text: String, accent: Color) {
     Box(
-        Modifier.glassPanel(radius = 11.dp, fill = Brush.verticalGradient(listOf(PpCourtGlass, Color(0x0A071016))))
-            .padding(horizontal = 9.dp, vertical = 4.dp)
-    ) { Text(text, style = PpTextStyles.Overline, color = accent, maxLines = 1) }
+        Modifier.glassPanel(radius = 11.dp, fill = SolidColor(PpCourtGlass), edge = SolidColor(PpCourtLine))
+            .padding(horizontal = 10.dp, vertical = 4.dp)
+    ) { Text(text, style = RailLabel, color = accent, maxLines = 1) }
 }
 
 @Composable
@@ -348,117 +350,113 @@ private fun CenterRail(
     onFinish: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val scroll = rememberScrollState()
-    Box(modifier) {
-        Column(
-            Modifier.fillMaxSize().verticalScroll(scroll),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+    BoxWithConstraints(modifier) {
+        // Колонка без прокрутки: шапка и подвал фиксированы, кнопки делят остаток поровну.
+        val tight = maxHeight < 330.dp
+        Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 rail.timer,
                 style = if (compact) PpTextStyles.Title else PpTextStyles.Numeral,
                 color = if (rail.paused) PpAmberLed else PpTextHigh,
                 maxLines = 1
             )
-            Text(rail.setLabel.uppercase(), style = PpTextStyles.Overline, color = PpTextMid, maxLines = 1)
-            Text(rail.formatLabel.uppercase(), style = PpTextStyles.Overline, color = PpTextLow, maxLines = 1)
-            rail.sets.takeLast(3).forEach { s ->
-                Text(s, style = PpTextStyles.Overline, color = PpGlassCyan, maxLines = 1)
+            Text(rail.setLabel, style = RailLabel, color = PpTextMid, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (!tight) {
+                Text(rail.formatLabel, style = RailLabel, color = PpTextLow, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+            if (rail.sets.isNotEmpty()) {
+                Text(
+                    rail.sets.takeLast(3).joinToString("  "),
+                    style = RailLabel, color = PpTextMid, maxLines = 1, overflow = TextOverflow.Ellipsis
+                )
             }
 
-            if (rail.recentPoints.isNotEmpty()) {
-                Spacer(Modifier.height(5.dp))
+            if (rail.recentPoints.isNotEmpty() && !tight) {
+                Spacer(Modifier.height(4.dp))
                 PointTape(rail.recentPoints)
+            }
+
+            if (rail.banner != null) {
+                Spacer(Modifier.height(4.dp))
+                Box(
+                    Modifier.fillMaxWidth().glassPanel(
+                        radius = 11.dp,
+                        fill = SolidColor(PpLime.copy(alpha = 0.12f).compositeOver(PpCourtPanel)),
+                        edge = SolidColor(PpLime.copy(alpha = 0.35f))
+                    ).padding(vertical = 4.dp, horizontal = 3.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        rail.banner, style = RailLabel, color = PpTextHigh,
+                        textAlign = TextAlign.Center, maxLines = if (tight) 1 else 2, overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
 
             Spacer(Modifier.height(6.dp))
 
-            if (rail.banner != null) {
-                Box(
-                    Modifier.fillMaxWidth().glassPanel(
-                        radius = 11.dp,
-                        fill = Brush.horizontalGradient(listOf(Color(0x33C8F751), Color(0x1A5FE3FF)))
-                    ).padding(vertical = 5.dp, horizontal = 3.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        rail.banner.uppercase(), style = PpTextStyles.Overline, color = PpTextHigh,
-                        textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis
-                    )
-                }
-                Spacer(Modifier.height(5.dp))
+            Column(
+                Modifier.weight(1f).fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                RailButton(
+                    icon = if (rail.paused) Icons.Rounded.PlayArrow else Icons.Rounded.Pause,
+                    label = if (rail.paused) "Играть" else "Пауза",
+                    accent = if (rail.paused) PpAmberLed else PpTextHigh,
+                    enabled = !rail.busy, compact = compact, onClick = onPauseToggle,
+                    modifier = Modifier.weight(1f)
+                )
+                RailButton(
+                    icon = Icons.Rounded.Undo, label = "Отменить", accent = PpTextMid,
+                    enabled = rail.canUndo && !rail.busy && !rail.paused,
+                    compact = compact, onClick = onUndo,
+                    modifier = Modifier.weight(1f)
+                )
+                RailButton(
+                    icon = Icons.Rounded.SwapHoriz,
+                    label = if (rail.autoSwap) "Авто" else "Стороны",
+                    accent = if (rail.swapped) PpLime else PpTextMid,
+                    enabled = !rail.busy, compact = compact, onClick = onSwapSides,
+                    modifier = Modifier.weight(1f)
+                )
+                RailButton(
+                    icon = Icons.Rounded.Settings, label = "Настройки", accent = PpTextMid,
+                    enabled = !rail.busy, compact = compact, onClick = onSettings,
+                    modifier = Modifier.weight(1f)
+                )
+                RailButton(
+                    icon = Icons.Rounded.Flag, label = "Завершить", accent = PpLime,
+                    enabled = !rail.busy, compact = compact, onClick = onFinish,
+                    modifier = Modifier.weight(1f)
+                )
             }
 
-            RailButton(
-                icon = if (rail.paused) Icons.Rounded.PlayArrow else Icons.Rounded.Pause,
-                label = if (rail.paused) "ИГРАТЬ" else "ПАУЗА",
-                accent = if (rail.paused) PpAmberLed else PpGlassCyan,
-                enabled = !rail.busy, compact = compact, onClick = onPauseToggle
-            )
-            RailButton(
-                icon = Icons.Rounded.Undo, label = "ОТМЕНИТЬ", accent = PpTextMid,
-                enabled = rail.canUndo && !rail.busy && !rail.paused,
-                compact = compact, onClick = onUndo
-            )
-            RailButton(
-                icon = Icons.Rounded.SwapHoriz,
-                label = if (rail.autoSwap) "АВТО" else "СТОРОНЫ",
-                accent = if (rail.swapped) PpLime else PpGlassCyan,
-                enabled = !rail.busy, compact = compact, onClick = onSwapSides
-            )
-            RailButton(
-                icon = Icons.Rounded.Settings, label = "НАСТРОЙКИ", accent = PpTextMid,
-                enabled = !rail.busy, compact = compact, onClick = onSettings
-            )
-            RailButton(
-                icon = Icons.Rounded.Flag, label = "ЗАВЕРШИТЬ", accent = PpLime,
-                enabled = !rail.busy, compact = compact, onClick = onFinish
-            )
-
-            Spacer(Modifier.height(4.dp))
-            Text(
-                rail.deuceLabel.uppercase(), style = PpTextStyles.Overline, color = PpTextLow,
-                maxLines = 2, textAlign = TextAlign.Center, overflow = TextOverflow.Ellipsis
-            )
-        }
-
-        if (scroll.maxValue > 0) {
-            Canvas(
-                Modifier.align(Alignment.CenterEnd).width(3.dp).fillMaxHeight().padding(vertical = 4.dp)
-            ) {
-                val track = size.height
-                val ratio = scroll.value.toFloat() / scroll.maxValue.coerceAtLeast(1)
-                val thumb = (track * (track / (track + scroll.maxValue))).coerceAtLeast(24.dp.toPx())
-                drawRoundRect(Color(0x1F2C5566), cornerRadius = CornerRadius(2.dp.toPx()))
-                drawRoundRect(
-                    Brush.verticalGradient(listOf(PpGlassCyan, PpLime)),
-                    topLeft = Offset(0f, (track - thumb) * ratio),
-                    size = Size(size.width, thumb),
-                    cornerRadius = CornerRadius(2.dp.toPx())
+            if (!tight) {
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    rail.deuceLabel, style = RailLabel, color = PpTextLow,
+                    maxLines = 2, textAlign = TextAlign.Center, overflow = TextOverflow.Ellipsis
                 )
             }
         }
     }
 }
 
-/** Лента последних очков: лайм — команда A, циан — команда B; последняя крупнее. */
+/** Лента последних очков: лайм — команда A, небесный — команда B; последняя крупнее. */
 @Composable
 private fun PointTape(points: List<Boolean>) {
     val tail = points.takeLast(8)
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("ПОСЛЕДНИЕ", style = PpTextStyles.Overline, color = PpTextLow, maxLines = 1)
-        Canvas(Modifier.fillMaxWidth().height(12.dp)) {
-            val n = tail.size.coerceAtLeast(1)
-            val step = size.width / n
-            tail.forEachIndexed { i, teamA ->
-                val c = if (teamA) PpLime else PpGlassCyan
-                val last = i == tail.lastIndex
-                drawCircle(
-                    color = c.copy(alpha = if (last) 1f else 0.42f + 0.06f * i),
-                    radius = if (last) 4.2.dp.toPx() else 2.6.dp.toPx(),
-                    center = Offset(step * (i + 0.5f), size.height / 2)
-                )
-            }
+    Canvas(Modifier.fillMaxWidth().height(12.dp)) {
+        val n = tail.size.coerceAtLeast(1)
+        val step = size.width / n
+        tail.forEachIndexed { i, teamA ->
+            val c = if (teamA) PpLime else PpGlassCyan
+            val last = i == tail.lastIndex
+            drawCircle(
+                color = c.copy(alpha = if (last) 1f else 0.42f + 0.06f * i),
+                radius = if (last) 4.2.dp.toPx() else 2.6.dp.toPx(),
+                center = Offset(step * (i + 0.5f), size.height / 2)
+            )
         }
     }
 }
@@ -470,22 +468,32 @@ private fun RailButton(
     accent: Color,
     enabled: Boolean,
     compact: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    Column(
-        Modifier
+    BoxWithConstraints(
+        modifier
             .fillMaxWidth()
-            .padding(vertical = 2.5.dp)
+            .heightIn(max = 56.dp)
             .glassPanel(radius = 13.dp)
-            .then(if (enabled) Modifier.clickableNoRipple(onClick) else Modifier)
-            .padding(vertical = if (compact) 5.dp else 7.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .then(if (enabled) Modifier.clickableNoRipple(onClick) else Modifier),
+        contentAlignment = Alignment.Center
     ) {
-        Icon(icon, label, tint = if (enabled) accent else PpTextLow, modifier = Modifier.size(if (compact) 18.dp else 20.dp))
-        Text(
-            label, style = PpTextStyles.Overline,
-            color = if (enabled) PpTextMid else PpTextLow,
-            maxLines = 1, overflow = TextOverflow.Ellipsis
-        )
+        // Подпись показываем, только если кнопке хватает высоты; иначе остаётся иконка.
+        val showLabel = maxHeight >= 40.dp
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                icon, label,
+                tint = if (enabled) accent else PpTextLow,
+                modifier = Modifier.size(if (compact) 18.dp else 20.dp)
+            )
+            if (showLabel) {
+                Text(
+                    label, style = RailLabel,
+                    color = if (enabled) PpTextMid else PpTextLow,
+                    maxLines = 1, overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
     }
 }

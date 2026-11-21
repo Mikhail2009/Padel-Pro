@@ -309,7 +309,7 @@ fun ProfileScreen(
                         Canvas(Modifier.size(6.dp)) { drawCircle(PpLime) }
                         Spacer(Modifier.size(PpSpacing.sm))
                         Text(
-                            text = stringResource(R.string.profile_section_achievements).uppercase(),
+                            text = stringResource(R.string.profile_section_achievements),
                             style = PpTextStyles.Micro,
                             color = PpTextMid
                         )

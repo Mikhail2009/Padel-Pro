@@ -24,15 +24,18 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import com.padelpro.app.core.designsystem.theme.LocalPpMotion
-import com.padelpro.app.core.designsystem.theme.PpChartPalette
-import com.padelpro.app.core.designsystem.theme.PpGlassCyan
+import com.padelpro.app.core.designsystem.theme.PpCourtLine
+import com.padelpro.app.core.designsystem.theme.PpCourtLineStrong
+import com.padelpro.app.core.designsystem.theme.PpTrophyMagenta
 import com.padelpro.app.core.designsystem.theme.PpLime
 import com.padelpro.app.core.designsystem.theme.PpSpacing
 import com.padelpro.app.core.designsystem.theme.PpTextHigh
+import com.padelpro.app.core.designsystem.theme.PpTextLow
 import com.padelpro.app.core.designsystem.theme.PpTextMid
 import com.padelpro.app.core.designsystem.theme.PpTextStyles
 
@@ -46,18 +49,20 @@ fun PpWinDonut(fraction: Float, centerLabel: String, modifier: Modifier = Modifi
     )
     Box(modifier.size(148.dp), contentAlignment = Alignment.Center) {
         Canvas(Modifier.size(148.dp)) {
-            val st = 14.dp.toPx()
+            val st = 12.dp.toPx()
             val inset = st / 2
             val arc = Size(size.width - st, size.height - st)
-            drawArc(Color(0x1F2C5566), 0f, 360f, false, Offset(inset, inset), arc, style = Stroke(st, cap = StrokeCap.Round))
-            drawArc(
-                Brush.sweepGradient(listOf(PpChartPalette[2], PpGlassCyan, PpLime, PpChartPalette[2])),
-                -90f, 360f * f, false, Offset(inset, inset), arc, style = Stroke(st, cap = StrokeCap.Round)
-            )
+            drawArc(PpCourtLine, 0f, 360f, false, Offset(inset, inset), arc, style = Stroke(st, cap = StrokeCap.Round))
+            if (f > 0f) {
+                drawArc(
+                    PpLime,
+                    -90f, 360f * f, false, Offset(inset, inset), arc, style = Stroke(st, cap = StrokeCap.Round)
+                )
+            }
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(centerLabel, style = PpTextStyles.DisplayNum, color = PpTextHigh)
-            Text("ПОБЕД", style = PpTextStyles.Overline, color = PpTextMid)
+            Text("Побед", style = PpTextStyles.Label, color = PpTextMid)
         }
     }
 }
@@ -76,14 +81,15 @@ fun PpActivityBars(labels: List<String>, values: List<Int>, modifier: Modifier =
             val gap = 10.dp.toPx()
             val bw = ((size.width - gap * (n - 1)) / n).coerceAtLeast(6.dp.toPx())
             val base = size.height - 18.dp.toPx()
-            drawLine(Color(0x1F2C5566), Offset(0f, base), Offset(size.width, base), 1f)
+            drawLine(PpCourtLine, Offset(0f, base), Offset(size.width, base), 1f)
             values.forEachIndexed { i, v ->
                 val h = (base - 8.dp.toPx()) * (v.toFloat() / max) * grow.value
-                val c = PpChartPalette[i % PpChartPalette.size]
+                // Один цвет: максимум — лайм, остальные — нейтральные. Радуга из 6 цветов мешает читать данные.
+                val c = if (v == max && v > 0) PpLime else PpCourtLineStrong
                 drawRoundRect(
-                    Brush.verticalGradient(listOf(c, c.copy(alpha = 0.25f))),
+                    c,
                     topLeft = Offset(i * (bw + gap), base - h),
-                    size = Size(bw, h.coerceAtLeast(2.dp.toPx())),
+                    size = Size(bw, h.coerceAtLeast(3.dp.toPx())),
                     cornerRadius = CornerRadius(6.dp.toPx())
                 )
             }
@@ -91,8 +97,12 @@ fun PpActivityBars(labels: List<String>, values: List<Int>, modifier: Modifier =
         Row(Modifier.fillMaxWidth().padding(top = 6.dp), horizontalArrangement = Arrangement.SpaceBetween) {
             labels.forEachIndexed { i, l ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
-                    Text((values.getOrNull(i) ?: 0).toString(), style = PpTextStyles.Label, color = PpChartPalette[i % PpChartPalette.size])
-                    Text(l.uppercase(), style = PpTextStyles.Overline, color = PpTextMid, maxLines = 1)
+                    val v = values.getOrNull(i) ?: 0
+                    Text(
+                        v.toString(), style = PpTextStyles.Label.copy(fontFeatureSettings = "tnum"),
+                        color = if (v == max && v > 0) PpTextHigh else PpTextMid
+                    )
+                    Text(l, style = PpTextStyles.Micro.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Normal), color = PpTextLow, maxLines = 1)
                 }
             }
         }
@@ -103,12 +113,12 @@ fun PpActivityBars(labels: List<String>, values: List<Int>, modifier: Modifier =
 fun PpFormChips(results: List<Boolean>, modifier: Modifier = Modifier) {
     Row(modifier, horizontalArrangement = Arrangement.spacedBy(PpSpacing.sm)) {
         results.forEach { win ->
-            val c = if (win) PpLime else PpChartPalette[4]
+            val c = if (win) PpLime else PpTrophyMagenta
             Box(
                 Modifier.size(36.dp).glassPanel(
-                    radius = if (win) 18.dp else 8.dp,
-                    fill = Brush.verticalGradient(listOf(c.copy(alpha = 0.22f), Color.Transparent)),
-                    edge = Brush.linearGradient(listOf(c.copy(alpha = 0.8f), c.copy(alpha = 0.2f)))
+                    radius = 18.dp,
+                    fill = SolidColor(c.copy(alpha = 0.14f)),
+                    edge = SolidColor(c.copy(alpha = 0.35f))
                 ),
                 contentAlignment = Alignment.Center
             ) { Text(if (win) "В" else "П", style = PpTextStyles.Label, color = c) }

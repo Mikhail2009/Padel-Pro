@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.EmojiEvents
 import androidx.compose.material.icons.rounded.LocalFireDepartment
@@ -29,6 +30,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -38,19 +40,16 @@ import com.padelpro.app.R
 import com.padelpro.app.core.designsystem.theme.PpAmberLed
 import com.padelpro.app.core.designsystem.theme.PpBallTrail
 import com.padelpro.app.core.designsystem.theme.PpCourtGlass
-import com.padelpro.app.core.designsystem.theme.PpCourtLine
 import com.padelpro.app.core.designsystem.theme.PpCourtNight
-import com.padelpro.app.core.designsystem.theme.PpCourtPanel
-import com.padelpro.app.core.designsystem.theme.PpGlassCyan
 import com.padelpro.app.core.designsystem.theme.PpLime
+import com.padelpro.app.core.designsystem.theme.PpPanelFill
+import com.padelpro.app.core.designsystem.theme.PpSpecularEdge
 import com.padelpro.app.core.designsystem.theme.PpRadius
 import com.padelpro.app.core.designsystem.theme.PpSpacing
 import com.padelpro.app.core.designsystem.theme.PpTextHigh
 import com.padelpro.app.core.designsystem.theme.PpTextLow
 import com.padelpro.app.core.designsystem.theme.PpTextMid
 import com.padelpro.app.core.designsystem.theme.PpTextStyles
-import com.padelpro.app.core.designsystem.theme.PpTrophyMagenta
-import com.padelpro.app.core.designsystem.theme.PpTrophySweep
 
 @StringRes
 fun levelTitleRes(level: Int): Int = when (level) {
@@ -84,22 +83,24 @@ fun PpXpIndicator(
             center = level.toString(),
             caption = levelTitle
         )
-        Spacer(Modifier.width(PpSpacing.lg))
+        Spacer(Modifier.width(PpSpacing.xl))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = stringResource(R.string.level_badge_format, level, levelTitle),
-                style = PpTextStyles.Micro,
-                color = PpGlassCyan
+                style = PpTextStyles.Label,
+                color = PpTextMid,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
             Spacer(Modifier.height(PpSpacing.xs))
             Text(
                 text = stringResource(R.string.xp_progress_format, currentXp, nextLevelXp),
                 style = PpTextStyles.Numeral,
-                color = PpAmberLed,
+                color = PpTextHigh,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
-            Spacer(Modifier.height(PpSpacing.md))
+            Spacer(Modifier.height(PpSpacing.md + 2.dp))
             PpProgressBar(
                 progress = progress,
                 brush = PpBallTrail,
@@ -118,13 +119,8 @@ fun PpStreakFlame(
     Row(
         modifier = modifier
             .clip(PpRadius.pill)
-            .background(if (active) Color(0x26FFB43D) else PpCourtNight)
-            .border(
-                width = 1.dp,
-                color = if (active) PpAmberLed.copy(alpha = 0.65f) else PpCourtLine,
-                shape = PpRadius.pill
-            )
-            .padding(horizontal = PpSpacing.md, vertical = PpSpacing.xs),
+            .background(if (active) PpAmberLed.copy(alpha = 0.14f) else PpCourtGlass)
+            .padding(horizontal = PpSpacing.md, vertical = 6.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
@@ -133,7 +129,7 @@ fun PpStreakFlame(
             tint = if (active) PpAmberLed else PpTextLow,
             modifier = Modifier.size(16.dp)
         )
-        Spacer(Modifier.width(PpSpacing.xs))
+        Spacer(Modifier.width(PpSpacing.xs + 2.dp))
         Text(
             text = pluralStringResource(R.plurals.streak_days_format, streakDays, streakDays),
             style = PpTextStyles.Micro.copy(fontFeatureSettings = "tnum"),
@@ -155,63 +151,39 @@ fun PpAchievementBadge(
             .alpha(if (unlocked) 1f else 0.56f)
             .glassPanel(
                 radius = PpRadius.card,
-                fill = if (unlocked) {
-                    Brush.verticalGradient(listOf(Color(0x26FF3D8F), PpCourtPanel))
-                } else {
-                    Brush.verticalGradient(listOf(PpCourtNight, PpCourtNight))
-                },
-                edge = if (unlocked) {
-                    PpTrophySweep
-                } else {
-                    Brush.linearGradient(listOf(PpCourtLine, PpCourtLine))
-                }
+                fill = if (unlocked) PpPanelFill else SolidColor(PpCourtNight),
+                edge = if (unlocked) SolidColor(PpAmberLed.copy(alpha = 0.45f)) else PpSpecularEdge
             )
-            .padding(PpSpacing.md)
+            .padding(PpSpacing.md + 2.dp)
     ) {
         Box(
-            modifier = Modifier.size(44.dp),
+            modifier = Modifier
+                .size(44.dp)
+                .clip(RoundedCornerShape(14.dp))
+                .background(if (unlocked) PpAmberLed.copy(alpha = 0.14f) else PpCourtGlass),
             contentAlignment = Alignment.Center
         ) {
-            if (unlocked) {
-                Canvas(Modifier.size(44.dp)) {
-                    drawCircle(
-                        Brush.radialGradient(listOf(Color(0x4DFF3D8F), Color(0x1AFFB43D), Color.Transparent))
-                    )
-                    drawCircle(
-                        brush = PpTrophySweep,
-                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.dp.toPx())
-                    )
-                }
-            } else {
-                Box(
-                    Modifier
-                        .size(44.dp)
-                        .clip(CircleShape)
-                        .background(PpCourtGlass.copy(alpha = 0.4f))
-                        .border(1.dp, PpCourtLine, CircleShape)
-                )
-            }
             Icon(
                 imageVector = if (unlocked) Icons.Rounded.EmojiEvents else Icons.Rounded.Lock,
                 contentDescription = null,
                 tint = if (unlocked) PpAmberLed else PpTextLow,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(22.dp)
             )
         }
         Spacer(Modifier.height(PpSpacing.md))
         Text(
             text = title,
-            style = PpTextStyles.Micro,
-            color = if (unlocked) PpTrophyMagenta else PpTextLow,
+            style = PpTextStyles.Label.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold),
+            color = if (unlocked) PpTextHigh else PpTextLow,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )
         Spacer(Modifier.height(PpSpacing.xs))
         Text(
             text = description,
-            style = PpTextStyles.Label,
+            style = PpTextStyles.Micro.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Normal),
             color = if (unlocked) PpTextMid else PpTextLow,
-            maxLines = 2,
+            maxLines = 3,
             overflow = TextOverflow.Ellipsis,
             textAlign = TextAlign.Start
         )

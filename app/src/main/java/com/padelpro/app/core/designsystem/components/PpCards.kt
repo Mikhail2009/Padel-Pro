@@ -1,7 +1,6 @@
 package com.padelpro.app.core.designsystem.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.CheckCircle
@@ -27,8 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -36,11 +35,11 @@ import androidx.compose.ui.unit.dp
 import com.padelpro.app.R
 import com.padelpro.app.core.designsystem.theme.PpBallTrail
 import com.padelpro.app.core.designsystem.theme.PpCourtGlass
-import com.padelpro.app.core.designsystem.theme.PpCourtLine
 import com.padelpro.app.core.designsystem.theme.PpCourtNight
-import com.padelpro.app.core.designsystem.theme.PpCourtPanel
-import com.padelpro.app.core.designsystem.theme.PpGlassCyan
 import com.padelpro.app.core.designsystem.theme.PpLime
+import com.padelpro.app.core.designsystem.theme.PpOnAccent
+import com.padelpro.app.core.designsystem.theme.PpPanelFill
+import com.padelpro.app.core.designsystem.theme.PpSpecularEdge
 import com.padelpro.app.core.designsystem.theme.PpRadius
 import com.padelpro.app.core.designsystem.theme.PpSpacing
 import com.padelpro.app.core.designsystem.theme.PpTextHigh
@@ -51,6 +50,10 @@ import com.padelpro.app.core.designsystem.theme.PpTrophyMagenta
 import com.padelpro.app.domain.model.MatchFormat
 import com.padelpro.app.domain.model.MatchSummary
 
+/**
+ * Карточка курса. Состояния различаются тихо: текущий — лаймовая кромка и подпись,
+ * пройденный — галочка, закрытый — приглушён. Никаких цветных полос на всю высоту.
+ */
 @Composable
 fun PpCourseCard(
     title: String,
@@ -65,33 +68,23 @@ fun PpCourseCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val railColor: Color? = when {
-        isHighlighted -> PpGlassCyan
-        isCompleted -> PpLime
-        else -> null
-    }
     val statusAccent = when {
         !isUnlocked -> PpTextLow
-        isHighlighted -> PpGlassCyan
-        isCompleted -> PpLime
+        isHighlighted || isCompleted -> PpLime
         else -> PpTextMid
     }
 
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .alpha(if (isUnlocked) 1f else 0.62f)
+            .alpha(if (isUnlocked) 1f else 0.6f)
             .glassPanel(
                 radius = PpRadius.card,
-                fill = if (isUnlocked) {
-                    Brush.verticalGradient(listOf(PpCourtGlass, PpCourtPanel))
-                } else {
-                    Brush.verticalGradient(listOf(PpCourtNight, PpCourtNight))
-                }
+                fill = if (isUnlocked) PpPanelFill else SolidColor(PpCourtNight),
+                edge = if (isHighlighted) SolidColor(PpLime.copy(alpha = 0.5f)) else PpSpecularEdge
             )
-            .then(if (railColor != null) Modifier.accentRail(railColor) else Modifier)
             .clickable(onClick = onClick)
-            .padding(PpSpacing.lg)
+            .padding(PpSpacing.lg + 2.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -99,34 +92,19 @@ fun PpCourseCard(
         ) {
             Box(
                 modifier = Modifier
-                    .size(46.dp)
-                    .clip(CircleShape)
-                    .background(
-                        when {
-                            isHighlighted -> PpGlassCyan.copy(alpha = 0.16f)
-                            isCompleted -> PpLime.copy(alpha = 0.16f)
-                            else -> PpCourtNight
-                        }
-                    )
-                    .border(
-                        width = 1.dp,
-                        color = when {
-                            isHighlighted -> PpGlassCyan.copy(alpha = 0.7f)
-                            isCompleted -> PpLime.copy(alpha = 0.7f)
-                            else -> PpCourtLine
-                        },
-                        shape = CircleShape
-                    ),
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(15.dp))
+                    .background(if (isHighlighted) PpLime.copy(alpha = 0.14f) else PpCourtGlass),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = if (!isUnlocked) Icons.Rounded.Lock else icon,
                     contentDescription = null,
-                    tint = statusAccent,
-                    modifier = Modifier.size(21.dp)
+                    tint = if (isHighlighted) PpLime else if (isUnlocked) PpTextHigh else PpTextLow,
+                    modifier = Modifier.size(22.dp)
                 )
             }
-            Spacer(Modifier.width(PpSpacing.md))
+            Spacer(Modifier.width(PpSpacing.md + 2.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -153,13 +131,14 @@ fun PpCourseCard(
                             Spacer(Modifier.width(PpSpacing.xs))
                         }
                         Text(
-                            text = statusLabel.uppercase(),
-                            style = PpTextStyles.Overline,
-                            color = statusAccent
+                            text = statusLabel,
+                            style = PpTextStyles.Label,
+                            color = statusAccent,
+                            maxLines = 1
                         )
                     }
                 }
-                Spacer(Modifier.height(PpSpacing.xs))
+                Spacer(Modifier.height(2.dp))
                 Text(
                     text = meta,
                     style = PpTextStyles.Label,
@@ -202,14 +181,8 @@ fun PpLessonRow(
     modifier: Modifier = Modifier,
     enabled: Boolean = isUnlocked
 ) {
-    val railColor: Color? = when {
-        isCurrent -> PpGlassCyan
-        isCompleted -> PpLime
-        else -> null
-    }
     val accent = when {
-        isCurrent -> PpGlassCyan
-        isCompleted -> PpLime
+        isCurrent || isCompleted -> PpLime
         else -> PpTextLow
     }
 
@@ -220,20 +193,11 @@ fun PpLessonRow(
             .alpha(if (isUnlocked) 1f else 0.56f)
             .glassPanel(
                 radius = PpRadius.card,
-                fill = when {
-                    isCurrent -> Brush.horizontalGradient(listOf(Color(0x265FE3FF), PpCourtPanel))
-                    isUnlocked -> Brush.verticalGradient(listOf(PpCourtGlass, PpCourtPanel))
-                    else -> Brush.verticalGradient(listOf(PpCourtNight, PpCourtNight))
-                },
-                edge = if (isCurrent) {
-                    Brush.linearGradient(listOf(PpGlassCyan, PpLime.copy(alpha = 0.4f)))
-                } else {
-                    Brush.linearGradient(listOf(PpCourtLine, PpCourtLine))
-                }
+                fill = if (isUnlocked) PpPanelFill else SolidColor(PpCourtNight),
+                edge = if (isCurrent) SolidColor(PpLime.copy(alpha = 0.5f)) else PpSpecularEdge
             )
-            .then(if (railColor != null) Modifier.accentRail(railColor) else Modifier)
             .then(if (enabled) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(PpSpacing.lg)
+            .padding(horizontal = PpSpacing.lg, vertical = PpSpacing.md + 2.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -245,19 +209,10 @@ fun PpLessonRow(
                     .clip(CircleShape)
                     .background(
                         when {
-                            isCurrent -> PpGlassCyan.copy(alpha = 0.18f)
-                            isCompleted -> PpLime.copy(alpha = 0.16f)
-                            else -> PpCourtNight
+                            isCurrent -> PpLime
+                            isCompleted -> PpLime.copy(alpha = 0.14f)
+                            else -> PpCourtGlass
                         }
-                    )
-                    .border(
-                        width = 1.dp,
-                        color = when {
-                            isCurrent -> PpGlassCyan
-                            isCompleted -> PpLime
-                            else -> PpCourtLine
-                        },
-                        shape = CircleShape
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -266,13 +221,13 @@ fun PpLessonRow(
                         imageVector = Icons.Rounded.CheckCircle,
                         contentDescription = null,
                         tint = PpLime,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                     isCurrent -> Icon(
                         imageVector = Icons.Rounded.PlayArrow,
                         contentDescription = null,
-                        tint = PpGlassCyan,
-                        modifier = Modifier.size(18.dp)
+                        tint = PpOnAccent,
+                        modifier = Modifier.size(20.dp)
                     )
                     !isUnlocked -> Icon(
                         imageVector = Icons.Rounded.Lock,
@@ -287,7 +242,7 @@ fun PpLessonRow(
                     )
                 }
             }
-            Spacer(Modifier.width(PpSpacing.md))
+            Spacer(Modifier.width(PpSpacing.md + 2.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
@@ -307,7 +262,7 @@ fun PpLessonRow(
             Text(
                 text = xpLabel,
                 style = PpTextStyles.Micro.copy(fontFeatureSettings = "tnum"),
-                color = if (isCurrent || isCompleted) accent else PpTextLow
+                color = accent
             )
         }
     }
@@ -338,7 +293,7 @@ fun PpMatchCard(
     val resultColor = when (match.userWon) {
         true -> PpLime
         false -> PpTrophyMagenta
-        null -> PpTextLow
+        null -> PpTextMid
     }
     val isWin = match.userWon == true
     val chipText = when (match.userWon) {
@@ -346,7 +301,7 @@ fun PpMatchCard(
         false -> stringResource(R.string.history_chip_loss)
         null -> stringResource(R.string.history_chip_completed)
     }
-    val scoreLine = match.sets.joinToString(" ") { set ->
+    val scoreLine = match.sets.joinToString("  ") { set ->
         val tb = if (set.tbA != null && set.tbB != null) {
             "(${minOf(set.tbA, set.tbB)})"
         } else ""
@@ -357,33 +312,27 @@ fun PpMatchCard(
         modifier = modifier
             .fillMaxWidth()
             .glassPanel(radius = PpRadius.card)
-            .accentRail(resultColor)
             .clickable(onClick = onClick)
-            .padding(PpSpacing.lg)
+            .padding(PpSpacing.lg + 2.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .clip(PpRadius.pill)
-                    .background(resultColor.copy(alpha = 0.14f))
-                    .border(
-                        width = 1.dp,
-                        color = resultColor.copy(alpha = 0.55f),
-                        shape = PpRadius.pill
-                    )
-                    .padding(horizontal = PpSpacing.md, vertical = PpSpacing.xs)
-            ) {
-                Text(
-                    text = chipText,
-                    style = PpTextStyles.Overline,
-                    color = resultColor
-                )
-            }
-            Spacer(Modifier.width(PpSpacing.md))
             Column(modifier = Modifier.weight(1f)) {
+                Box(
+                    modifier = Modifier
+                        .clip(PpRadius.pill)
+                        .background(resultColor.copy(alpha = 0.14f))
+                        .padding(horizontal = PpSpacing.md, vertical = 3.dp)
+                ) {
+                    Text(
+                        text = chipText,
+                        style = PpTextStyles.Micro,
+                        color = resultColor
+                    )
+                }
+                Spacer(Modifier.height(PpSpacing.sm + 2.dp))
                 val formatLabel = when (match.format) {
                     MatchFormat.SINGLES -> stringResource(R.string.match_format_singles_short)
                     MatchFormat.DOUBLES -> stringResource(R.string.match_format_doubles_short)
@@ -395,11 +344,11 @@ fun PpMatchCard(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(Modifier.height(PpSpacing.xs))
+                Spacer(Modifier.height(2.dp))
                 Text(
                     text = scoreLine,
-                    style = PpTextStyles.Title.copy(fontFeatureSettings = "tnum"),
-                    color = if (isWin) PpLime else PpTextMid
+                    style = PpTextStyles.H2.copy(fontFeatureSettings = "tnum"),
+                    color = if (isWin) PpLime else PpTextHigh
                 )
                 Spacer(Modifier.height(2.dp))
                 val metaText = if (match.durationMs != null) {

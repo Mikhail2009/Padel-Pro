@@ -167,7 +167,7 @@ private fun WelcomeStep(
                     .size(64.dp)
                     .clip(CircleShape)
                     .background(
-                        Brush.radialGradient(listOf(Color(0x33C8F751), Color(0x145FE3FF)))
+                        Brush.radialGradient(listOf(Color(0x1FC2F54C), Color(0x1472B7F0)))
                     )
                     .border(
                         1.5.dp,

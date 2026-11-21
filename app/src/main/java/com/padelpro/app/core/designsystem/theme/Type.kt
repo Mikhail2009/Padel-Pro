@@ -5,64 +5,90 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import com.padelpro.app.R
 
-// В проекте один статический Inter Regular: регистрируем только Normal,
-// жирность синтезируется платформой (FontSynthesis.All по умолчанию).
-val InterFontFamily = FontFamily(Font(R.font.inter, FontWeight.Normal))
+// Раньше в проекте лежал один урезанный Inter Regular БЕЗ кириллицы: русский текст
+// рисовался системным Roboto, а жирность синтезировалась платформой («фейковый» bold).
+// Теперь — настоящие начертания Inter (текст) и Inter Display (крупные цифры и заголовки)
+// с латиницей и кириллицей, по одному файлу на каждый вес.
+val InterFontFamily = FontFamily(
+    Font(R.font.inter_regular, FontWeight.Normal),
+    Font(R.font.inter_medium, FontWeight.Medium),
+    Font(R.font.inter_semibold, FontWeight.SemiBold),
+    Font(R.font.inter_bold, FontWeight.Bold)
+)
+
+val InterDisplayFamily = FontFamily(
+    Font(R.font.inter_display_semibold, FontWeight.SemiBold),
+    Font(R.font.inter_display_bold, FontWeight.Bold),
+    Font(R.font.inter_display_extrabold, FontWeight.ExtraBold)
+)
 
 private const val TABULAR = "tnum"
 
+// Строки выровнены по центру глифов: убирает «пустоту» сверху у крупных цифр.
+private val TrimLines = LineHeightStyle(
+    alignment = LineHeightStyle.Alignment.Center,
+    trim = LineHeightStyle.Trim.None
+)
+
 object PpTextStyles {
-    // LED-цифры табло: табличные цифры, плотный трекинг
+    // Цифры табло: табличные, очень плотный трекинг — выглядят как отлитые, а не набранные.
     val ScoreDisplay = TextStyle(
-        fontFamily = InterFontFamily, fontWeight = FontWeight.Bold,
-        fontSize = 84.sp, lineHeight = 86.sp, letterSpacing = (-1).sp,
-        fontFeatureSettings = TABULAR, textAlign = TextAlign.Center
+        fontFamily = InterDisplayFamily, fontWeight = FontWeight.ExtraBold,
+        fontSize = 88.sp, lineHeight = 88.sp, letterSpacing = (-3).sp,
+        fontFeatureSettings = TABULAR, textAlign = TextAlign.Center,
+        lineHeightStyle = TrimLines
     )
     val ScoreLed = TextStyle(
-        fontFamily = InterFontFamily, fontWeight = FontWeight.Bold,
-        fontSize = 56.sp, lineHeight = 58.sp, letterSpacing = 0.sp,
-        fontFeatureSettings = TABULAR, textAlign = TextAlign.Center
+        fontFamily = InterDisplayFamily, fontWeight = FontWeight.Bold,
+        fontSize = 56.sp, lineHeight = 58.sp, letterSpacing = (-1.6).sp,
+        fontFeatureSettings = TABULAR, textAlign = TextAlign.Center,
+        lineHeightStyle = TrimLines
     )
     val DisplayNum = TextStyle(
-        fontFamily = InterFontFamily, fontWeight = FontWeight.Bold,
-        fontSize = 40.sp, lineHeight = 44.sp, letterSpacing = (-0.5).sp,
+        fontFamily = InterDisplayFamily, fontWeight = FontWeight.Bold,
+        fontSize = 40.sp, lineHeight = 44.sp, letterSpacing = (-1).sp,
         fontFeatureSettings = TABULAR
     )
     val Numeral = TextStyle(
-        fontFamily = InterFontFamily, fontWeight = FontWeight.Bold,
-        fontSize = 24.sp, lineHeight = 26.sp, fontFeatureSettings = TABULAR
+        fontFamily = InterDisplayFamily, fontWeight = FontWeight.Bold,
+        fontSize = 24.sp, lineHeight = 28.sp, letterSpacing = (-0.4).sp,
+        fontFeatureSettings = TABULAR
     )
     val H1 = TextStyle(
-        fontFamily = InterFontFamily, fontWeight = FontWeight.Bold,
-        fontSize = 28.sp, lineHeight = 32.sp, letterSpacing = (-0.4).sp
+        fontFamily = InterDisplayFamily, fontWeight = FontWeight.Bold,
+        fontSize = 30.sp, lineHeight = 36.sp, letterSpacing = (-0.8).sp
     )
     val H2 = TextStyle(
-        fontFamily = InterFontFamily, fontWeight = FontWeight.SemiBold,
-        fontSize = 21.sp, lineHeight = 26.sp, letterSpacing = (-0.2).sp
+        fontFamily = InterDisplayFamily, fontWeight = FontWeight.SemiBold,
+        fontSize = 21.sp, lineHeight = 27.sp, letterSpacing = (-0.3).sp
     )
     val Title = TextStyle(
         fontFamily = InterFontFamily, fontWeight = FontWeight.SemiBold,
-        fontSize = 17.sp, lineHeight = 22.sp
+        fontSize = 16.sp, lineHeight = 22.sp, letterSpacing = (-0.1).sp
     )
     val Body = TextStyle(
         fontFamily = InterFontFamily, fontWeight = FontWeight.Normal,
-        fontSize = 15.sp, lineHeight = 23.sp
+        fontSize = 15.sp, lineHeight = 22.sp
     )
     val Label = TextStyle(
         fontFamily = InterFontFamily, fontWeight = FontWeight.Medium,
         fontSize = 13.sp, lineHeight = 18.sp
     )
+    // Подпись-«эйбрау» и чипы: обычный регистр, средний вес, лёгкий трекинг.
     val Micro = TextStyle(
         fontFamily = InterFontFamily, fontWeight = FontWeight.SemiBold,
-        fontSize = 11.sp, lineHeight = 14.sp, letterSpacing = 1.1.sp
+        fontSize = 12.sp, lineHeight = 16.sp, letterSpacing = 0.2.sp
     )
+    // Единственный стиль для КАПСА: крошечные метки метрик. Трекинг умеренный:
+    // на кириллице широкий разряд читается плохо.
     val Overline = TextStyle(
-        fontFamily = InterFontFamily, fontWeight = FontWeight.Bold,
-        fontSize = 10.sp, lineHeight = 13.sp, letterSpacing = 1.6.sp
+        fontFamily = InterFontFamily, fontWeight = FontWeight.SemiBold,
+        fontSize = 10.5.sp, lineHeight = 14.sp, letterSpacing = 0.7.sp
     )
 }
 

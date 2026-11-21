@@ -17,7 +17,8 @@ class PpMotionSpec(val scale: Float) {
     val fast get() = (140 * scale).toInt()
     val base get() = (240 * scale).toInt()
     val slow get() = (420 * scale).toInt()
-    fun <T> pop() = spring<T>(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow)
+    // Пружина без «резинового» отскока: быстрая и собранная, как у системных контролов iOS.
+    fun <T> pop() = spring<T>(dampingRatio = 0.85f, stiffness = Spring.StiffnessMedium)
     fun <T> glide() = tween<T>(durationMillis = base)
     val enabled get() = scale > 0.01f
 }
@@ -46,7 +47,7 @@ private val PpScheme = darkColorScheme(
     onSecondaryContainer = PpTextHigh,
     tertiary = PpAmberLed,
     onTertiary = PpOnAccent,
-    tertiaryContainer = Color(0x26FFB43D),
+    tertiaryContainer = Color(0x26F2B84B),
     onTertiaryContainer = PpAmberLed,
     background = PpCourtDeep,
     onBackground = PpTextHigh,
@@ -63,7 +64,7 @@ private val PpScheme = darkColorScheme(
     outlineVariant = PpCourtLineStrong,
     error = PpDanger,
     onError = PpOnAccent,
-    errorContainer = Color(0x33FF4D5E),
+    errorContainer = Color(0x33FF5A5F),
     onErrorContainer = PpDanger,
     scrim = PpScrimColor,
     inverseSurface = PpTextHigh,

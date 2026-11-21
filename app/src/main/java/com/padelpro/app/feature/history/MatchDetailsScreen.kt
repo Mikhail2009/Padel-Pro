@@ -61,9 +61,7 @@ import com.padelpro.app.core.designsystem.components.PpSectionHeader
 import com.padelpro.app.core.designsystem.components.PpSetScoreRow
 import com.padelpro.app.core.designsystem.components.formatDurationRu
 import com.padelpro.app.core.designsystem.theme.PpAmberLed
-import com.padelpro.app.core.designsystem.theme.PpCourtGlass
 import com.padelpro.app.core.designsystem.theme.PpCourtLine
-import com.padelpro.app.core.designsystem.theme.PpCourtLineStrong
 import com.padelpro.app.core.designsystem.theme.PpGlassCyan
 import com.padelpro.app.core.designsystem.theme.PpLime
 import com.padelpro.app.core.designsystem.theme.PpRadius
@@ -255,7 +253,7 @@ private fun MatchDetailsBody(
                             Canvas(Modifier.size(50.dp)) {
                                 drawCircle(
                                     Brush.radialGradient(
-                                        listOf(Color(0x4DFF3D8F), Color(0x1AFFB43D), Color.Transparent)
+                                        listOf(Color(0x33E8638C), Color(0x1AF2B84B), Color.Transparent)
                                     )
                                 )
                                 drawCircle(
@@ -282,7 +280,7 @@ private fun MatchDetailsBody(
                     Spacer(Modifier.width(PpSpacing.md))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = bannerTitle.uppercase(),
+                            text = bannerTitle,
                             style = PpTextStyles.Micro,
                             color = bannerAccent
                         )
@@ -549,7 +547,7 @@ private fun RosterTeamBlock(
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = teamTitle.uppercase(),
+            text = teamTitle,
             style = PpTextStyles.Micro,
             color = if (isWinner) accent else PpTextMid
         )
@@ -612,7 +610,7 @@ private fun DetailMetaRow(label: String, value: String) {
         verticalAlignment = Alignment.Top
     ) {
         Text(
-            text = label.uppercase(),
+            text = label,
             style = PpTextStyles.Micro,
             color = PpTextMid
         )

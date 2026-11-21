@@ -91,7 +91,7 @@ fun CompletionScreen(
                     Canvas(Modifier.size(96.dp)) {
                         drawCircle(
                             Brush.radialGradient(
-                                listOf(Color(0x4DFF3D8F), Color(0x26FFB43D), Color.Transparent)
+                                listOf(Color(0x33E8638C), Color(0x1AF2B84B), Color.Transparent)
                             )
                         )
                         drawCircle(
@@ -229,7 +229,7 @@ fun CompletionScreen(
                                         Canvas(Modifier.size(44.dp)) {
                                             drawCircle(
                                                 Brush.radialGradient(
-                                                    listOf(Color(0x4DFF3D8F), Color(0x1AFFB43D), Color.Transparent)
+                                                    listOf(Color(0x33E8638C), Color(0x1AF2B84B), Color.Transparent)
                                                 )
                                             )
                                             drawCircle(

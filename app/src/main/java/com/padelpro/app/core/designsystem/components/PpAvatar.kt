@@ -22,6 +22,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.stringResource
@@ -30,7 +31,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.padelpro.app.R
-import com.padelpro.app.core.designsystem.theme.PpAmberLed
 import com.padelpro.app.core.designsystem.theme.PpCourtGlass
 import com.padelpro.app.core.designsystem.theme.PpCourtLineStrong
 import com.padelpro.app.core.designsystem.theme.PpCourtNight
@@ -51,12 +51,9 @@ fun PpAvatar(
 ) {
     val index = avatarId.coerceIn(0, 11)
     val cd = stringResource(R.string.cd_user_avatar)
-    val ringBrush = if (highlighted) {
-        Brush.sweepGradient(listOf(PpGlassCyan, PpLime, PpAmberLed, PpGlassCyan))
-    } else {
-        Brush.sweepGradient(listOf(PpCourtLineStrong, PpGlassCyan.copy(alpha = 0.45f), PpCourtLineStrong))
-    }
-    val borderWidth = if (highlighted) 2.5.dp else 1.5.dp
+    // Один цвет вместо радужного кольца: активный профиль — лайм, остальные — нейтральная граница.
+    val ringBrush: Brush = if (highlighted) SolidColor(PpLime) else SolidColor(PpCourtLineStrong)
+    val borderWidth = if (highlighted) 2.dp else 1.dp
 
     val baseModifier = modifier
         .size(size)
@@ -280,7 +277,7 @@ fun PpAvatarPickerGrid(
                             .size(48.dp)
                             .clip(CircleShape)
                             .background(
-                                if (selected) Color(0x265FE3FF) else PpCourtNight
+                                if (selected) PpLime.copy(alpha = 0.14f) else PpCourtNight
                             )
                             .padding(2.dp),
                         contentAlignment = Alignment.Center

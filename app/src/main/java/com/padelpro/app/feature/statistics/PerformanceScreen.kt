@@ -74,7 +74,7 @@ fun PerformanceScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .widthIn(max = 600.dp),
-            contentPadding = PaddingValues(PpSpacing.lg),
+            contentPadding = PaddingValues(horizontal = PpSpacing.screen, vertical = PpSpacing.lg),
             verticalArrangement = Arrangement.spacedBy(PpSpacing.lg)
         ) {
             item {
@@ -274,13 +274,13 @@ private fun SectionHeaderWithCaption(
             Canvas(Modifier.size(6.dp)) { drawCircle(PpLime) }
             Spacer(Modifier.size(PpSpacing.sm))
             Text(
-                text = title.uppercase(),
+                text = title,
                 style = PpTextStyles.Micro,
                 color = PpTextMid
             )
         }
         Text(
-            text = caption.uppercase(),
+            text = caption,
             style = PpTextStyles.Overline,
             color = PpTextLow
         )
@@ -298,7 +298,7 @@ private fun FormatSplitCard(
     val rateStr = winRatePercent?.let { "$it%" } ?: stringResource(R.string.dash_placeholder)
     PpCard(modifier = modifier) {
         Text(
-            text = title.uppercase(),
+            text = title,
             style = PpTextStyles.Micro,
             color = PpTextMid
         )

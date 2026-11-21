@@ -79,7 +79,7 @@ fun AcademyScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .widthIn(max = 600.dp),
-            contentPadding = PaddingValues(PpSpacing.lg),
+            contentPadding = PaddingValues(horizontal = PpSpacing.screen, vertical = PpSpacing.lg),
             verticalArrangement = Arrangement.spacedBy(PpSpacing.md)
         ) {
             item {

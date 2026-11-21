@@ -222,11 +222,11 @@ fun QuizScreen(
                                 }
                                 val fillBrush = when {
                                     state.isChecked && isCorrectOption ->
-                                        Brush.horizontalGradient(listOf(Color(0x2E2FD98A), PpCourtPanel))
+                                        Brush.horizontalGradient(listOf(Color(0x1F46D68F), PpCourtPanel))
                                     state.isChecked && isSelected && !isCorrectOption ->
-                                        Brush.horizontalGradient(listOf(Color(0x2EFF4D5E), PpCourtPanel))
+                                        Brush.horizontalGradient(listOf(Color(0x1FFF5A5F), PpCourtPanel))
                                     isSelected ->
-                                        Brush.horizontalGradient(listOf(Color(0x265FE3FF), PpCourtPanel))
+                                        Brush.horizontalGradient(listOf(Color(0x1A72B7F0), PpCourtPanel))
                                     else ->
                                         Brush.verticalGradient(listOf(PpCourtGlass, PpCourtPanel))
                                 }

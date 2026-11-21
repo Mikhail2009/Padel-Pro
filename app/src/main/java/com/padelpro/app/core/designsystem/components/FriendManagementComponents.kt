@@ -28,15 +28,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.padelpro.app.R
-import com.padelpro.app.core.designsystem.theme.PpCourtGlass
 import com.padelpro.app.core.designsystem.theme.PpCourtLine
 import com.padelpro.app.core.designsystem.theme.PpCourtNight
-import com.padelpro.app.core.designsystem.theme.PpCourtPanel
 import com.padelpro.app.core.designsystem.theme.PpDanger
 import com.padelpro.app.core.designsystem.theme.PpErrorTint
 import com.padelpro.app.core.designsystem.theme.PpGlassCyan
@@ -87,17 +86,17 @@ fun PlayerManagementRow(
         .glassPanel(
             radius = PpRadius.input,
             fill = if (isHighlighted) {
-                Brush.horizontalGradient(listOf(Color(0x265FE3FF), PpCourtPanel))
+                SolidColor(PpLime.copy(alpha = 0.08f))
             } else {
-                Brush.verticalGradient(listOf(PpCourtGlass.copy(alpha = 0.7f), PpCourtNight))
+                SolidColor(PpCourtNight)
             },
             edge = if (isHighlighted) {
-                Brush.linearGradient(listOf(PpGlassCyan, PpLime))
+                SolidColor(PpLime.copy(alpha = 0.5f))
             } else {
-                Brush.linearGradient(listOf(PpCourtLine, PpCourtLine))
+                SolidColor(PpCourtLine)
             }
         )
-        .then(if (isHighlighted) Modifier.accentRail(PpGlassCyan) else Modifier)
+        .then(if (isHighlighted) Modifier.accentRail(PpLime) else Modifier)
         .then(if (onSelect != null) Modifier.clickable(onClick = onSelect) else Modifier)
 
     Row(

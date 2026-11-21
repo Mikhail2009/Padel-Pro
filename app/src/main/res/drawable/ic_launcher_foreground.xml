@@ -20,11 +20,11 @@
             M54.8,50 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0 z"/>
 
     <!-- Мяч -->
-    <path android:fillColor="#FFC8F751"
+    <path android:fillColor="#FFC2F54C"
         android:pathData="M55.5,62 a10.5,10.5 0 1,0 21,0 a10.5,10.5 0 1,0 -21,0 z"/>
-    <path android:strokeColor="#FF071016" android:strokeWidth="2.6"
+    <path android:strokeColor="#FF090B0A" android:strokeWidth="2.6"
         android:pathData="M55.5,62 a10.5,10.5 0 1,0 21,0 a10.5,10.5 0 1,0 -21,0 z"/>
-    <path android:strokeColor="#FF071016" android:strokeWidth="2.6" android:strokeLineCap="round"
+    <path android:strokeColor="#FF090B0A" android:strokeWidth="2.6" android:strokeLineCap="round"
         android:pathData="M58,55 C63,58 63,66 58,70"/>
     <path android:strokeColor="#FFFFB43D" android:strokeWidth="2.4" android:strokeLineCap="round"
         android:pathData="M59,57 C60.5,54.5 63,53 66,53"/>

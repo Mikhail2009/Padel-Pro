@@ -96,7 +96,7 @@ fun HomeScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .widthIn(max = 600.dp),
-            contentPadding = PaddingValues(PpSpacing.lg),
+            contentPadding = PaddingValues(horizontal = PpSpacing.screen, vertical = PpSpacing.lg),
             verticalArrangement = Arrangement.spacedBy(PpSpacing.lg)
         ) {
             item {
@@ -330,7 +330,7 @@ private fun QuickActionCard(
             .glassPanel(
                 radius = PpRadius.card,
                 fill = if (highlighted) {
-                    Brush.verticalGradient(listOf(Color(0x2BC8F751), PpCourtPanel))
+                    Brush.verticalGradient(listOf(Color(0x1FC2F54C), PpCourtPanel))
                 } else {
                     Brush.verticalGradient(listOf(PpCourtGlass, PpCourtPanel))
                 }

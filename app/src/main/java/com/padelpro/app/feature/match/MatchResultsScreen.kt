@@ -207,8 +207,8 @@ private fun MatchResultsContent(
                             drawCircle(
                                 Brush.radialGradient(
                                     listOf(
-                                        Color(0x4DFF3D8F),
-                                        Color(0x26FFB43D),
+                                        Color(0x33E8638C),
+                                        Color(0x1AF2B84B),
                                         Color.Transparent
                                     )
                                 )
@@ -425,7 +425,7 @@ private fun ResultMetaRow(label: String, value: String) {
         verticalAlignment = Alignment.Top
     ) {
         Text(
-            text = label.uppercase(),
+            text = label,
             style = PpTextStyles.Micro,
             color = PpTextMid
         )

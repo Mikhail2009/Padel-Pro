@@ -325,7 +325,7 @@ fun MatchSetupScreen(
                                     .glassPanel(
                                         radius = PpRadius.input,
                                         fill = if (selected) {
-                                            Brush.verticalGradient(listOf(Color(0x265FE3FF), PpCourtPanel))
+                                            Brush.verticalGradient(listOf(Color(0x1A72B7F0), PpCourtPanel))
                                         } else {
                                             Brush.verticalGradient(listOf(PpCourtNight, PpCourtNight))
                                         },
@@ -575,7 +575,7 @@ private fun DeuceOptionRow(
             Box(
                 modifier = Modifier
                     .clip(PpRadius.pill)
-                    .background(Color(0x1F5FE3FF))
+                    .background(Color(0x1A72B7F0))
                     .border(1.dp, PpGlassCyan.copy(alpha = 0.5f), PpRadius.pill)
                     .padding(horizontal = PpSpacing.sm, vertical = 2.dp)
             ) {

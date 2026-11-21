@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -26,100 +27,95 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.padelpro.app.core.designsystem.theme.PpCourtBlue
 import com.padelpro.app.core.designsystem.theme.PpCourtDeep
-import com.padelpro.app.core.designsystem.theme.PpCourtGlass
 import com.padelpro.app.core.designsystem.theme.PpCourtLine
-import com.padelpro.app.core.designsystem.theme.PpGlassCyan
 import com.padelpro.app.core.designsystem.theme.PpLime
+import com.padelpro.app.core.designsystem.theme.PpPanelFill
 import com.padelpro.app.core.designsystem.theme.PpRadius
 import com.padelpro.app.core.designsystem.theme.PpSpecularEdge
-import kotlin.random.Random
+import com.padelpro.app.core.designsystem.theme.PpTextLow
 
-/** Фон «ночной корт»: софиты, разметка, зерно. Ставится один раз на экран. */
+/**
+ * Фон приложения. Один мягкий источник света сверху и больше ничего:
+ * без зерна, без разметки корта, без «софитов» — тишина фона делает контент дороже.
+ * Параметры [floodlight] и [courtLines] оставлены для совместимости вызовов.
+ */
 @Composable
 fun PpNightCourt(
     modifier: Modifier = Modifier,
     floodlight: Boolean = true,
-    courtLines: Boolean = true,
+    @Suppress("UNUSED_PARAMETER") courtLines: Boolean = false,
     content: @Composable BoxScope.() -> Unit
 ) {
     Box(modifier.fillMaxSize()) {
         Canvas(Modifier.fillMaxSize()) {
             drawRect(PpCourtDeep)
             if (floodlight) {
+                // Едва заметное лаймовое свечение в верхнем левом углу (≈5%).
                 drawRect(
                     Brush.radialGradient(
-                        colors = listOf(Color(0x335FE3FF), Color(0x141E6FE8), Color.Transparent),
-                        center = Offset(size.width * 0.18f, -size.height * 0.06f),
-                        radius = size.maxDimension * 0.72f
+                        colors = listOf(Color(0x14C2F54C), Color.Transparent),
+                        center = Offset(size.width * 0.05f, -size.height * 0.04f),
+                        radius = size.maxDimension * 0.62f
                     )
                 )
-                drawRect(
-                    Brush.radialGradient(
-                        colors = listOf(Color(0x26C8F751), Color.Transparent),
-                        center = Offset(size.width * 0.92f, size.height * 0.04f),
-                        radius = size.maxDimension * 0.5f
-                    )
-                )
-            }
-            if (courtLines) {
-                val w = size.width * 0.86f
-                val h = w * 0.5f
-                val left = (size.width - w) / 2f
-                val top = size.height - h * 0.62f
-                val line = Color(0x142C5566)
-                val s = Stroke(width = 1.4f)
-                drawRect(line, Offset(left, top), Size(w, h), style = s)
-                drawLine(line, Offset(left, top + h / 2), Offset(left + w, top + h / 2), 1.4f)
-                drawLine(line, Offset(left + w * 0.30f, top), Offset(left + w * 0.30f, top + h), 1.4f)
-                drawLine(line, Offset(left + w * 0.70f, top), Offset(left + w * 0.70f, top + h), 1.4f)
-                drawLine(Color(0x1FC8F751), Offset(left + w / 2, top), Offset(left + w / 2, top + h), 2f)
             }
         }
-        PpGrain(Modifier.fillMaxSize())
         content()
     }
 }
 
-/** Детерминированное зерно — кэшируется, не пересчитывается на кадр. */
+/** Оставлено для совместимости: зерно убрано как визуальный шум. */
 @Composable
-fun PpGrain(modifier: Modifier = Modifier, alpha: Float = 0.035f) {
-    Canvas(modifier.drawWithCache {
-        val rnd = Random(20260101)
-        val pts = List(700) { Offset(rnd.nextFloat() * size.width, rnd.nextFloat() * size.height) }
-        val r = 0.9f
-        onDrawBehind { pts.forEach { drawCircle(Color.White, r, it, alpha = alpha) } }
-    }) {}
+fun PpGrain(modifier: Modifier = Modifier, @Suppress("UNUSED_PARAMETER") alpha: Float = 0f) {
+    Box(modifier)
 }
 
-/** Стеклянная панель: слой блика + спекулярная кромка. */
+/**
+ * Базовая поверхность: плотная заливка + тонкая кромка. Имя сохранено ради существующих вызовов.
+ * Без внутренних бликов и стеклянных градиентов.
+ */
 fun Modifier.glassPanel(
     radius: Dp = PpRadius.card,
-    fill: Brush = Brush.verticalGradient(listOf(PpCourtGlass, PpCourtDeep)),
+    fill: Brush = PpPanelFill,
     edge: Brush = PpSpecularEdge,
     borderWidth: Dp = 1.dp
 ): Modifier = this
-    .clip(androidx.compose.foundation.shape.RoundedCornerShape(radius))
+    .clip(RoundedCornerShape(radius))
     .drawWithCache {
         val r = radius.toPx()
         val bw = borderWidth.toPx()
         onDrawBehind {
             drawRoundRect(fill, cornerRadius = CornerRadius(r, r))
+            // Кромка рисуется внутрь, чтобы не обрезаться клипом.
             drawRoundRect(
-                edge, cornerRadius = CornerRadius(r, r),
+                edge,
+                topLeft = Offset(bw / 2, bw / 2),
+                size = Size(size.width - bw, size.height - bw),
+                cornerRadius = CornerRadius(r - bw / 2, r - bw / 2),
                 style = Stroke(width = bw)
             )
         }
     }
 
-/** Акцентная кромка слева — для «главного» блока экрана. */
+/**
+ * Индикатор состояния слева: короткая скруглённая метка по центру кромки
+ * (вместо сплошной цветной полосы на всю высоту карточки — частый шаблонный приём).
+ */
 fun Modifier.accentRail(color: Color = PpLime, width: Dp = 3.dp): Modifier = this.drawWithCache {
     val w = width.toPx()
-    onDrawBehind { drawRect(color, Offset.Zero, Size(w, size.height)) }
+    val h = (size.height * 0.46f).coerceIn(18.dp.toPx(), 44.dp.toPx())
+    onDrawBehind {
+        drawRoundRect(
+            color = color,
+            topLeft = Offset(0f, (size.height - h) / 2f),
+            size = Size(w + 2.dp.toPx(), h),
+            cornerRadius = CornerRadius(w, w)
+        )
+    }
 }
 
-/** Вертикальный скролл с индикатором в палитре приложения. */
+/** Вертикальный скролл с тонким индикатором. */
 @Composable
 fun PpScrollColumn(
     modifier: Modifier = Modifier,
@@ -139,9 +135,9 @@ fun PpScrollColumn(
                 val track = size.height
                 val ratio = state.value.toFloat() / state.maxValue.coerceAtLeast(1)
                 val thumbH = (track * (track / (track + state.maxValue))).coerceAtLeast(28.dp.toPx())
-                drawRoundRect(Color(0x1F2C5566), cornerRadius = CornerRadius(2.dp.toPx()))
+                drawRoundRect(PpCourtLine.copy(alpha = 0.5f), cornerRadius = CornerRadius(2.dp.toPx()))
                 drawRoundRect(
-                    Brush.verticalGradient(listOf(PpGlassCyan, PpLime)),
+                    PpTextLow.copy(alpha = 0.7f),
                     topLeft = Offset(0f, (track - thumbH) * ratio),
                     size = Size(size.width, thumbH),
                     cornerRadius = CornerRadius(2.dp.toPx())
@@ -151,7 +147,7 @@ fun PpScrollColumn(
     }
 }
 
-/** Траектория мяча — декоративный разделитель секций. */
+/** Траектория мяча — декоративный разделитель секций: тонкая линия, гаснущая слева. */
 @Composable
 fun PpBallTrailDivider(modifier: Modifier = Modifier) {
     Canvas(modifier.fillMaxWidth().padding(vertical = 10.dp)) {
@@ -159,7 +155,7 @@ fun PpBallTrailDivider(modifier: Modifier = Modifier) {
             moveTo(0f, size.height)
             quadraticBezierTo(size.width * 0.45f, -size.height * 0.8f, size.width, size.height * 0.4f)
         }
-        drawPath(p, Brush.horizontalGradient(listOf(Color.Transparent, PpCourtBlue, PpGlassCyan, PpLime)), style = Stroke(1.6f))
-        drawCircle(PpLime, 3.2f, Offset(size.width, size.height * 0.4f))
+        drawPath(p, Brush.horizontalGradient(listOf(Color.Transparent, PpLime.copy(alpha = 0.7f))), style = Stroke(1.4f))
+        drawCircle(PpLime, 3f, Offset(size.width, size.height * 0.4f))
     }
 }

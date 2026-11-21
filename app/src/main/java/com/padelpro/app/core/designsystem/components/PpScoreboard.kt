@@ -17,12 +17,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.padelpro.app.R
-import com.padelpro.app.core.designsystem.theme.PpCourtBlue
 import com.padelpro.app.core.designsystem.theme.PpCourtLineStrong
 import com.padelpro.app.core.designsystem.theme.PpCourtNight
-import com.padelpro.app.core.designsystem.theme.PpGlassCyan
 import com.padelpro.app.core.designsystem.theme.PpLime
-import com.padelpro.app.core.designsystem.theme.PpLimeGlow
 import com.padelpro.app.core.designsystem.theme.PpTextHigh
 
 @Composable
@@ -49,10 +46,10 @@ fun PpCourtGraphic(
         val netX = padX + cw * 0.5f
         val centerY = padY + ch * 0.5f
 
-        // Subtle blue night-court surface inside court boundaries
+        // Тихая поверхность корта внутри границ: без синего «неона»
         drawRoundRect(
-            brush = Brush.linearGradient(
-                listOf(PpCourtNight, PpCourtBlue.copy(alpha = 0.22f), PpCourtNight)
+            brush = Brush.verticalGradient(
+                listOf(Color(0xFF161B17), PpCourtNight)
             ),
             topLeft = Offset(padX, padY),
             size = Size(cw, ch),
@@ -61,7 +58,7 @@ fun PpCourtGraphic(
 
         // Outer glass court rectangle
         drawRect(
-            color = if (diagramId == "glass_rebound") PpGlassCyan else PpCourtLineStrong,
+            color = if (diagramId == "glass_rebound") PpLime else PpCourtLineStrong,
             topLeft = Offset(padX, padY),
             size = Size(cw, ch),
             style = Stroke(width = if (diagramId == "glass_rebound") 2.5.dp.toPx() else 1.8.dp.toPx())
@@ -70,28 +67,28 @@ fun PpCourtGraphic(
         when {
             diagramId == "service_boxes" || highlightServiceBoxes -> {
                 drawRect(
-                    color = PpGlassCyan.copy(alpha = 0.14f),
+                    color = PpLime.copy(alpha = 0.10f),
                     topLeft = Offset(leftServiceX, padY),
                     size = Size(rightServiceX - leftServiceX, ch)
                 )
             }
             diagramId == "diagonal_serve" -> {
                 drawRect(
-                    color = PpGlassCyan.copy(alpha = 0.18f),
+                    color = PpLime.copy(alpha = 0.12f),
                     topLeft = Offset(netX, padY),
                     size = Size(rightServiceX - netX, ch * 0.5f)
                 )
             }
             diagramId == "net_zone" -> {
                 drawRect(
-                    color = PpGlassCyan.copy(alpha = 0.16f),
+                    color = PpLime.copy(alpha = 0.11f),
                     topLeft = Offset(padX + cw * 0.36f, padY),
                     size = Size(cw * 0.28f, ch)
                 )
             }
             diagramId == "glass_rebound" -> {
                 drawRect(
-                    color = PpGlassCyan.copy(alpha = 0.16f),
+                    color = PpLime.copy(alpha = 0.11f),
                     topLeft = Offset(rightServiceX, padY),
                     size = Size(padX + cw - rightServiceX, ch)
                 )
@@ -99,7 +96,7 @@ fun PpCourtGraphic(
         }
 
         // Service lines
-        val serviceLineColor = if (diagramId == "service_boxes") PpGlassCyan else PpCourtLineStrong
+        val serviceLineColor = if (diagramId == "service_boxes") PpLime else PpCourtLineStrong
         drawLine(
             color = serviceLineColor,
             start = Offset(leftServiceX, padY),
@@ -135,14 +132,14 @@ fun PpCourtGraphic(
                 val serveStart = Offset(leftServiceX - cw * 0.08f, padY + ch * 0.75f)
                 val serveEnd = Offset(netX + (rightServiceX - netX) * 0.58f, padY + ch * 0.24f)
                 drawLine(
-                    brush = Brush.linearGradient(listOf(PpGlassCyan, PpLime), serveStart, serveEnd),
+                    brush = Brush.linearGradient(listOf(PpLime.copy(alpha = 0.3f), PpLime), serveStart, serveEnd),
                     start = serveStart,
                     end = serveEnd,
                     strokeWidth = 2.6.dp.toPx(),
                     cap = StrokeCap.Round
                 )
-                drawCircle(color = PpGlassCyan, radius = 4.dp.toPx(), center = serveStart)
-                drawCircle(color = PpLimeGlow.copy(alpha = 0.35f), radius = 9.dp.toPx(), center = serveEnd)
+                drawCircle(color = PpLime, radius = 4.dp.toPx(), center = serveStart)
+                drawCircle(color = PpLime.copy(alpha = 0.22f), radius = 9.dp.toPx(), center = serveEnd)
                 drawCircle(color = PpLime, radius = 5.dp.toPx(), center = serveEnd)
             }
             "glass_rebound" -> {
@@ -161,15 +158,15 @@ fun PpCourtGraphic(
                     color = PpLime,
                     style = Stroke(width = 2.5.dp.toPx(), cap = StrokeCap.Round)
                 )
-                drawCircle(color = PpGlassCyan, radius = 4.dp.toPx(), center = wall)
-                drawCircle(color = PpLimeGlow.copy(alpha = 0.35f), radius = 8.dp.toPx(), center = rebound)
+                drawCircle(color = PpLime, radius = 4.dp.toPx(), center = wall)
+                drawCircle(color = PpLime.copy(alpha = 0.22f), radius = 8.dp.toPx(), center = rebound)
                 drawCircle(color = PpLime, radius = 4.5.dp.toPx(), center = rebound)
             }
             "net_zone" -> {
                 val player1 = Offset(padX + cw * 0.41f, padY + ch * 0.28f)
                 val player2 = Offset(padX + cw * 0.41f, padY + ch * 0.72f)
-                drawCircle(color = PpGlassCyan, radius = 5.5.dp.toPx(), center = player1)
-                drawCircle(color = PpGlassCyan, radius = 5.5.dp.toPx(), center = player2)
+                drawCircle(color = PpLime, radius = 5.5.dp.toPx(), center = player1)
+                drawCircle(color = PpLime, radius = 5.5.dp.toPx(), center = player2)
                 if (showTrajectory) {
                     drawLine(
                         color = PpLime,
@@ -193,11 +190,11 @@ fun PpCourtGraphic(
                 }
                 drawPath(
                     path = arc,
-                    brush = Brush.horizontalGradient(listOf(PpGlassCyan, PpLime)),
+                    brush = Brush.horizontalGradient(listOf(PpLime.copy(alpha = 0.3f), PpLime)),
                     style = Stroke(width = 2.6.dp.toPx(), cap = StrokeCap.Round)
                 )
                 val endPt = Offset(padX + cw * 0.84f, padY + ch * 0.34f)
-                drawCircle(color = PpLimeGlow.copy(alpha = 0.35f), radius = 8.dp.toPx(), center = endPt)
+                drawCircle(color = PpLime.copy(alpha = 0.22f), radius = 8.dp.toPx(), center = endPt)
                 drawCircle(color = PpLime, radius = 4.5.dp.toPx(), center = endPt)
             }
         }

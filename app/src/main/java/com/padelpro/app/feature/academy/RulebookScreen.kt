@@ -229,7 +229,7 @@ private fun RulebookCard(
                 Box(
                     modifier = Modifier
                         .clip(PpRadius.pill)
-                        .background(Color(0x1FC8F751))
+                        .background(Color(0x1AC2F54C))
                         .border(1.dp, PpLime.copy(alpha = 0.45f), PpRadius.pill)
                         .padding(horizontal = PpSpacing.sm, vertical = 2.dp)
                 ) {
@@ -242,7 +242,7 @@ private fun RulebookCard(
                 Box(
                     modifier = Modifier
                         .clip(PpRadius.pill)
-                        .background(Color(0x1F5FE3FF))
+                        .background(Color(0x1A72B7F0))
                         .border(1.dp, PpGlassCyan.copy(alpha = 0.55f), PpRadius.pill)
                         .padding(horizontal = PpSpacing.sm, vertical = 2.dp)
                 ) {

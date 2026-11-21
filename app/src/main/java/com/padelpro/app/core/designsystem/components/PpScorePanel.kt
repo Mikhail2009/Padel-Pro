@@ -19,16 +19,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.padelpro.app.core.designsystem.theme.LocalPpMotion
-import com.padelpro.app.core.designsystem.theme.PpAmberLed
-import com.padelpro.app.core.designsystem.theme.PpGlassCyan
+import com.padelpro.app.core.designsystem.theme.PpCourtGlass
+import com.padelpro.app.core.designsystem.theme.PpCourtLine
 import com.padelpro.app.core.designsystem.theme.PpLime
 import com.padelpro.app.core.designsystem.theme.PpSpacing
 import com.padelpro.app.core.designsystem.theme.PpTextHigh
@@ -50,21 +48,17 @@ fun PpScoreHalf(
     val pop = remember { Animatable(1f) }
     LaunchedEffect(score) {
         if (!motion.enabled) { pop.snapTo(1f); return@LaunchedEffect }
-        pop.snapTo(1.14f)
-        pop.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium))
+        pop.snapTo(0.94f)
+        pop.animateTo(1f, spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessMedium))
     }
     Box(
         modifier
             .fillMaxWidth()
             .height(196.dp)
-            .glassPanel(radius = 24.dp)
-            .drawBehind {
-                if (serving) {
-                    val cr = CornerRadius(24.dp.toPx())
-                    drawRoundRect(Brush.verticalGradient(listOf(accent.copy(alpha = 0.16f), Color.Transparent)), cornerRadius = cr)
-                    drawRoundRect(accent.copy(alpha = 0.55f), cornerRadius = cr, style = Stroke(1.6f))
-                }
-            }
+            .glassPanel(
+                radius = 24.dp,
+                edge = if (serving) SolidColor(accent.copy(alpha = 0.6f)) else com.padelpro.app.core.designsystem.theme.PpSpecularEdge
+            )
             .then(if (enabled) Modifier.clickableNoRipple(onTap) else Modifier)
             .padding(PpSpacing.lg),
         contentAlignment = Alignment.Center
@@ -75,26 +69,22 @@ fun PpScoreHalf(
                     Box(Modifier.size(8.dp).drawBehind { drawCircle(accent) })
                     Spacer(Modifier.size(6.dp))
                 }
-                Text(teamLabel.uppercase(), style = PpTextStyles.Micro, color = PpTextMid, maxLines = 1)
+                Text(teamLabel, style = PpTextStyles.Label, color = PpTextMid, maxLines = 1)
             }
             Text(
                 score,
                 style = PpTextStyles.ScoreDisplay,
-                color = if (serving) PpAmberLed else PpTextHigh,
+                color = PpTextHigh,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.graphicsLayer { scaleX = pop.value; scaleY = pop.value }
             )
             if (banner != null) {
                 Text(
-                    banner.uppercase(), style = PpTextStyles.Overline, color = PpGlassCyan,
+                    banner, style = PpTextStyles.Label, color = accent,
                     modifier = Modifier.padding(top = 2.dp)
                 )
             }
         }
-        Text(
-            "+", style = PpTextStyles.Numeral, color = accent.copy(alpha = 0.5f),
-            modifier = Modifier.align(Alignment.BottomEnd)
-        )
     }
 }
 
@@ -102,16 +92,20 @@ fun PpScoreHalf(
 fun PpSetStrip(sets: List<String>, modifier: Modifier = Modifier, currentSet: String? = null) {
     Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(PpSpacing.sm)) {
         sets.forEach { s ->
-            Box(Modifier.glassPanel(radius = 12.dp).padding(horizontal = 10.dp, vertical = 6.dp)) {
-                Text(s, style = PpTextStyles.Label, color = PpTextMid)
+            Box(
+                Modifier
+                    .glassPanel(radius = 12.dp, fill = SolidColor(PpCourtGlass), edge = SolidColor(PpCourtLine))
+                    .padding(horizontal = 10.dp, vertical = 6.dp)
+            ) {
+                Text(s, style = PpTextStyles.Label.copy(fontFeatureSettings = "tnum"), color = PpTextMid)
             }
         }
         if (currentSet != null) {
             Box(
                 Modifier
-                    .glassPanel(radius = 12.dp, fill = Brush.horizontalGradient(listOf(Color(0x33C8F751), Color(0x1A5FE3FF))))
+                    .glassPanel(radius = 12.dp, fill = SolidColor(PpLime.copy(alpha = 0.14f)), edge = SolidColor(PpLime.copy(alpha = 0.4f)))
                     .padding(horizontal = 10.dp, vertical = 6.dp)
-            ) { Text(currentSet, style = PpTextStyles.Label, color = PpLime) }
+            ) { Text(currentSet, style = PpTextStyles.Label.copy(fontFeatureSettings = "tnum"), color = PpLime) }
         }
     }
 }

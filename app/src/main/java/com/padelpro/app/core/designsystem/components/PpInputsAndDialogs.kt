@@ -30,11 +30,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.padelpro.app.R
 import com.padelpro.app.core.designsystem.theme.PpCourtGlass
+import com.padelpro.app.core.designsystem.theme.PpCourtLine
 import com.padelpro.app.core.designsystem.theme.PpCourtLineStrong
 import com.padelpro.app.core.designsystem.theme.PpCourtNight
-import com.padelpro.app.core.designsystem.theme.PpCourtPanel
 import com.padelpro.app.core.designsystem.theme.PpDanger
-import com.padelpro.app.core.designsystem.theme.PpGlassCyan
 import com.padelpro.app.core.designsystem.theme.PpLime
 import com.padelpro.app.core.designsystem.theme.PpRadius
 import com.padelpro.app.core.designsystem.theme.PpScrimColor
@@ -75,7 +74,7 @@ fun PpTextField(
                 Icon(
                     imageVector = leadingIcon,
                     contentDescription = null,
-                    tint = PpGlassCyan,
+                    tint = PpTextMid,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -84,9 +83,9 @@ fun PpTextField(
         textStyle = PpTextStyles.Body.copy(color = PpTextHigh),
         shape = PpRadius.inputShape,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = PpCourtPanel,
+            focusedContainerColor = PpCourtNight,
             unfocusedContainerColor = PpCourtNight,
-            focusedBorderColor = PpGlassCyan,
+            focusedBorderColor = PpLime,
             unfocusedBorderColor = PpCourtLineStrong,
             cursorColor = PpLime,
             focusedTextColor = PpTextHigh,
@@ -111,7 +110,7 @@ fun PpConfirmDialog(
         onDismissRequest = onDismiss,
         containerColor = PpCourtGlass,
         shape = PpRadius.cardShape,
-        modifier = Modifier.border(1.dp, PpCourtLineStrong, PpRadius.cardShape),
+        modifier = Modifier.border(1.dp, PpCourtLine, PpRadius.cardShape),
         title = {
             Text(
                 text = title,
@@ -129,8 +128,8 @@ fun PpConfirmDialog(
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 Text(
-                    text = confirmText.uppercase(),
-                    style = PpTextStyles.Label.copy(fontWeight = FontWeight.Bold),
+                    text = confirmText,
+                    style = PpTextStyles.Title.copy(fontWeight = FontWeight.SemiBold),
                     color = if (isDestructive) PpDanger else PpLime
                 )
             }
@@ -139,7 +138,7 @@ fun PpConfirmDialog(
             TextButton(onClick = onDismiss) {
                 Text(
                     text = stringResource(R.string.action_cancel),
-                    style = PpTextStyles.Label,
+                    style = PpTextStyles.Title.copy(fontWeight = FontWeight.Medium),
                     color = PpTextMid
                 )
             }

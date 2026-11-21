@@ -214,7 +214,7 @@ fun LessonScreen(
                             Text(
                                 text = stringResource(
                                     R.string.lesson_header_meta_format,
-                                    lesson.courseTitle.uppercase(),
+                                    lesson.courseTitle,
                                     lesson.order
                                 ),
                                 style = PpTextStyles.Micro,

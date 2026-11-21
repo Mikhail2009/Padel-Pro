@@ -80,7 +80,7 @@ class HistoryViewModel(
         val groups = filtered
             .groupBy { match ->
                 timeProvider.formatFullMonthYear(match.endedAt ?: match.startedAt)
-                    .uppercase(ruLocale)
+                    .replaceFirstChar { it.uppercase(ruLocale) }
             }
             .map { (monthLabel, groupMatches) ->
                 MonthMatchGroup(monthLabel = monthLabel, matches = groupMatches)

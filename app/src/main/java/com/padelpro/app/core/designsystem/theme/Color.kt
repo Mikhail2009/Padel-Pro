@@ -3,36 +3,38 @@ package com.padelpro.app.core.designsystem.theme
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 
-// ── Основа: ночной корт (холодная тёмная семья, самые большие поля) ─────────────
-val PpCourtDeep = Color(0xFF071016)   // фон приложения
-val PpCourtNight = Color(0xFF0B1A22)  // поверхности
-val PpCourtPanel = Color(0xFF10242E)  // карточки
-val PpCourtGlass = Color(0xFF16323F)  // оверлеи, sheets
-val PpCourtLine = Color(0xFF1E3A47)   // границы
-val PpCourtLineStrong = Color(0xFF2C5566)
+// ── Основа: «обсидиан» — почти чёрный с едва заметным зелёным подтоном ───────────
+// Ступени поверхностей отличаются на 3–4% светлоты: глубина создаётся не градиентами,
+// а чёткой лестницей слоёв и тонкой границей.
+val PpCourtDeep = Color(0xFF090B0A)   // фон приложения
+val PpCourtNight = Color(0xFF111512)  // поверхность уровня 1 (нижняя панель, поля ввода)
+val PpCourtPanel = Color(0xFF171C18)  // карточки
+val PpCourtGlass = Color(0xFF1E241F)  // приподнятые слои: sheets, диалоги, чипы
+val PpCourtLine = Color(0xFF28302A)   // тонкие границы (hairline)
+val PpCourtLineStrong = Color(0xFF3A453C)
 
-// ── Акценты: мяч, корт, стекло ────────────────────────────────────────────────
-val PpLime = Color(0xFFC8F751)        // мяч — главный акцент
-val PpLimeDeep = Color(0xFF9BD62B)
-val PpLimeGlow = Color(0xFFE4FF8A)
-val PpCourtBlue = Color(0xFF1E6FE8)   // синий корт
-val PpGlassCyan = Color(0xFF5FE3FF)   // блик стекла / информация
-val PpAmberLed = Color(0xFFFFB43D)    // LED-счёт, XP
-val PpTrophyMagenta = Color(0xFFFF3D8F) // достижения
-val PpViolet = Color(0xFF9B7BFF)
+// ── Акценты: один главный (лайм) + сдержанные второстепенные ───────────────────
+val PpLime = Color(0xFFC2F54C)        // мяч — единственный «громкий» акцент
+val PpLimeDeep = Color(0xFF8FCB38)
+val PpLimeGlow = Color(0xFFDBFF86)
+val PpCourtBlue = Color(0xFF3E7BE6)   // синий корт (только графики)
+val PpGlassCyan = Color(0xFF72B7F0)   // небесный: команда B, «текущий» урок, информация
+val PpAmberLed = Color(0xFFF2B84B)    // золото: XP, подача, серия
+val PpTrophyMagenta = Color(0xFFE8638C) // поражение / редкие достижения (приглушённый розовый)
+val PpViolet = Color(0xFFA793F2)
 
 // ── Семантика ─────────────────────────────────────────────────────────────────
-val PpSuccess = Color(0xFF2FD98A)
+val PpSuccess = Color(0xFF46D68F)
 val PpWarning = PpAmberLed
-val PpDanger = Color(0xFFFF4D5E)
+val PpDanger = Color(0xFFFF5A5F)
 val PpInfo = PpGlassCyan
 
-// ── Нейтральные ───────────────────────────────────────────────────────────────
-val PpTextHigh = Color(0xFFF4F8F7)
-val PpTextMid = Color(0xFF9DB2BC)
-val PpTextLow = Color(0xFF6B8391)
-val PpOnAccent = Color(0xFF04120A)
-val PpScrimColor = Color(0xE604090C)
+// ── Текст ─────────────────────────────────────────────────────────────────────
+val PpTextHigh = Color(0xFFF5F7F2)
+val PpTextMid = Color(0xFF9BA59B)
+val PpTextLow = Color(0xFF737E74)
+val PpOnAccent = Color(0xFF0A1006)
+val PpScrimColor = Color(0xE6050706)
 
 // ── Совместимость с существующими именами токенов ─────────────────────────────
 val PpBackground = PpCourtDeep
@@ -42,7 +44,7 @@ val PpCardSurface = PpCourtPanel
 val PpCard = PpCourtPanel
 val PpPrimary = PpLime
 val PpPrimaryDim = PpLimeDeep
-val PpPrimaryTint = Color(0x1FC8F751)
+val PpPrimaryTint = Color(0x1FC2F54C)
 val PpOnPrimary = PpOnAccent
 val PpTextPrimary = PpTextHigh
 val PpTextSecondary = PpTextMid
@@ -50,25 +52,29 @@ val PpTextTertiary = PpTextLow
 val PpOutline = PpCourtLine
 val PpOutlineStrong = PpCourtLineStrong
 val PpError = PpDanger
-val PpErrorTint = Color(0x26FF4D5E)
+val PpErrorTint = Color(0x26FF5A5F)
 
-// ── Градиенты через реально разные оттенки ────────────────────────────────────
-val PpCourtSweep: Brush get() = Brush.linearGradient(listOf(PpCourtBlue, PpGlassCyan, PpLime))
-val PpBallTrail: Brush get() = Brush.linearGradient(listOf(PpLimeGlow, PpLime, PpAmberLed))
-val PpTrophySweep: Brush get() = Brush.linearGradient(listOf(PpTrophyMagenta, PpAmberLed))
+// ── Заливки и кромки: максимально тихие ───────────────────────────────────────
+val PpCourtSweep: Brush get() = Brush.linearGradient(listOf(PpLime, PpLimeDeep))
+val PpBallTrail: Brush get() = Brush.horizontalGradient(listOf(PpLimeDeep, PpLime))
+val PpTrophySweep: Brush get() = Brush.linearGradient(listOf(PpAmberLed, Color(0xFFFFDA8F)))
 val PpGlassFill: Brush get() = Brush.verticalGradient(
-    listOf(Color(0x1A5FE3FF), Color(0x0AFFFFFF), Color(0x00000000))
+    listOf(Color(0x14FFFFFF), Color(0x06FFFFFF), Color(0x00000000))
 )
+
+/** Кромка карточки: светлее сверху, почти исчезает снизу — как подсветка грани. */
 val PpSpecularEdge: Brush get() = Brush.verticalGradient(
-    listOf(Color(0x59FFFFFF), Color(0x265FE3FF), Color(0x0DFFFFFF), Color(0x00FFFFFF))
+    listOf(Color(0x2EFFFFFF), Color(0x14FFFFFF), Color(0x0AFFFFFF))
 )
-val PpPanelFill: Brush get() = Brush.verticalGradient(listOf(PpCourtPanel, PpCourtNight))
+
+/** Заливка карточки: на 2–3% светлее к верху — почти плоская. */
+val PpPanelFill: Brush get() = Brush.verticalGradient(listOf(PpCourtPanel, Color(0xFF141915)))
 val PpScrimVertical: Brush get() = Brush.verticalGradient(
-    listOf(Color(0x00071016), Color(0xB3071016), PpCourtDeep)
+    listOf(Color(0x00090B0A), Color(0xB3090B0A), PpCourtDeep)
 )
 
 // ── Палитра графиков: 8 различимых оттенков (разная светлота + прямые подписи) ─
 val PpChartPalette = listOf(
-    PpLime, PpGlassCyan, PpCourtBlue, PpAmberLed,
-    PpTrophyMagenta, PpSuccess, PpViolet, Color(0xFF7FA0B0)
+    PpLime, PpGlassCyan, PpAmberLed, PpViolet,
+    PpTrophyMagenta, PpSuccess, PpCourtBlue, Color(0xFF8A9A8C)
 )

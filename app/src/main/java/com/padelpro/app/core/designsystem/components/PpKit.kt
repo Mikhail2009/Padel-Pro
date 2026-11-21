@@ -24,23 +24,24 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.padelpro.app.core.designsystem.theme.LocalPpMotion
-import com.padelpro.app.core.designsystem.theme.PpAmberLed
 import com.padelpro.app.core.designsystem.theme.PpBallTrail
 import com.padelpro.app.core.designsystem.theme.PpCourtGlass
 import com.padelpro.app.core.designsystem.theme.PpCourtLine
-import com.padelpro.app.core.designsystem.theme.PpGlassCyan
+import com.padelpro.app.core.designsystem.theme.PpCourtLineStrong
 import com.padelpro.app.core.designsystem.theme.PpLime
-import com.padelpro.app.core.designsystem.theme.PpRadius
+import com.padelpro.app.core.designsystem.theme.PpOnAccent
 import com.padelpro.app.core.designsystem.theme.PpSpacing
 import com.padelpro.app.core.designsystem.theme.PpTextHigh
-import com.padelpro.app.core.designsystem.theme.PpTextLow
 import com.padelpro.app.core.designsystem.theme.PpTextMid
 import com.padelpro.app.core.designsystem.theme.PpTextStyles
 
@@ -54,11 +55,15 @@ fun PpCard(
         modifier
             .glassPanel()
             .then(if (accent != null) Modifier.accentRail(accent) else Modifier)
-            .padding(PpSpacing.lg),
+            .padding(PpSpacing.lg + 2.dp),
         content = content
     )
 }
 
+/**
+ * Метрика: крупное число и спокойная подпись. Цвет-смысл передаётся маленькой точкой,
+ * а не заливкой числа — три разноцветных числа подряд выглядят как «радуга».
+ */
 @Composable
 fun PpStatCard(
     value: String,
@@ -68,17 +73,15 @@ fun PpStatCard(
 ) {
     Column(
         modifier
-            .glassPanel(radius = 16.dp)
-            .padding(PpSpacing.md)
+            .glassPanel(radius = 18.dp)
+            .padding(horizontal = PpSpacing.md + 2.dp, vertical = PpSpacing.md + 2.dp)
     ) {
-        Canvas(Modifier.fillMaxWidth().height(2.dp)) {
-            drawRect(Brush.horizontalGradient(listOf(accent, Color.Transparent)))
-        }
-        Spacer(Modifier.height(PpSpacing.sm))
-        Text(value, style = PpTextStyles.Numeral, color = accent, maxLines = 1)
+        Canvas(Modifier.size(6.dp)) { drawCircle(accent) }
+        Spacer(Modifier.height(PpSpacing.md))
+        Text(value, style = PpTextStyles.Numeral, color = PpTextHigh, maxLines = 1)
         Spacer(Modifier.height(2.dp))
         Text(
-            label.uppercase(), style = PpTextStyles.Overline, color = PpTextMid,
+            label, style = PpTextStyles.Label, color = PpTextMid,
             maxLines = 2, overflow = TextOverflow.Ellipsis
         )
     }
@@ -92,24 +95,25 @@ fun PpSectionHeader(
     onActionClick: (() -> Unit)? = null
 ) {
     Row(
-        modifier.fillMaxWidth().padding(vertical = PpSpacing.sm),
+        modifier.fillMaxWidth().padding(top = PpSpacing.xs, bottom = PpSpacing.sm),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Canvas(Modifier.size(6.dp)) { drawCircle(PpLime) }
-            Spacer(Modifier.size(PpSpacing.sm))
-            Text(title.uppercase(), style = PpTextStyles.Micro, color = PpTextMid)
-        }
+        Text(
+            title, style = PpTextStyles.Title, color = PpTextHigh,
+            maxLines = 1, overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f, fill = false)
+        )
         if (actionLabel != null && onActionClick != null) {
             Text(
-                actionLabel.uppercase(), style = PpTextStyles.Micro, color = PpGlassCyan,
+                actionLabel, style = PpTextStyles.Label, color = PpLime,
                 modifier = Modifier.clickableNoRipple(onActionClick).padding(PpSpacing.xs)
             )
         }
     }
 }
 
+/** Фильтр-чип: выбранный — светлая заливка с тёмным текстом (лайм остаётся для главных действий). */
 @Composable
 fun PpFilterChip(
     label: String,
@@ -123,19 +127,17 @@ fun PpFilterChip(
             .height(40.dp)
             .glassPanel(
                 radius = 20.dp,
-                fill = if (selected) Brush.horizontalGradient(listOf(Color(0x33C8F751), Color(0x1A5FE3FF)))
-                else Brush.verticalGradient(listOf(PpCourtGlass, PpCourtGlass)),
-                edge = if (selected) Brush.linearGradient(listOf(PpLime, PpGlassCyan))
-                else Brush.linearGradient(listOf(PpCourtLine, PpCourtLine))
+                fill = SolidColor(if (selected) PpTextHigh else PpCourtGlass),
+                edge = SolidColor(if (selected) PpTextHigh else PpCourtLine)
             )
             .clickableNoRipple(onClick)
-            .padding(horizontal = PpSpacing.md),
+            .padding(horizontal = PpSpacing.lg),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (leadingContent != null) { leadingContent(); Spacer(Modifier.size(6.dp)) }
         Text(
-            label.uppercase(), style = PpTextStyles.Micro,
-            color = if (selected) PpTextHigh else PpTextMid, maxLines = 1
+            label, style = PpTextStyles.Label,
+            color = if (selected) PpOnAccent else PpTextMid, maxLines = 1
         )
     }
 }
@@ -145,7 +147,7 @@ fun PpProgressBar(
     progress: Float,
     modifier: Modifier = Modifier,
     brush: Brush = PpBallTrail,
-    height: Dp = 8.dp
+    height: Dp = 6.dp
 ) {
     val motion = LocalPpMotion.current
     val p by animateFloatAsState(
@@ -155,10 +157,11 @@ fun PpProgressBar(
     )
     Canvas(modifier.fillMaxWidth().height(height)) {
         val r = size.height / 2
-        drawRoundRect(Color(0x1F2C5566), cornerRadius = CornerRadius(r))
+        drawRoundRect(PpCourtLine, cornerRadius = CornerRadius(r))
         if (p > 0f) {
-            drawRoundRect(brush, size = Size(size.width * p, size.height), cornerRadius = CornerRadius(r))
-            drawCircle(Color(0xFFE4FF8A), r * 0.9f, Offset(size.width * p, r))
+            // Минимальная ширина = высота, чтобы малый прогресс не превращался в точку-артефакт.
+            val w = (size.width * p).coerceAtLeast(size.height)
+            drawRoundRect(brush, size = Size(w, size.height), cornerRadius = CornerRadius(r))
         }
     }
 }
@@ -176,20 +179,29 @@ fun PpXpRing(
         animationSpec = if (motion.enabled) motion.glide() else snap(),
         label = "pp-ring"
     )
-    Box(modifier.size(132.dp), contentAlignment = Alignment.Center) {
-        Canvas(Modifier.size(132.dp)) {
-            val stroke = 10.dp.toPx()
+    Box(modifier.size(124.dp), contentAlignment = Alignment.Center) {
+        Canvas(Modifier.size(124.dp)) {
+            val stroke = 8.dp.toPx()
             val inset = stroke / 2
             val arcSize = Size(size.width - stroke, size.height - stroke)
-            drawArc(Color(0x1F2C5566), 0f, 360f, false, Offset(inset, inset), arcSize, style = Stroke(stroke, cap = StrokeCap.Round))
-            drawArc(
-                Brush.sweepGradient(listOf(PpGlassCyan, PpLime, PpAmberLed, PpGlassCyan)),
-                -90f, 360f * p, false, Offset(inset, inset), arcSize, style = Stroke(stroke, cap = StrokeCap.Round)
-            )
+            drawArc(PpCourtLine, 0f, 360f, false, Offset(inset, inset), arcSize, style = Stroke(stroke, cap = StrokeCap.Round))
+            if (p > 0f) {
+                drawArc(
+                    PpLime,
+                    -90f, 360f * p, false, Offset(inset, inset), arcSize, style = Stroke(stroke, cap = StrokeCap.Round)
+                )
+            }
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(center, style = PpTextStyles.Numeral, color = PpTextHigh)
-            if (caption.isNotEmpty()) Text(caption.uppercase(), style = PpTextStyles.Overline, color = PpTextMid)
+            Text(
+                center,
+                style = PpTextStyles.DisplayNum.copy(fontSize = 32.sp, lineHeight = 36.sp),
+                color = PpTextHigh,
+                maxLines = 1
+            )
+            if (caption.isNotEmpty()) {
+                Text(caption, style = PpTextStyles.Label, color = PpTextMid, maxLines = 1)
+            }
         }
     }
 }
@@ -202,19 +214,20 @@ fun PpEmptyState(
     modifier: Modifier = Modifier
 ) {
     Column(
-        modifier.fillMaxWidth().glassPanel().padding(PpSpacing.xl),
+        modifier.fillMaxWidth().glassPanel().padding(horizontal = PpSpacing.xl, vertical = PpSpacing.xl + 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(Modifier.size(64.dp), contentAlignment = Alignment.Center) {
-            Canvas(Modifier.size(64.dp)) {
-                drawCircle(Brush.radialGradient(listOf(Color(0x335FE3FF), Color.Transparent)))
-                drawCircle(Color(0x332C5566), style = Stroke(1f))
-            }
-            Icon(icon, null, tint = PpGlassCyan, modifier = Modifier.size(26.dp))
+        Box(
+            Modifier
+                .size(56.dp)
+                .glassPanel(radius = 28.dp, fill = SolidColor(PpCourtGlass), edge = SolidColor(PpCourtLineStrong)),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(icon, null, tint = PpLime, modifier = Modifier.size(24.dp))
         }
-        Spacer(Modifier.height(PpSpacing.md))
-        Text(title, style = PpTextStyles.Title, color = PpTextHigh)
+        Spacer(Modifier.height(PpSpacing.lg))
+        Text(title, style = PpTextStyles.Title, color = PpTextHigh, textAlign = TextAlign.Center)
         Spacer(Modifier.height(PpSpacing.xs))
-        Text(subtitle, style = PpTextStyles.Body, color = PpTextLow)
+        Text(subtitle, style = PpTextStyles.Body, color = PpTextMid, textAlign = TextAlign.Center)
     }
 }
