@@ -143,7 +143,8 @@ fun LiveMatchScreen(
                     serverName = if (engineState.servingTeam == TeamSide.A) engineState.servingPlayerName else null,
                     setPoint = engineState.isSetPointA,
                     matchPoint = engineState.isMatchPointA,
-                    accent = PpLime
+                    accent = PpLime,
+                    pointsWon = engineState.totalPointsWonA
                 )
                 val sideB = LiveSideUi(
                     teamLabel = teamBLabel,
@@ -155,7 +156,8 @@ fun LiveMatchScreen(
                     serverName = if (engineState.servingTeam == TeamSide.B) engineState.servingPlayerName else null,
                     setPoint = engineState.isSetPointB,
                     matchPoint = engineState.isMatchPointB,
-                    accent = PpGlassCyan
+                    accent = PpGlassCyan,
+                    pointsWon = engineState.totalPointsWonB
                 )
 
                 val swapped = uiState.swapped
@@ -192,7 +194,8 @@ fun LiveMatchScreen(
                     ),
                     autoSwap = uiState.autoSideSwap,
                     swapped = swapped,
-                    sets = completedSets
+                    sets = completedSets,
+                    recentPoints = uiState.recentPoints
                 )
 
                 LiveMatchLandscape(

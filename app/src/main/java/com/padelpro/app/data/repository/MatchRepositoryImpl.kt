@@ -175,6 +175,10 @@ class MatchRepositoryImpl(
                     val engineEvents = eventEntities.mapNotNull { it.toEngineEvent() }
                     val engineState = MatchEngine.replay(config, engineEvents)
                     val canUndo = engineEvents.any { it is MatchEngineEvent.PointWon }
+                    val recentPoints = engineEvents
+                        .filterIsInstance<MatchEngineEvent.PointWon>()
+                        .takeLast(8)
+                        .map { it.team == TeamSide.A }
                     val wasRestored =
                         activeEntity.id !in sessionStartedMatchIds &&
                             activeEntity.id !in dismissedIds
@@ -185,7 +189,8 @@ class MatchRepositoryImpl(
                         teamAPlayers = teamAPlayers,
                         teamBPlayers = teamBPlayers,
                         canUndo = canUndo,
-                        wasRestored = wasRestored
+                        wasRestored = wasRestored,
+                        recentPoints = recentPoints
                     )
                 }
             }

@@ -36,6 +36,7 @@ data class LiveMatchUiState(
     val keepScreenOn: Boolean = true,
     val autoSideSwap: Boolean = true,
     val swapped: Boolean = false,
+    val recentPoints: List<Boolean> = emptyList(),
     val isMutating: Boolean = false
 )
 
@@ -81,6 +82,7 @@ class LiveMatchViewModel(
             keepScreenOn = settings.keepScreenOn,
             autoSideSwap = settings.autoSideSwap,
             swapped = swapped,
+            recentPoints = snapshot?.recentPoints.orEmpty(),
             isMutating = mutating
         )
     }.stateIn(

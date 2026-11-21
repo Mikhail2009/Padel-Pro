@@ -1,10 +1,13 @@
 package com.padelpro.app.feature.match
 
+import android.os.SystemClock
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -41,15 +44,19 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -84,7 +91,8 @@ data class LiveSideUi(
     val serverName: String?,
     val setPoint: Boolean,
     val matchPoint: Boolean,
-    val accent: Color
+    val accent: Color,
+    val pointsWon: Int = 0
 )
 
 data class LiveRailUi(
@@ -98,8 +106,11 @@ data class LiveRailUi(
     val banner: String?,
     val autoSwap: Boolean,
     val swapped: Boolean,
-    val sets: List<String>
+    val sets: List<String>,
+    val recentPoints: List<Boolean> = emptyList()
 )
+
+private const val TAP_GUARD_MS = 220L
 
 @Composable
 fun LiveMatchLandscape(
@@ -117,10 +128,19 @@ fun LiveMatchLandscape(
     LockLandscape()
     val haptics = LocalHapticFeedback.current
     val servingLeft = when { left.serving -> true; right.serving -> false; else -> null }
+    var lastTapAt by remember { mutableLongStateOf(0L) }
+
+    fun guarded(action: () -> Unit) {
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastTapAt < TAP_GUARD_MS) return
+        lastTapAt = now
+        haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        action()
+    }
 
     BoxWithConstraints(Modifier.fillMaxSize()) {
         val compact = maxWidth < 700.dp
-        val railWidth = if (compact) 96.dp else 118.dp
+        val railWidth = if (compact) 100.dp else 122.dp
         val gap = if (compact) 4.dp else PpSpacing.sm
 
         PpCourtBackdrop(servingLeft = servingLeft, dimmed = rail.paused)
@@ -137,18 +157,14 @@ fun LiveMatchLandscape(
                 paused = rail.paused,
                 compact = compact,
                 modifier = Modifier.weight(1f).fillMaxHeight(),
-                onTap = {
-                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove); onLeftTap()
-                }
+                onTap = { guarded(onLeftTap) }
             )
             CenterRail(
                 rail = rail,
                 compact = compact,
-                onUndo = onUndo,
-                onPauseToggle = onPauseToggle,
-                onSwapSides = {
-                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove); onSwapSides()
-                },
+                onUndo = { guarded(onUndo) },
+                onPauseToggle = { guarded(onPauseToggle) },
+                onSwapSides = { guarded(onSwapSides) },
                 onSettings = onSettings,
                 onFinish = onFinish,
                 modifier = Modifier.width(railWidth).fillMaxHeight().padding(horizontal = gap)
@@ -159,9 +175,7 @@ fun LiveMatchLandscape(
                 paused = rail.paused,
                 compact = compact,
                 modifier = Modifier.weight(1f).fillMaxHeight(),
-                onTap = {
-                    haptics.performHapticFeedback(HapticFeedbackType.TextHandleMove); onRightTap()
-                }
+                onTap = { guarded(onRightTap) }
             )
         }
     }
@@ -177,11 +191,22 @@ private fun SideHalf(
     modifier: Modifier = Modifier
 ) {
     val motion = LocalPpMotion.current
+
     val pop = remember { Animatable(1f) }
     LaunchedEffect(ui.score) {
         if (!motion.enabled) { pop.snapTo(1f); return@LaunchedEffect }
         pop.snapTo(1.13f)
         pop.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium))
+    }
+
+    val burst = remember { Animatable(1f) }
+    var seenPoints by remember { mutableLongStateOf(ui.pointsWon.toLong()) }
+    LaunchedEffect(ui.pointsWon) {
+        if (ui.pointsWon.toLong() == seenPoints) return@LaunchedEffect
+        seenPoints = ui.pointsWon.toLong()
+        if (!motion.enabled) { burst.snapTo(1f); return@LaunchedEffect }
+        burst.snapTo(0f)
+        burst.animateTo(1f, tween(durationMillis = 520, easing = LinearOutSlowInEasing))
     }
 
     BoxWithConstraints(
@@ -195,19 +220,40 @@ private fun SideHalf(
                     listOf(ui.accent.copy(alpha = if (ui.serving) 0.8f else 0.22f), Color(0x142C5566))
                 )
             )
+            .drawWithContent {
+                drawContent()
+                val t = burst.value
+                if (t < 1f) {
+                    val maxR = size.maxDimension * 0.62f
+                    drawCircle(
+                        color = ui.accent.copy(alpha = 0.30f * (1f - t)),
+                        radius = maxR * t,
+                        center = center
+                    )
+                    drawCircle(
+                        color = ui.accent.copy(alpha = 0.55f * (1f - t)),
+                        radius = maxR * t,
+                        center = center,
+                        style = Stroke(width = 2.dp.toPx() * (1f - t) + 0.5f)
+                    )
+                }
+            }
             .then(if (enabled) Modifier.clickableNoRipple(onTap) else Modifier)
-            .padding(horizontal = if (compact) PpSpacing.md else PpSpacing.lg, vertical = PpSpacing.md)
+            .padding(horizontal = if (compact) PpSpacing.md else PpSpacing.lg, vertical = PpSpacing.sm)
     ) {
         val density = LocalDensity.current
-        val scoreSize = with(density) { (maxHeight * 0.36f).toSp().value.coerceIn(40f, 96f).sp }
-        val scoreLine = with(density) { (maxHeight * 0.37f).toSp().value.coerceIn(42f, 98f).sp }
+        val tight = maxHeight < 230.dp || density.fontScale > 1.2f
+        val scoreSize = with(density) { (maxHeight * (if (tight) 0.30f else 0.34f)).toSp() }
+            .value.coerceIn(38f, 96f).sp
+        val scoreLine = with(density) { (maxHeight * (if (tight) 0.31f else 0.35f)).toSp() }
+            .value.coerceIn(40f, 98f).sp
 
         AnimatedContent(
             targetState = ui.teamLabel,
             transitionSpec = {
                 if (motion.enabled) {
-                    (slideInHorizontally { it / 3 } + fadeIn()) togetherWith
-                        (slideOutHorizontally { -it / 3 } + fadeOut())
+                    (slideInHorizontally { it / 4 } + fadeIn()) togetherWith
+                        (slideOutHorizontally { -it / 4 } + fadeOut())
                 } else {
                     fadeIn(animationSpec = snap()) togetherWith fadeOut(animationSpec = snap())
                 }
@@ -227,11 +273,11 @@ private fun SideHalf(
                     }
                     Text(
                         ui.teamLabel.uppercase(),
-                        style = if (compact) PpTextStyles.Label else PpTextStyles.Title,
+                        style = if (compact || tight) PpTextStyles.Label else PpTextStyles.Title,
                         color = PpTextHigh, maxLines = 1, overflow = TextOverflow.Ellipsis
                     )
                 }
-                if (ui.players.isNotBlank() && !compact) {
+                if (ui.players.isNotBlank() && !compact && !tight) {
                     Text(
                         ui.players, style = PpTextStyles.Label, color = PpTextMid,
                         maxLines = 1, overflow = TextOverflow.Ellipsis
@@ -247,9 +293,9 @@ private fun SideHalf(
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     MiniChip("ГЕЙМ ${ui.games}", ui.accent)
-                    MiniChip("СЕТЫ ${ui.setsWon}", PpGlassCyan)
+                    if (!tight) MiniChip("СЕТЫ ${ui.setsWon}", PpGlassCyan)
                 }
-                if (ui.serving && !ui.serverName.isNullOrBlank()) {
+                if (ui.serving && !ui.serverName.isNullOrBlank() && !tight) {
                     Text(
                         "ПОДАЁТ · ${ui.serverName.uppercase()}",
                         style = PpTextStyles.Overline, color = PpAmberLed,
@@ -320,6 +366,11 @@ private fun CenterRail(
                 Text(s, style = PpTextStyles.Overline, color = PpGlassCyan, maxLines = 1)
             }
 
+            if (rail.recentPoints.isNotEmpty()) {
+                Spacer(Modifier.height(5.dp))
+                PointTape(rail.recentPoints)
+            }
+
             Spacer(Modifier.height(6.dp))
 
             if (rail.banner != null) {
@@ -384,6 +435,28 @@ private fun CenterRail(
                     topLeft = Offset(0f, (track - thumb) * ratio),
                     size = Size(size.width, thumb),
                     cornerRadius = CornerRadius(2.dp.toPx())
+                )
+            }
+        }
+    }
+}
+
+/** Лента последних очков: лайм — команда A, циан — команда B; последняя крупнее. */
+@Composable
+private fun PointTape(points: List<Boolean>) {
+    val tail = points.takeLast(8)
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("ПОСЛЕДНИЕ", style = PpTextStyles.Overline, color = PpTextLow, maxLines = 1)
+        Canvas(Modifier.fillMaxWidth().height(12.dp)) {
+            val n = tail.size.coerceAtLeast(1)
+            val step = size.width / n
+            tail.forEachIndexed { i, teamA ->
+                val c = if (teamA) PpLime else PpGlassCyan
+                val last = i == tail.lastIndex
+                drawCircle(
+                    color = c.copy(alpha = if (last) 1f else 0.42f + 0.06f * i),
+                    radius = if (last) 4.2.dp.toPx() else 2.6.dp.toPx(),
+                    center = Offset(step * (i + 0.5f), size.height / 2)
                 )
             }
         }

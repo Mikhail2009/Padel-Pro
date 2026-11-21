@@ -239,7 +239,8 @@ data class LiveMatchSnapshot(
     val teamAPlayers: List<Player>,
     val teamBPlayers: List<Player>,
     val canUndo: Boolean,
-    val wasRestored: Boolean
+    val wasRestored: Boolean,
+    val recentPoints: List<Boolean> = emptyList()
 )
 
 enum class DeleteFriendResult {
