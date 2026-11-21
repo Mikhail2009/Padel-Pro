@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+
+    <!-- Ракетка: голова + ручка, перфорация и горло вырезаны (evenOdd) -->
+    <path android:fillColor="#FF4DEEFF" android:fillType="evenOdd"
+        android:pathData="
+            M50,23 a19,19 0 1,0 0.01,0 z
+            M46,61 h8 v13 a4,4 0 0,1 -4,4 a4,4 0 0,1 -4,-4 z
+            M42,55 L58,55 L50,60 Z
+            M38.8,34 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0 z
+            M46.8,34 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0 z
+            M54.8,34 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0 z
+            M38.8,42 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0 z
+            M46.8,42 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0 z
+            M54.8,42 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0 z
+            M38.8,50 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0 z
+            M46.8,50 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0 z
+            M54.8,50 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0 z"/>
+
+    <!-- Мяч -->
+    <path android:fillColor="#FFC2F54C"
+        android:pathData="M55.5,62 a10.5,10.5 0 1,0 21,0 a10.5,10.5 0 1,0 -21,0 z"/>
+    <path android:strokeColor="#FF090B0A" android:strokeWidth="2.6"
+        android:pathData="M55.5,62 a10.5,10.5 0 1,0 21,0 a10.5,10.5 0 1,0 -21,0 z"/>
+    <path android:strokeColor="#FF090B0A" android:strokeWidth="2.6" android:strokeLineCap="round"
+        android:pathData="M58,55 C63,58 63,66 58,70"/>
+    <path android:strokeColor="#FFFFB43D" android:strokeWidth="2.4" android:strokeLineCap="round"
+        android:pathData="M59,57 C60.5,54.5 63,53 66,53"/>
+</vector>

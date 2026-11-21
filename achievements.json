@@ -1,0 +1,142 @@
+[
+  {
+    "id": "FIRST_LESSON",
+    "title": "ПЕРВЫЙ ШАГ",
+    "description": "Завершите первый урок",
+    "icon": "school",
+    "condition": {
+      "type": "COMPLETED_LESSONS",
+      "threshold": 1
+    }
+  },
+  {
+    "id": "FIRST_COURSE",
+    "title": "ВЫПУСКНИК",
+    "description": "Пройдите целый курс",
+    "icon": "workspace_premium",
+    "condition": {
+      "type": "COMPLETED_COURSES",
+      "threshold": 1
+    }
+  },
+  {
+    "id": "PERFECT_QUIZ",
+    "title": "БЕЗ ОШИБОК",
+    "description": "Наберите 100% в любом тесте",
+    "icon": "verified",
+    "condition": {
+      "type": "PERFECT_QUIZ",
+      "threshold": 1
+    }
+  },
+  {
+    "id": "STREAK_3",
+    "title": "СЕРИЯ 3 ДНЯ",
+    "description": "Учитесь 3 дня подряд",
+    "icon": "local_fire_department",
+    "condition": {
+      "type": "LEARNING_STREAK",
+      "threshold": 3
+    }
+  },
+  {
+    "id": "STREAK_7",
+    "title": "СЕРИЯ 7 ДНЕЙ",
+    "description": "Учитесь 7 дней подряд",
+    "icon": "whatshot",
+    "condition": {
+      "type": "LEARNING_STREAK",
+      "threshold": 7
+    }
+  },
+  {
+    "id": "FIRST_MATCH",
+    "title": "ДЕБЮТ",
+    "description": "Сыграйте первый матч",
+    "icon": "sports_tennis",
+    "condition": {
+      "type": "MATCHES_PLAYED",
+      "threshold": 1
+    }
+  },
+  {
+    "id": "FIRST_WIN",
+    "title": "ПЕРВАЯ ПОБЕДА",
+    "description": "Выиграйте первый матч",
+    "icon": "emoji_events",
+    "condition": {
+      "type": "MATCH_WINS",
+      "threshold": 1
+    }
+  },
+  {
+    "id": "WIN_STREAK_3",
+    "title": "В УДАРЕ",
+    "description": "Выиграйте 3 матча подряд",
+    "icon": "bolt",
+    "condition": {
+      "type": "MATCH_WIN_STREAK",
+      "threshold": 3
+    }
+  },
+  {
+    "id": "SINGLES_5_WINS",
+    "title": "СОЛО-АС",
+    "description": "Выиграйте 5 одиночных матчей",
+    "icon": "person",
+    "condition": {
+      "type": "SINGLES_WINS",
+      "threshold": 5
+    }
+  },
+  {
+    "id": "DOUBLES_5_WINS",
+    "title": "ИДЕАЛЬНАЯ ПАРА",
+    "description": "Выиграйте 5 парных матчей",
+    "icon": "groups",
+    "condition": {
+      "type": "DOUBLES_WINS",
+      "threshold": 5
+    }
+  },
+  {
+    "id": "MATCHES_10",
+    "title": "ПОСТОЯННЫЙ ИГРОК",
+    "description": "Сыграйте 10 матчей",
+    "icon": "calendar_today",
+    "condition": {
+      "type": "MATCHES_PLAYED",
+      "threshold": 10
+    }
+  },
+  {
+    "id": "MATCHES_25",
+    "title": "ВЕТЕРАН",
+    "description": "Сыграйте 25 матчей",
+    "icon": "military_tech",
+    "condition": {
+      "type": "MATCHES_PLAYED",
+      "threshold": 25
+    }
+  },
+  {
+    "id": "LEVEL_5",
+    "title": "СТРАТЕГ",
+    "description": "Достигните 5-го уровня",
+    "icon": "trending_up",
+    "condition": {
+      "type": "LEVEL_REACHED",
+      "threshold": 5
+    }
+  },
+  {
+    "id": "GOLDEN_WIN",
+    "title": "ЖЕЛЕЗНЫЕ НЕРВЫ",
+    "description": "Выиграйте матч с золотым мячом",
+    "icon": "star",
+    "condition": {
+      "type": "GOLDEN_POINT_WIN",
+      "threshold": 1
+    }
+  }
+]
