@@ -2,6 +2,10 @@ package com.padelpro.app
 
 import android.content.Context
 import android.database.sqlite.SQLiteConstraintException
+import android.os.Looper
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStore
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.padelpro.app.core.common.TimeProvider
@@ -18,7 +22,11 @@ import com.padelpro.app.domain.model.StartMatchParticipant
 import com.padelpro.app.domain.model.StartMatchRequest
 import com.padelpro.app.domain.model.StartMatchResult
 import com.padelpro.app.domain.model.TeamSide
+import com.padelpro.app.feature.match.LiveMatchViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -30,6 +38,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows
 import org.robolectric.annotation.Config
 import java.io.File
 import java.time.LocalDate
@@ -423,5 +432,78 @@ class MatchPersistenceRobolectricTest {
         val summary = matchRepo.observeMatchById(started.matchId).first()
         assertNotNull(summary)
         assertEquals(24 * 60_000L, summary!!.durationMs)
+    }
+
+    @Test
+    fun `manual swap taps reset to zero after cancelling match A and starting match B`() = runBlocking {
+        val user = playerRepo.createLocalProfile("Алекс", 0, MatchFormat.SINGLES)
+        val opp = playerRepo.createFriend("Марк", 1)
+
+        suspend fun awaitCondition(timeoutMs: Long = 5_000L, predicate: () -> Boolean) {
+            val deadline = System.currentTimeMillis() + timeoutMs
+            while (!predicate()) {
+                Shadows.shadowOf(Looper.getMainLooper()).idle()
+                if (System.currentTimeMillis() >= deadline) break
+                delay(20L)
+            }
+            assertTrue(predicate())
+        }
+
+        val store = ViewModelStore()
+        val viewModel = ViewModelProvider(
+            store,
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                    LiveMatchViewModel(matchRepo, settings, timeProvider) as T
+            }
+        )[LiveMatchViewModel::class.java]
+
+        val uiJob = launch { viewModel.uiState.collect { } }
+        try {
+            val matchA = matchRepo.startMatch(
+                StartMatchRequest(
+                    format = MatchFormat.SINGLES,
+                    deuceMode = DeuceMode.GOLDEN_POINT,
+                    firstServerTeam = TeamSide.A,
+                    participants = listOf(
+                        StartMatchParticipant(user.id, TeamSide.A, 0, isUser = true),
+                        StartMatchParticipant(opp.id, TeamSide.B, 0, isUser = false)
+                    )
+                )
+            ) as StartMatchResult.Started
+
+            awaitCondition { viewModel.uiState.value.snapshot?.matchId == matchA.matchId }
+            assertEquals(0, viewModel.manualSwapTaps.value)
+            assertFalse(viewModel.uiState.value.swapped)
+
+            viewModel.swapSidesManually()
+            awaitCondition { viewModel.manualSwapTaps.value == 1 && viewModel.uiState.value.swapped }
+
+            viewModel.swapSidesManually()
+            awaitCondition { viewModel.manualSwapTaps.value == 2 && !viewModel.uiState.value.swapped }
+
+            assertTrue(matchRepo.cancelActiveMatch())
+            awaitCondition { viewModel.uiState.value.snapshot == null && viewModel.manualSwapTaps.value == 0 }
+
+            val matchB = matchRepo.startMatch(
+                StartMatchRequest(
+                    format = MatchFormat.SINGLES,
+                    deuceMode = DeuceMode.ADVANTAGE,
+                    firstServerTeam = TeamSide.A,
+                    participants = listOf(
+                        StartMatchParticipant(user.id, TeamSide.A, 0, isUser = true),
+                        StartMatchParticipant(opp.id, TeamSide.B, 0, isUser = false)
+                    )
+                )
+            ) as StartMatchResult.Started
+
+            awaitCondition { viewModel.uiState.value.snapshot?.matchId == matchB.matchId }
+            assertFalse(viewModel.uiState.value.swapped)
+            assertEquals(0, viewModel.manualSwapTaps.value)
+        } finally {
+            uiJob.cancel()
+            store.clear()
+        }
     }
 }

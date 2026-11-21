@@ -11,6 +11,8 @@ import com.padelpro.app.domain.model.MatchStatus
 import com.padelpro.app.domain.model.TeamSide
 import com.padelpro.app.domain.repository.MatchRepository
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -60,6 +62,20 @@ class LiveMatchViewModel(
                 clockMillis.value = timeProvider.nowMillis()
                 delay(500L)
             }
+        }
+        // Ручные перевороты сторон принадлежат конкретному матчу:
+        // при смене/завершении/отмене активного матча счётчик обнуляется.
+        viewModelScope.launch {
+            var lastMatchId: String? = null
+            matchRepository.observeActiveMatchLive()
+                .map { it?.matchId }
+                .distinctUntilChanged()
+                .collect { id ->
+                    if (id != lastMatchId) {
+                        _manualSwapTaps.value = 0
+                    }
+                    lastMatchId = id
+                }
         }
     }
 
