@@ -2,12 +2,14 @@ package com.padelpro.app.feature.academy
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -23,7 +25,6 @@ import androidx.compose.material.icons.rounded.School
 import androidx.compose.material.icons.rounded.SportsBaseball
 import androidx.compose.material.icons.rounded.SportsTennis
 import androidx.compose.material.icons.rounded.Timeline
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -47,9 +48,14 @@ import com.padelpro.app.core.designsystem.components.PpPrimaryButton
 import com.padelpro.app.core.designsystem.components.PpProgressBar
 import com.padelpro.app.core.designsystem.components.PpSecondaryButton
 import com.padelpro.app.core.designsystem.components.PpStreakFlame
+import com.padelpro.app.core.designsystem.components.PpXpRing
 import com.padelpro.app.core.designsystem.components.levelTitleRes
-import com.padelpro.app.core.designsystem.theme.PpPrimary
+import com.padelpro.app.core.designsystem.theme.PpAmberLed
+import com.padelpro.app.core.designsystem.theme.PpBallTrail
+import com.padelpro.app.core.designsystem.theme.PpGlassCyan
 import com.padelpro.app.core.designsystem.theme.PpSpacing
+import com.padelpro.app.core.designsystem.theme.PpTextHigh
+import com.padelpro.app.core.designsystem.theme.PpTextMid
 import com.padelpro.app.core.designsystem.theme.PpTextStyles
 import com.padelpro.app.domain.model.CourseCategory
 
@@ -85,58 +91,57 @@ fun AcademyScreen(
                     Text(
                         text = stringResource(R.string.academy_title),
                         style = PpTextStyles.H1,
-                        color = MaterialTheme.colorScheme.onBackground,
+                        color = PpTextHigh,
                         modifier = Modifier.weight(1f)
                     )
                     PpSecondaryButton(
                         text = stringResource(R.string.academy_rulebook_btn),
-                        icon = Icons.Rounded.MenuBook,
+                        leadingIcon = Icons.Rounded.MenuBook,
                         onClick = onOpenRulebook,
-                        fullWidth = false,
                         modifier = Modifier.testTag("academy_rulebook_button")
                     )
                 }
             }
 
             item {
+                val academyFraction = if (state.totalLessons == 0) 0f
+                else state.completedLessons.toFloat() / state.totalLessons.toFloat()
                 PpCard(modifier = Modifier.fillMaxWidth()) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = stringResource(
-                                R.string.level_badge_format,
-                                state.level,
-                                stringResource(levelTitleRes(state.level))
-                            ),
-                            style = PpTextStyles.Micro,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        PpXpRing(
+                            progress = academyFraction,
+                            center = "${state.academyPercent}%",
+                            caption = stringResource(levelTitleRes(state.level))
                         )
-                        Text(
-                            text = stringResource(R.string.xp_total_format, state.totalXp),
-                            style = PpTextStyles.Title,
-                            color = PpPrimary
-                        )
-                    }
-                    Spacer(Modifier.height(PpSpacing.md))
-                    PpProgressBar(
-                        progress = if (state.totalLessons == 0) 0f else state.completedLessons.toFloat() / state.totalLessons.toFloat(),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                    Spacer(Modifier.height(PpSpacing.md))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        PpStreakFlame(streakDays = state.streakDays)
-                        Text(
-                            text = stringResource(R.string.academy_progress_summary_format, state.academyPercent),
-                            style = PpTextStyles.Micro,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Spacer(Modifier.width(PpSpacing.lg))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(
+                                    R.string.level_badge_format,
+                                    state.level,
+                                    stringResource(levelTitleRes(state.level))
+                                ),
+                                style = PpTextStyles.Micro,
+                                color = PpGlassCyan
+                            )
+                            Spacer(Modifier.height(PpSpacing.xs))
+                            Text(
+                                text = stringResource(R.string.xp_total_format, state.totalXp),
+                                style = PpTextStyles.Numeral,
+                                color = PpAmberLed
+                            )
+                            Spacer(Modifier.height(PpSpacing.sm))
+                            PpProgressBar(
+                                progress = academyFraction,
+                                brush = PpBallTrail,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            Spacer(Modifier.height(PpSpacing.md))
+                            PpStreakFlame(streakDays = state.streakDays)
+                        }
                     }
                 }
             }
@@ -201,13 +206,15 @@ fun AcademyScreen(
             Text(
                 text = stringResource(R.string.academy_locked_sheet_body),
                 style = PpTextStyles.Body,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = PpTextMid
             )
             Spacer(Modifier.height(PpSpacing.xl))
             PpPrimaryButton(
                 text = stringResource(R.string.academy_locked_sheet_ok),
                 onClick = { showLockedSheet = false },
-                modifier = Modifier.testTag("academy_locked_ok_button")
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("academy_locked_ok_button")
             )
         }
     }

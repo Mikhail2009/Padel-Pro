@@ -8,20 +8,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
@@ -32,14 +30,16 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.padelpro.app.R
-import com.padelpro.app.core.designsystem.theme.PpCard
-import com.padelpro.app.core.designsystem.theme.PpOutline
-import com.padelpro.app.core.designsystem.theme.PpPrimary
-import com.padelpro.app.core.designsystem.theme.PpPrimaryDim
+import com.padelpro.app.core.designsystem.theme.PpAmberLed
+import com.padelpro.app.core.designsystem.theme.PpCourtGlass
+import com.padelpro.app.core.designsystem.theme.PpCourtLineStrong
+import com.padelpro.app.core.designsystem.theme.PpCourtNight
+import com.padelpro.app.core.designsystem.theme.PpCourtPanel
+import com.padelpro.app.core.designsystem.theme.PpGlassCyan
+import com.padelpro.app.core.designsystem.theme.PpLime
 import com.padelpro.app.core.designsystem.theme.PpSpacing
-import com.padelpro.app.core.designsystem.theme.PpSurface
-import com.padelpro.app.core.designsystem.theme.PpTextPrimary
-import com.padelpro.app.core.designsystem.theme.PpTextSecondary
+import com.padelpro.app.core.designsystem.theme.PpTextHigh
+import com.padelpro.app.core.designsystem.theme.PpTextMid
 
 @Composable
 fun PpAvatar(
@@ -51,14 +51,20 @@ fun PpAvatar(
 ) {
     val index = avatarId.coerceIn(0, 11)
     val cd = stringResource(R.string.cd_user_avatar)
-    val borderColor = if (highlighted) PpPrimary else PpOutline
-    val borderWidth = if (highlighted) 2.dp else 1.dp
+    val ringBrush = if (highlighted) {
+        Brush.sweepGradient(listOf(PpGlassCyan, PpLime, PpAmberLed, PpGlassCyan))
+    } else {
+        Brush.sweepGradient(listOf(PpCourtLineStrong, PpGlassCyan.copy(alpha = 0.45f), PpCourtLineStrong))
+    }
+    val borderWidth = if (highlighted) 2.5.dp else 1.5.dp
 
     val baseModifier = modifier
         .size(size)
         .clip(CircleShape)
-        .background(PpCard)
-        .border(borderWidth, borderColor, CircleShape)
+        .background(
+            Brush.radialGradient(listOf(PpCourtGlass, PpCourtPanel))
+        )
+        .border(borderWidth, ringBrush, CircleShape)
         .semantics { contentDescription = cd }
 
     val clickableModifier = if (onClick != null) {
@@ -75,15 +81,14 @@ fun PpAvatar(
             val stroke = w * 0.055f
 
             val accent = when (index % 3) {
-                0 -> PpPrimary
-                1 -> PpPrimaryDim
-                else -> PpTextPrimary
+                0 -> PpLime
+                1 -> PpGlassCyan
+                else -> PpTextHigh
             }
-            val muted = PpTextSecondary.copy(alpha = 0.45f)
+            val muted = PpTextMid.copy(alpha = 0.48f)
 
             when (index) {
                 0 -> {
-                    // Geometric racket crest
                     drawCircle(color = muted, radius = w * 0.34f, center = c, style = Stroke(stroke))
                     drawOval(
                         color = accent,
@@ -100,7 +105,6 @@ fun PpAvatar(
                     )
                 }
                 1 -> {
-                    // Padel ball orbit
                     drawCircle(color = accent, radius = w * 0.22f, center = c, style = Stroke(stroke))
                     drawArc(
                         color = muted,
@@ -111,10 +115,9 @@ fun PpAvatar(
                         size = Size(w * 0.68f, h * 0.68f),
                         style = Stroke(stroke, cap = StrokeCap.Round)
                     )
-                    drawCircle(color = accent, radius = w * 0.07f, center = Offset(w * 0.72f, h * 0.28f))
+                    drawCircle(color = PpLime, radius = w * 0.07f, center = Offset(w * 0.72f, h * 0.28f))
                 }
                 2 -> {
-                    // Twin court chevrons
                     val p = Path().apply {
                         moveTo(w * 0.28f, h * 0.58f)
                         lineTo(w * 0.5f, h * 0.32f)
@@ -129,7 +132,6 @@ fun PpAvatar(
                     drawPath(p2, color = muted, style = Stroke(stroke, cap = StrokeCap.Round))
                 }
                 3 -> {
-                    // Diamond court shield
                     val p = Path().apply {
                         moveTo(w * 0.5f, h * 0.20f)
                         lineTo(w * 0.78f, h * 0.5f)
@@ -138,10 +140,9 @@ fun PpAvatar(
                         close()
                     }
                     drawPath(p, color = accent, style = Stroke(stroke))
-                    drawCircle(color = accent, radius = w * 0.09f, center = c)
+                    drawCircle(color = PpGlassCyan, radius = w * 0.09f, center = c)
                 }
                 4 -> {
-                    // Athlete silhouette
                     drawCircle(color = accent, radius = w * 0.14f, center = Offset(w * 0.5f, h * 0.34f))
                     drawArc(
                         color = accent,
@@ -154,7 +155,6 @@ fun PpAvatar(
                     )
                 }
                 5 -> {
-                    // Crossed trajectory arcs
                     drawLine(
                         color = muted,
                         start = Offset(w * 0.22f, h * 0.5f),
@@ -170,10 +170,9 @@ fun PpAvatar(
                         size = Size(w * 0.60f, h * 0.52f),
                         style = Stroke(stroke * 1.1f, cap = StrokeCap.Round)
                     )
-                    drawCircle(color = accent, radius = w * 0.08f, center = Offset(w * 0.74f, h * 0.36f))
+                    drawCircle(color = PpLime, radius = w * 0.08f, center = Offset(w * 0.74f, h * 0.36f))
                 }
                 6 -> {
-                    // Hexagon badge
                     val p = Path()
                     for (i in 0 until 6) {
                         val angle = Math.toRadians((60 * i - 30).toDouble())
@@ -186,7 +185,6 @@ fun PpAvatar(
                     drawCircle(color = muted, radius = w * 0.12f, center = c, style = Stroke(stroke))
                 }
                 7 -> {
-                    // Net & smash stripe
                     drawLine(
                         color = muted,
                         start = Offset(w * 0.2f, h * 0.55f),
@@ -200,16 +198,14 @@ fun PpAvatar(
                         strokeWidth = stroke * 1.3f,
                         cap = StrokeCap.Round
                     )
-                    drawCircle(color = accent, radius = w * 0.07f, center = Offset(w * 0.7f, h * 0.26f))
+                    drawCircle(color = PpLime, radius = w * 0.07f, center = Offset(w * 0.7f, h * 0.26f))
                 }
                 8 -> {
-                    // Concentric radar rings
                     drawCircle(color = muted, radius = w * 0.34f, center = c, style = Stroke(stroke * 0.8f))
                     drawCircle(color = accent, radius = w * 0.21f, center = c, style = Stroke(stroke))
-                    drawCircle(color = accent, radius = w * 0.08f, center = c)
+                    drawCircle(color = PpGlassCyan, radius = w * 0.08f, center = c)
                 }
                 9 -> {
-                    // Twin triangle crest
                     val topTri = Path().apply {
                         moveTo(w * 0.5f, h * 0.22f)
                         lineTo(w * 0.74f, h * 0.54f)
@@ -226,7 +222,6 @@ fun PpAvatar(
                     )
                 }
                 10 -> {
-                    // Padel court grid top-view
                     drawRect(
                         color = muted,
                         topLeft = Offset(w * 0.28f, h * 0.22f),
@@ -247,7 +242,6 @@ fun PpAvatar(
                     )
                 }
                 else -> {
-                    // Star-point crown
                     val p = Path().apply {
                         moveTo(w * 0.24f, h * 0.66f)
                         lineTo(w * 0.32f, h * 0.34f)
@@ -285,7 +279,9 @@ fun PpAvatarPickerGrid(
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape)
-                            .background(if (selected) PpPrimary.copy(alpha = 0.14f) else PpSurface)
+                            .background(
+                                if (selected) Color(0x265FE3FF) else PpCourtNight
+                            )
                             .padding(2.dp),
                         contentAlignment = Alignment.Center
                     ) {

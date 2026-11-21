@@ -1,7 +1,6 @@
 package com.padelpro.app.feature.statistics
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,35 +17,43 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.SportsTennis
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.padelpro.app.R
+import com.padelpro.app.core.designsystem.components.PpActivityBars
 import com.padelpro.app.core.designsystem.components.PpCard
-import com.padelpro.app.core.designsystem.components.PpChartBar
-import com.padelpro.app.core.designsystem.components.PpChartDonut
 import com.padelpro.app.core.designsystem.components.PpEmptyState
+import com.padelpro.app.core.designsystem.components.PpFormChips
+import com.padelpro.app.core.designsystem.components.PpPrimaryButton
 import com.padelpro.app.core.designsystem.components.PpProgressBar
 import com.padelpro.app.core.designsystem.components.PpSectionHeader
 import com.padelpro.app.core.designsystem.components.PpStatCard
-import com.padelpro.app.core.designsystem.theme.PpOutline
-import com.padelpro.app.core.designsystem.theme.PpPrimary
-import com.padelpro.app.core.designsystem.theme.PpPrimaryTint
+import com.padelpro.app.core.designsystem.components.PpWinDonut
+import com.padelpro.app.core.designsystem.theme.PpAmberLed
+import com.padelpro.app.core.designsystem.theme.PpBallTrail
+import com.padelpro.app.core.designsystem.theme.PpCourtSweep
+import com.padelpro.app.core.designsystem.theme.PpGlassCyan
+import com.padelpro.app.core.designsystem.theme.PpLime
 import com.padelpro.app.core.designsystem.theme.PpRadius
 import com.padelpro.app.core.designsystem.theme.PpSpacing
+import com.padelpro.app.core.designsystem.theme.PpTextHigh
+import com.padelpro.app.core.designsystem.theme.PpTextLow
+import com.padelpro.app.core.designsystem.theme.PpTextMid
 import com.padelpro.app.core.designsystem.theme.PpTextStyles
+import com.padelpro.app.core.designsystem.theme.PpTrophyMagenta
 
 @Composable
 fun PerformanceScreen(
@@ -74,18 +81,25 @@ fun PerformanceScreen(
                 Text(
                     text = stringResource(R.string.performance_title),
                     style = PpTextStyles.H1,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = PpTextHigh
                 )
             }
 
             item {
-                PpCard(modifier = Modifier.fillMaxWidth()) {
+                PpCard(
+                    accent = PpLime,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        PpChartDonut(winRatePercent = state.winRatePercent)
+                        PpWinDonut(
+                            fraction = (state.winRatePercent ?: 0) / 100f,
+                            centerLabel = state.winRatePercent?.let { "$it%" }
+                                ?: stringResource(R.string.dash_placeholder)
+                        )
                         Spacer(Modifier.width(PpSpacing.xl))
                         Column(
                             modifier = Modifier.weight(1f),
@@ -93,13 +107,13 @@ fun PerformanceScreen(
                         ) {
                             Text(
                                 text = pluralStringResource(R.plurals.performance_wins_format, state.wins, state.wins),
-                                style = PpTextStyles.Title,
-                                color = if (state.wins > 0) PpPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                                style = PpTextStyles.Title.copy(fontFeatureSettings = "tnum"),
+                                color = if (state.wins > 0) PpLime else PpTextMid
                             )
                             Text(
                                 text = pluralStringResource(R.plurals.performance_losses_format, state.losses, state.losses),
-                                style = PpTextStyles.Title,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                style = PpTextStyles.Title.copy(fontFeatureSettings = "tnum"),
+                                color = if (state.losses > 0) PpTrophyMagenta else PpTextMid
                             )
                         }
                     }
@@ -114,8 +128,11 @@ fun PerformanceScreen(
                     PpStatCard(
                         value = state.totalMatches.toString(),
                         label = stringResource(R.string.performance_kpi_matches),
-                        onClick = onOpenMatchHistory,
-                        modifier = Modifier.weight(1f)
+                        accent = PpGlassCyan,
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(16.dp))
+                            .clickable(onClick = onOpenMatchHistory)
                     )
                     val currentStreakValue = when (state.isCurrentStreakWin) {
                         true -> stringResource(R.string.streak_win_short_format, state.currentStreakCount)
@@ -125,7 +142,7 @@ fun PerformanceScreen(
                     PpStatCard(
                         value = currentStreakValue,
                         label = stringResource(R.string.performance_kpi_current_streak),
-                        accentValue = state.isCurrentStreakWin == true,
+                        accent = if (state.isCurrentStreakWin == true) PpLime else PpAmberLed,
                         modifier = Modifier.weight(1f)
                     )
                     PpStatCard(
@@ -135,6 +152,7 @@ fun PerformanceScreen(
                             stringResource(R.string.dash_placeholder)
                         },
                         label = stringResource(R.string.performance_kpi_best_streak),
+                        accent = PpAmberLed,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -142,26 +160,37 @@ fun PerformanceScreen(
 
             if (state.totalMatches == 0) {
                 item {
-                    PpEmptyState(
-                        icon = Icons.Rounded.SportsTennis,
-                        title = stringResource(R.string.performance_empty_cta_text),
-                        subtitle = stringResource(R.string.home_recent_match_empty_sub),
-                        ctaText = stringResource(R.string.action_start_a_match),
-                        onCtaClick = onStartMatch,
-                        modifier = Modifier.testTag("performance_empty_state")
-                    )
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        PpEmptyState(
+                            icon = Icons.Rounded.SportsTennis,
+                            title = stringResource(R.string.performance_empty_cta_text),
+                            subtitle = stringResource(R.string.home_recent_match_empty_sub),
+                            modifier = Modifier.testTag("performance_empty_state")
+                        )
+                        Spacer(Modifier.height(PpSpacing.md))
+                        PpPrimaryButton(
+                            text = stringResource(R.string.action_start_a_match),
+                            onClick = onStartMatch,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
             }
 
             item {
-                PpSectionHeader(
+                SectionHeaderWithCaption(
                     title = stringResource(R.string.performance_section_monthly),
-                    actionText = stringResource(R.string.performance_last_6_months),
-                    onActionClick = null
+                    caption = stringResource(R.string.performance_last_6_months)
                 )
                 Spacer(Modifier.height(PpSpacing.sm))
                 PpCard(modifier = Modifier.fillMaxWidth()) {
-                    PpChartBar(items = state.monthlyActivity)
+                    PpActivityBars(
+                        labels = state.monthlyActivity.map { it.label },
+                        values = state.monthlyActivity.map { it.count }
+                    )
                 }
             }
 
@@ -176,22 +205,23 @@ fun PerformanceScreen(
                         title = stringResource(R.string.match_center_singles),
                         matches = state.singlesMatches,
                         winRatePercent = state.singlesWinRatePercent,
+                        progressBrush = PpCourtSweep,
                         modifier = Modifier.weight(1f)
                     )
                     FormatSplitCard(
                         title = stringResource(R.string.match_center_doubles),
                         matches = state.doublesMatches,
                         winRatePercent = state.doublesWinRatePercent,
+                        progressBrush = PpBallTrail,
                         modifier = Modifier.weight(1f)
                     )
                 }
             }
 
             item {
-                PpSectionHeader(
+                SectionHeaderWithCaption(
                     title = stringResource(R.string.performance_section_recent_form),
-                    actionText = stringResource(R.string.performance_last_5_matches),
-                    onActionClick = null
+                    caption = stringResource(R.string.performance_last_5_matches)
                 )
                 Spacer(Modifier.height(PpSpacing.sm))
                 PpCard(modifier = Modifier.fillMaxWidth()) {
@@ -199,32 +229,10 @@ fun PerformanceScreen(
                         Text(
                             text = stringResource(R.string.dash_placeholder),
                             style = PpTextStyles.Body,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = PpTextMid
                         )
                     } else {
-                        Row(horizontalArrangement = Arrangement.spacedBy(PpSpacing.sm)) {
-                            state.recentForm.forEach { won ->
-                                Box(
-                                    modifier = Modifier
-                                        .size(36.dp)
-                                        .clip(CircleShape)
-                                        .background(if (won) PpPrimaryTint else MaterialTheme.colorScheme.surface)
-                                        .border(
-                                            1.dp,
-                                            if (won) PpPrimary else PpOutline,
-                                            CircleShape
-                                        ),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = if (won) stringResource(R.string.performance_form_w)
-                                        else stringResource(R.string.performance_form_l),
-                                        style = PpTextStyles.Micro,
-                                        color = if (won) PpPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                        }
+                        PpFormChips(results = state.recentForm)
                     }
                 }
             }
@@ -237,7 +245,7 @@ fun PerformanceScreen(
                     Text(
                         text = stringResource(R.string.performance_view_history),
                         style = PpTextStyles.Micro,
-                        color = PpPrimary,
+                        color = PpGlassCyan,
                         modifier = Modifier
                             .clip(PpRadius.pill)
                             .clickable(onClick = onOpenMatchHistory)
@@ -251,10 +259,40 @@ fun PerformanceScreen(
 }
 
 @Composable
+private fun SectionHeaderWithCaption(
+    title: String,
+    caption: String
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = PpSpacing.sm),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Canvas(Modifier.size(6.dp)) { drawCircle(PpLime) }
+            Spacer(Modifier.size(PpSpacing.sm))
+            Text(
+                text = title.uppercase(),
+                style = PpTextStyles.Micro,
+                color = PpTextMid
+            )
+        }
+        Text(
+            text = caption.uppercase(),
+            style = PpTextStyles.Overline,
+            color = PpTextLow
+        )
+    }
+}
+
+@Composable
 private fun FormatSplitCard(
     title: String,
     matches: Int,
     winRatePercent: Int?,
+    progressBrush: Brush,
     modifier: Modifier = Modifier
 ) {
     val rateStr = winRatePercent?.let { "$it%" } ?: stringResource(R.string.dash_placeholder)
@@ -262,17 +300,18 @@ private fun FormatSplitCard(
         Text(
             text = title.uppercase(),
             style = PpTextStyles.Micro,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = PpTextMid
         )
         Spacer(Modifier.height(PpSpacing.xs))
         Text(
             text = pluralStringResource(R.plurals.performance_format_meta_format, matches, matches, rateStr),
-            style = PpTextStyles.Label,
-            color = MaterialTheme.colorScheme.onBackground
+            style = PpTextStyles.Label.copy(fontFeatureSettings = "tnum"),
+            color = PpTextHigh
         )
         Spacer(Modifier.height(PpSpacing.md))
         PpProgressBar(
             progress = (winRatePercent ?: 0) / 100f,
+            brush = progressBrush,
             modifier = Modifier.fillMaxWidth()
         )
     }

@@ -14,32 +14,37 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.padelpro.app.R
-import com.padelpro.app.core.designsystem.theme.PpError
+import com.padelpro.app.core.designsystem.theme.PpCourtGlass
+import com.padelpro.app.core.designsystem.theme.PpCourtLine
+import com.padelpro.app.core.designsystem.theme.PpCourtNight
+import com.padelpro.app.core.designsystem.theme.PpCourtPanel
+import com.padelpro.app.core.designsystem.theme.PpDanger
 import com.padelpro.app.core.designsystem.theme.PpErrorTint
-import com.padelpro.app.core.designsystem.theme.PpOutline
-import com.padelpro.app.core.designsystem.theme.PpPrimary
-import com.padelpro.app.core.designsystem.theme.PpPrimaryTint
+import com.padelpro.app.core.designsystem.theme.PpGlassCyan
+import com.padelpro.app.core.designsystem.theme.PpLime
 import com.padelpro.app.core.designsystem.theme.PpRadius
 import com.padelpro.app.core.designsystem.theme.PpSpacing
+import com.padelpro.app.core.designsystem.theme.PpTextHigh
+import com.padelpro.app.core.designsystem.theme.PpTextMid
 import com.padelpro.app.core.designsystem.theme.PpTextStyles
 import com.padelpro.app.domain.model.Player
 
@@ -51,9 +56,9 @@ fun FriendInUseErrorBanner(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(PpRadius.input))
+            .clip(PpRadius.inputShape)
             .background(PpErrorTint)
-            .border(1.dp, PpError.copy(alpha = 0.6f), RoundedCornerShape(PpRadius.input))
+            .border(1.dp, PpDanger.copy(alpha = 0.65f), PpRadius.inputShape)
             .clickable(onClick = onDismiss)
             .padding(PpSpacing.md)
             .testTag("friend_in_use_error_banner")
@@ -61,7 +66,7 @@ fun FriendInUseErrorBanner(
         Text(
             text = stringResource(R.string.match_setup_friend_in_use),
             style = PpTextStyles.Label,
-            color = PpError
+            color = PpDanger
         )
     }
 }
@@ -76,25 +81,27 @@ fun PlayerManagementRow(
     onEdit: (() -> Unit)? = null,
     onDelete: (() -> Unit)? = null
 ) {
-    val shape = RoundedCornerShape(PpRadius.input)
-    val baseModifier = modifier
+    val rowModifier = modifier
         .fillMaxWidth()
         .heightIn(min = 56.dp)
-        .clip(shape)
-        .background(if (isHighlighted) PpPrimaryTint else MaterialTheme.colorScheme.surface)
-        .border(
-            width = 1.dp,
-            color = if (isHighlighted) PpPrimary else PpOutline,
-            shape = shape
+        .glassPanel(
+            radius = PpRadius.input,
+            fill = if (isHighlighted) {
+                Brush.horizontalGradient(listOf(Color(0x265FE3FF), PpCourtPanel))
+            } else {
+                Brush.verticalGradient(listOf(PpCourtGlass.copy(alpha = 0.7f), PpCourtNight))
+            },
+            edge = if (isHighlighted) {
+                Brush.linearGradient(listOf(PpGlassCyan, PpLime))
+            } else {
+                Brush.linearGradient(listOf(PpCourtLine, PpCourtLine))
+            }
         )
-    val interactiveModifier = if (onSelect != null) {
-        baseModifier.clickable(onClick = onSelect)
-    } else {
-        baseModifier
-    }
+        .then(if (isHighlighted) Modifier.accentRail(PpGlassCyan) else Modifier)
+        .then(if (onSelect != null) Modifier.clickable(onClick = onSelect) else Modifier)
 
     Row(
-        modifier = interactiveModifier.padding(horizontal = PpSpacing.md, vertical = PpSpacing.sm),
+        modifier = rowModifier.padding(horizontal = PpSpacing.md, vertical = PpSpacing.sm),
         verticalAlignment = Alignment.CenterVertically
     ) {
         PpAvatar(avatarId = player.avatarId, size = 38.dp, highlighted = isHighlighted)
@@ -104,7 +111,7 @@ fun PlayerManagementRow(
                 Text(
                     text = player.displayName,
                     style = PpTextStyles.Body,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = PpTextHigh,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f, fill = false)
@@ -114,13 +121,14 @@ fun PlayerManagementRow(
                     Box(
                         modifier = Modifier
                             .clip(PpRadius.pill)
-                            .background(PpPrimaryTint)
+                            .background(PpLime.copy(alpha = 0.16f))
+                            .border(1.dp, PpLime.copy(alpha = 0.5f), PpRadius.pill)
                             .padding(horizontal = PpSpacing.sm, vertical = 2.dp)
                     ) {
                         Text(
                             text = stringResource(R.string.label_you),
-                            style = PpTextStyles.Micro,
-                            color = PpPrimary
+                            style = PpTextStyles.Overline,
+                            color = PpLime
                         )
                     }
                 }
@@ -129,7 +137,7 @@ fun PlayerManagementRow(
                 Text(
                     text = subtitle,
                     style = PpTextStyles.Label,
-                    color = PpPrimary
+                    color = PpGlassCyan
                 )
             }
         }
@@ -144,7 +152,7 @@ fun PlayerManagementRow(
                 Icon(
                     imageVector = Icons.Rounded.Edit,
                     contentDescription = stringResource(R.string.action_edit),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = PpTextMid,
                     modifier = Modifier.size(18.dp)
                 )
             }
@@ -160,7 +168,7 @@ fun PlayerManagementRow(
                 Icon(
                     imageVector = Icons.Rounded.DeleteOutline,
                     contentDescription = stringResource(R.string.action_delete),
-                    tint = MaterialTheme.colorScheme.error,
+                    tint = PpDanger,
                     modifier = Modifier.size(18.dp)
                 )
             }
@@ -187,12 +195,12 @@ fun FriendFormFields(
         Text(
             text = stringResource(R.string.onboarding_name_label),
             style = PpTextStyles.Micro,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = PpTextMid
         )
         Text(
             text = stringResource(R.string.onboarding_name_counter, name.length),
-            style = PpTextStyles.Label,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            style = PpTextStyles.Label.copy(fontFeatureSettings = "tnum"),
+            color = PpTextMid
         )
     }
     Spacer(Modifier.height(PpSpacing.xs))
@@ -208,7 +216,7 @@ fun FriendFormFields(
     Text(
         text = stringResource(R.string.onboarding_avatar_label),
         style = PpTextStyles.Micro,
-        color = MaterialTheme.colorScheme.onSurfaceVariant
+        color = PpTextMid
     )
     Spacer(Modifier.height(PpSpacing.sm))
     PpAvatarPickerGrid(

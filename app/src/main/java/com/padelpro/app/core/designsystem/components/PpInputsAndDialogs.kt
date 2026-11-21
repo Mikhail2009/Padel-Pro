@@ -1,23 +1,18 @@
 package com.padelpro.app.core.designsystem.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,17 +23,25 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.padelpro.app.R
+import com.padelpro.app.core.designsystem.theme.PpCourtGlass
+import com.padelpro.app.core.designsystem.theme.PpCourtLineStrong
+import com.padelpro.app.core.designsystem.theme.PpCourtNight
+import com.padelpro.app.core.designsystem.theme.PpCourtPanel
+import com.padelpro.app.core.designsystem.theme.PpDanger
+import com.padelpro.app.core.designsystem.theme.PpGlassCyan
+import com.padelpro.app.core.designsystem.theme.PpLime
 import com.padelpro.app.core.designsystem.theme.PpRadius
+import com.padelpro.app.core.designsystem.theme.PpScrimColor
 import com.padelpro.app.core.designsystem.theme.PpSpacing
+import com.padelpro.app.core.designsystem.theme.PpTextHigh
+import com.padelpro.app.core.designsystem.theme.PpTextLow
+import com.padelpro.app.core.designsystem.theme.PpTextMid
 import com.padelpro.app.core.designsystem.theme.PpTextStyles
 
 @Composable
@@ -64,7 +67,7 @@ fun PpTextField(
             Text(
                 text = placeholder,
                 style = PpTextStyles.Body,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = PpTextLow
             )
         },
         leadingIcon = if (leadingIcon != null) {
@@ -72,84 +75,27 @@ fun PpTextField(
                 Icon(
                     imageVector = leadingIcon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = PpGlassCyan,
                     modifier = Modifier.size(20.dp)
                 )
             }
         } else null,
         singleLine = singleLine,
-        textStyle = PpTextStyles.Body.copy(color = MaterialTheme.colorScheme.onBackground),
-        shape = RoundedCornerShape(PpRadius.input),
+        textStyle = PpTextStyles.Body.copy(color = PpTextHigh),
+        shape = PpRadius.inputShape,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedContainerColor = MaterialTheme.colorScheme.surface,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-            focusedBorderColor = MaterialTheme.colorScheme.primary,
-            unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-            cursorColor = MaterialTheme.colorScheme.primary
+            focusedContainerColor = PpCourtPanel,
+            unfocusedContainerColor = PpCourtNight,
+            focusedBorderColor = PpGlassCyan,
+            unfocusedBorderColor = PpCourtLineStrong,
+            cursorColor = PpLime,
+            focusedTextColor = PpTextHigh,
+            unfocusedTextColor = PpTextHigh
         ),
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
         modifier = modifier.fillMaxWidth()
     )
-}
-
-@Composable
-fun PpEmptyState(
-    icon: ImageVector,
-    title: String,
-    subtitle: String,
-    modifier: Modifier = Modifier,
-    ctaText: String? = null,
-    onCtaClick: (() -> Unit)? = null,
-    ctaEnabled: Boolean = true
-) {
-    PpCard(modifier = modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = PpSpacing.lg),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surface)
-                    .border(1.dp, MaterialTheme.colorScheme.outline, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(26.dp)
-                )
-            }
-            Spacer(Modifier.height(PpSpacing.md))
-            Text(
-                text = title,
-                style = PpTextStyles.Title,
-                color = MaterialTheme.colorScheme.onBackground,
-                textAlign = TextAlign.Center
-            )
-            Spacer(Modifier.height(PpSpacing.xs))
-            Text(
-                text = subtitle,
-                style = PpTextStyles.Label,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-            )
-            if (ctaText != null && onCtaClick != null) {
-                Spacer(Modifier.height(PpSpacing.lg))
-                PpPrimaryButton(
-                    text = ctaText,
-                    onClick = onCtaClick,
-                    enabled = ctaEnabled,
-                    fullWidth = false
-                )
-            }
-        }
-    }
 }
 
 @Composable
@@ -163,20 +109,21 @@ fun PpConfirmDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(PpRadius.card),
+        containerColor = PpCourtGlass,
+        shape = PpRadius.cardShape,
+        modifier = Modifier.border(1.dp, PpCourtLineStrong, PpRadius.cardShape),
         title = {
             Text(
                 text = title,
                 style = PpTextStyles.H2,
-                color = MaterialTheme.colorScheme.onBackground
+                color = PpTextHigh
             )
         },
         text = {
             Text(
                 text = body,
                 style = PpTextStyles.Body,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = PpTextMid
             )
         },
         confirmButton = {
@@ -184,7 +131,7 @@ fun PpConfirmDialog(
                 Text(
                     text = confirmText.uppercase(),
                     style = PpTextStyles.Label.copy(fontWeight = FontWeight.Bold),
-                    color = if (isDestructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                    color = if (isDestructive) PpDanger else PpLime
                 )
             }
         },
@@ -193,7 +140,7 @@ fun PpConfirmDialog(
                 Text(
                     text = stringResource(R.string.action_cancel),
                     style = PpTextStyles.Label,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = PpTextMid
                 )
             }
         }
@@ -211,20 +158,24 @@ fun PpBottomSheet(
     ModalBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
-        containerColor = MaterialTheme.colorScheme.surface,
-        contentColor = MaterialTheme.colorScheme.onBackground,
-        shape = RoundedCornerShape(topStart = PpRadius.sheetTop, topEnd = PpRadius.sheetTop)
+        containerColor = PpCourtGlass,
+        contentColor = PpTextHigh,
+        scrimColor = PpScrimColor,
+        shape = RoundedCornerShape(topStart = PpRadius.sheet, topEnd = PpRadius.sheet),
+        dragHandle = {
+            BottomSheetDefaults.DragHandle(color = PpCourtLineStrong)
+        }
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = PpSpacing.lg)
-                .padding(bottom = PpSpacing.xxxl)
+                .padding(bottom = PpSpacing.xxl)
         ) {
             Text(
                 text = title,
                 style = PpTextStyles.H2,
-                color = MaterialTheme.colorScheme.onBackground
+                color = PpTextHigh
             )
             Spacer(Modifier.height(PpSpacing.lg))
             content()

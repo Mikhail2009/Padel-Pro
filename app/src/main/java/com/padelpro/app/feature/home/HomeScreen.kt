@@ -24,13 +24,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.School
 import androidx.compose.material.icons.rounded.SportsTennis
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -48,11 +50,20 @@ import com.padelpro.app.core.designsystem.components.PpSectionHeader
 import com.padelpro.app.core.designsystem.components.PpStatCard
 import com.padelpro.app.core.designsystem.components.PpStreakFlame
 import com.padelpro.app.core.designsystem.components.PpXpIndicator
+import com.padelpro.app.core.designsystem.components.accentRail
+import com.padelpro.app.core.designsystem.components.glassPanel
 import com.padelpro.app.core.designsystem.components.levelTitleRes
-import com.padelpro.app.core.designsystem.theme.PpPrimary
-import com.padelpro.app.core.designsystem.theme.PpPrimaryTint
+import com.padelpro.app.core.designsystem.theme.PpAmberLed
+import com.padelpro.app.core.designsystem.theme.PpBallTrail
+import com.padelpro.app.core.designsystem.theme.PpCourtGlass
+import com.padelpro.app.core.designsystem.theme.PpCourtPanel
+import com.padelpro.app.core.designsystem.theme.PpGlassCyan
+import com.padelpro.app.core.designsystem.theme.PpLime
+import com.padelpro.app.core.designsystem.theme.PpOnAccent
 import com.padelpro.app.core.designsystem.theme.PpRadius
 import com.padelpro.app.core.designsystem.theme.PpSpacing
+import com.padelpro.app.core.designsystem.theme.PpTextHigh
+import com.padelpro.app.core.designsystem.theme.PpTextMid
 import com.padelpro.app.core.designsystem.theme.PpTextStyles
 import com.padelpro.app.domain.model.MatchFormat
 
@@ -98,13 +109,13 @@ fun HomeScreen(
                         Text(
                             text = greetingText,
                             style = PpTextStyles.Micro,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = PpGlassCyan
                         )
                         Spacer(Modifier.height(PpSpacing.xs))
                         Text(
                             text = state.displayName.ifBlank { stringResource(R.string.profile_default_player_name) },
                             style = PpTextStyles.H1,
-                            color = MaterialTheme.colorScheme.onBackground,
+                            color = PpTextHigh,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -112,7 +123,8 @@ fun HomeScreen(
                     Spacer(Modifier.width(PpSpacing.md))
                     PpAvatar(
                         avatarId = state.avatarId,
-                        size = 48.dp,
+                        size = 52.dp,
+                        highlighted = true,
                         onClick = onOpenProfile,
                         modifier = Modifier.testTag("home_profile_avatar")
                     )
@@ -122,7 +134,7 @@ fun HomeScreen(
             if (state.activeMatch != null) {
                 item {
                     PpCard(
-                        borderColor = PpPrimary.copy(alpha = 0.7f),
+                        accent = PpAmberLed,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Row(
@@ -134,7 +146,7 @@ fun HomeScreen(
                                 Text(
                                     text = stringResource(R.string.home_resume_match_title),
                                     style = PpTextStyles.Micro,
-                                    color = PpPrimary
+                                    color = PpAmberLed
                                 )
                                 Spacer(Modifier.height(PpSpacing.xs))
                                 val activeFormatText = when (state.activeMatch?.format) {
@@ -145,13 +157,13 @@ fun HomeScreen(
                                 Text(
                                     text = activeFormatText,
                                     style = PpTextStyles.Title,
-                                    color = MaterialTheme.colorScheme.onBackground
+                                    color = PpTextHigh
                                 )
                             }
+                            Spacer(Modifier.width(PpSpacing.md))
                             PpPrimaryButton(
                                 text = stringResource(R.string.home_resume_cta),
-                                onClick = onResumeMatch,
-                                fullWidth = false
+                                onClick = onResumeMatch
                             )
                         }
                     }
@@ -188,7 +200,8 @@ fun HomeScreen(
                         title = stringResource(R.string.home_action_start_match),
                         subtitle = stringResource(R.string.home_action_start_match_sub),
                         icon = Icons.Rounded.SportsTennis,
-                        accent = true,
+                        accentColor = PpLime,
+                        highlighted = true,
                         onClick = onStartMatch,
                         modifier = Modifier
                             .weight(1f)
@@ -198,7 +211,8 @@ fun HomeScreen(
                         title = stringResource(R.string.home_action_continue_learning),
                         subtitle = learningSub,
                         icon = Icons.Rounded.School,
-                        accent = false,
+                        accentColor = PpGlassCyan,
+                        highlighted = false,
                         onClick = { onContinueLearning(state.nextUnlockedLessonId) },
                         modifier = Modifier
                             .weight(1f)
@@ -209,31 +223,29 @@ fun HomeScreen(
 
             item {
                 PpSectionHeader(title = stringResource(R.string.home_section_academy_progress))
-                Spacer(Modifier.height(PpSpacing.sm))
-                PpCard(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { onContinueLearning(state.nextUnlockedLessonId) }
+                Spacer(Modifier.height(PpSpacing.xs))
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .glassPanel(radius = PpRadius.card)
+                        .clickable { onContinueLearning(state.nextUnlockedLessonId) }
+                        .padding(PpSpacing.lg)
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = pluralStringResource(
-                                R.plurals.home_academy_progress_format,
-                                state.totalLessons,
-                                state.academyPercent,
-                                state.completedLessons,
-                                state.totalLessons
-                            ),
-                            style = PpTextStyles.Title,
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
-                    }
+                    Text(
+                        text = pluralStringResource(
+                            R.plurals.home_academy_progress_format,
+                            state.totalLessons,
+                            state.academyPercent,
+                            state.completedLessons,
+                            state.totalLessons
+                        ),
+                        style = PpTextStyles.Title.copy(fontFeatureSettings = "tnum"),
+                        color = PpTextHigh
+                    )
                     Spacer(Modifier.height(PpSpacing.md))
                     PpProgressBar(
                         progress = if (state.totalLessons == 0) 0f else state.completedLessons.toFloat() / state.totalLessons.toFloat(),
+                        brush = PpBallTrail,
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
@@ -241,7 +253,7 @@ fun HomeScreen(
 
             item {
                 PpSectionHeader(title = stringResource(R.string.home_section_recent_match))
-                Spacer(Modifier.height(PpSpacing.sm))
+                Spacer(Modifier.height(PpSpacing.xs))
                 val recent = state.recentMatch
                 if (recent != null) {
                     PpMatchCard(
@@ -260,7 +272,7 @@ fun HomeScreen(
 
             item {
                 PpSectionHeader(title = stringResource(R.string.home_section_performance))
-                Spacer(Modifier.height(PpSpacing.sm))
+                Spacer(Modifier.height(PpSpacing.xs))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(PpSpacing.md)
@@ -268,15 +280,20 @@ fun HomeScreen(
                     PpStatCard(
                         value = state.totalMatches.toString(),
                         label = stringResource(R.string.home_stat_matches_label),
-                        onClick = onOpenPerformance,
-                        modifier = Modifier.weight(1f)
+                        accent = PpGlassCyan,
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(16.dp))
+                            .clickable(onClick = onOpenPerformance)
                     )
                     PpStatCard(
                         value = state.winRatePercent?.let { "$it%" } ?: stringResource(R.string.dash_placeholder),
                         label = stringResource(R.string.home_stat_win_rate_label),
-                        accentValue = state.winRatePercent != null,
-                        onClick = onOpenPerformance,
-                        modifier = Modifier.weight(1f)
+                        accent = if (state.winRatePercent != null) PpLime else PpTextMid,
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(16.dp))
+                            .clickable(onClick = onOpenPerformance)
                     )
                     val streakValue = when (state.isCurrentStreakWin) {
                         true -> stringResource(R.string.streak_win_short_format, state.currentStreakCount)
@@ -286,8 +303,11 @@ fun HomeScreen(
                     PpStatCard(
                         value = streakValue,
                         label = stringResource(R.string.home_stat_streak_label),
-                        onClick = onOpenPerformance,
-                        modifier = Modifier.weight(1f)
+                        accent = PpAmberLed,
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(16.dp))
+                            .clickable(onClick = onOpenPerformance)
                     )
                 }
             }
@@ -299,36 +319,38 @@ fun HomeScreen(
 private fun QuickActionCard(
     title: String,
     subtitle: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    accent: Boolean,
+    icon: ImageVector,
+    accentColor: Color,
+    highlighted: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val shape = RoundedCornerShape(PpRadius.card)
     Column(
         modifier = modifier
-            .clip(shape)
-            .background(if (accent) PpPrimaryTint else MaterialTheme.colorScheme.surfaceVariant)
-            .border(
-                width = 1.dp,
-                color = if (accent) PpPrimary.copy(alpha = 0.55f) else MaterialTheme.colorScheme.outline,
-                shape = shape
+            .glassPanel(
+                radius = PpRadius.card,
+                fill = if (highlighted) {
+                    Brush.verticalGradient(listOf(Color(0x2BC8F751), PpCourtPanel))
+                } else {
+                    Brush.verticalGradient(listOf(PpCourtGlass, PpCourtPanel))
+                }
             )
+            .accentRail(accentColor)
             .clickable(onClick = onClick)
             .padding(PpSpacing.lg)
     ) {
         Box(
             modifier = Modifier
-                .size(40.dp)
+                .size(42.dp)
                 .clip(CircleShape)
-                .background(if (accent) PpPrimary else MaterialTheme.colorScheme.surface)
-                .border(1.dp, if (accent) PpPrimary else MaterialTheme.colorScheme.outline, CircleShape),
+                .background(if (highlighted) PpLime else accentColor.copy(alpha = 0.16f))
+                .border(1.dp, accentColor.copy(alpha = 0.7f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = if (accent) MaterialTheme.colorScheme.onPrimary else PpPrimary,
+                tint = if (highlighted) PpOnAccent else accentColor,
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -336,13 +358,13 @@ private fun QuickActionCard(
         Text(
             text = title,
             style = PpTextStyles.Micro,
-            color = if (accent) PpPrimary else MaterialTheme.colorScheme.onBackground
+            color = accentColor
         )
         Spacer(Modifier.height(PpSpacing.xs))
         Text(
             text = subtitle,
             style = PpTextStyles.Label,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            color = PpTextMid,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )

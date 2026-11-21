@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -30,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -44,9 +44,13 @@ import com.padelpro.app.core.designsystem.components.PpLessonRow
 import com.padelpro.app.core.designsystem.components.PpPrimaryButton
 import com.padelpro.app.core.designsystem.components.PpProgressBar
 import com.padelpro.app.core.designsystem.components.PpSectionHeader
-import com.padelpro.app.core.designsystem.theme.PpBackground
-import com.padelpro.app.core.designsystem.theme.PpPrimary
+import com.padelpro.app.core.designsystem.theme.PpBallTrail
+import com.padelpro.app.core.designsystem.theme.PpGlassCyan
+import com.padelpro.app.core.designsystem.theme.PpLime
+import com.padelpro.app.core.designsystem.theme.PpScrimVertical
 import com.padelpro.app.core.designsystem.theme.PpSpacing
+import com.padelpro.app.core.designsystem.theme.PpTextHigh
+import com.padelpro.app.core.designsystem.theme.PpTextMid
 import com.padelpro.app.core.designsystem.theme.PpTextStyles
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -75,7 +79,7 @@ fun CourseDetailScreen(
     val progressPercent = ((course?.progressFraction ?: 0f) * 100f).roundToInt()
 
     Scaffold(
-        containerColor = PpBackground,
+        containerColor = Color.Transparent,
         contentWindowInsets = WindowInsets.safeDrawing,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         bottomBar = {
@@ -84,7 +88,7 @@ fun CourseDetailScreen(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(PpBackground)
+                    .background(PpScrimVertical)
                     .navigationBarsPadding()
                     .padding(horizontal = PpSpacing.lg, vertical = PpSpacing.md),
                 contentAlignment = Alignment.Center
@@ -98,6 +102,7 @@ fun CourseDetailScreen(
                     onClick = { nextLessonId?.let(onOpenLesson) },
                     enabled = nextLessonId != null && course?.isUnlocked == true,
                     modifier = Modifier
+                        .fillMaxWidth()
                         .widthIn(max = 600.dp)
                         .testTag("course_detail_continue_button")
                 )
@@ -127,7 +132,10 @@ fun CourseDetailScreen(
                 }
 
                 item {
-                    PpCard(modifier = Modifier.fillMaxWidth()) {
+                    PpCard(
+                        accent = PpGlassCyan,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
                         PpCourtGraphic(
                             diagramId = when (order) {
                                 2 -> "court_overview"
@@ -138,7 +146,7 @@ fun CourseDetailScreen(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(120.dp)
+                                .height(128.dp)
                         )
                     }
                 }
@@ -147,13 +155,13 @@ fun CourseDetailScreen(
                     Text(
                         text = course?.title?.ifBlank { courseTitle(order) } ?: courseTitle(order),
                         style = PpTextStyles.H1,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = PpTextHigh
                     )
                     Spacer(Modifier.height(PpSpacing.xs))
                     Text(
                         text = course?.description?.ifBlank { courseDescription(order) } ?: courseDescription(order),
                         style = PpTextStyles.Body,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = PpTextMid
                     )
                     Spacer(Modifier.height(PpSpacing.md))
                     Row(horizontalArrangement = Arrangement.spacedBy(PpSpacing.sm)) {
@@ -183,8 +191,8 @@ fun CourseDetailScreen(
                         ) {
                             Text(
                                 text = stringResource(R.string.course_progress_complete_format, progressPercent),
-                                style = PpTextStyles.Micro,
-                                color = PpPrimary
+                                style = PpTextStyles.Micro.copy(fontFeatureSettings = "tnum"),
+                                color = PpLime
                             )
                             Text(
                                 text = pluralStringResource(
@@ -193,13 +201,14 @@ fun CourseDetailScreen(
                                     completedCount,
                                     lessonCount
                                 ),
-                                style = PpTextStyles.Label,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                style = PpTextStyles.Label.copy(fontFeatureSettings = "tnum"),
+                                color = PpTextMid
                             )
                         }
                         Spacer(Modifier.height(PpSpacing.sm))
                         PpProgressBar(
                             progress = course?.progressFraction ?: 0f,
+                            brush = PpBallTrail,
                             modifier = Modifier.fillMaxWidth()
                         )
                     }

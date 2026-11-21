@@ -1,7 +1,6 @@
 package com.padelpro.app.feature.academy
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,21 +16,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.EmojiEvents
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -40,13 +36,18 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.padelpro.app.R
 import com.padelpro.app.core.designsystem.components.PpCard
 import com.padelpro.app.core.designsystem.components.PpPrimaryButton
+import com.padelpro.app.core.designsystem.components.PpScrollColumn
 import com.padelpro.app.core.designsystem.components.PpSecondaryButton
 import com.padelpro.app.core.designsystem.components.PpStatCard
-import com.padelpro.app.core.designsystem.theme.PpBackground
-import com.padelpro.app.core.designsystem.theme.PpPrimary
-import com.padelpro.app.core.designsystem.theme.PpPrimaryTint
+import com.padelpro.app.core.designsystem.theme.PpAmberLed
+import com.padelpro.app.core.designsystem.theme.PpGlassCyan
+import com.padelpro.app.core.designsystem.theme.PpLime
 import com.padelpro.app.core.designsystem.theme.PpSpacing
+import com.padelpro.app.core.designsystem.theme.PpTextHigh
+import com.padelpro.app.core.designsystem.theme.PpTextMid
 import com.padelpro.app.core.designsystem.theme.PpTextStyles
+import com.padelpro.app.core.designsystem.theme.PpTrophyMagenta
+import com.padelpro.app.core.designsystem.theme.PpTrophySweep
 
 @Composable
 fun CompletionScreen(
@@ -65,50 +66,54 @@ fun CompletionScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(PpBackground)
             .windowInsetsPadding(WindowInsets.safeDrawing),
         contentAlignment = Alignment.TopCenter
     ) {
-        Column(
+        PpScrollColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .widthIn(max = 600.dp)
-                .verticalScroll(rememberScrollState())
-                .padding(PpSpacing.lg),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
         ) {
             Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(PpSpacing.lg),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.padding(top = PpSpacing.xl)
+                verticalArrangement = Arrangement.spacedBy(PpSpacing.md)
             ) {
+                Spacer(Modifier.height(PpSpacing.md))
+
+                // Trophy medal with PpTrophySweep
                 Box(
-                    modifier = Modifier
-                        .size(88.dp)
-                        .clip(CircleShape)
-                        .background(
-                            Brush.radialGradient(
-                                listOf(PpPrimaryTint, PpBackground)
-                            )
-                        )
-                        .border(1.dp, PpPrimary.copy(alpha = 0.5f), CircleShape),
+                    modifier = Modifier.size(96.dp),
                     contentAlignment = Alignment.Center
                 ) {
+                    Canvas(Modifier.size(96.dp)) {
+                        drawCircle(
+                            Brush.radialGradient(
+                                listOf(Color(0x4DFF3D8F), Color(0x26FFB43D), Color.Transparent)
+                            )
+                        )
+                        drawCircle(
+                            brush = PpTrophySweep,
+                            radius = size.minDimension / 2f - 4.dp.toPx(),
+                            style = Stroke(width = 2.5.dp.toPx())
+                        )
+                    }
                     Icon(
                         imageVector = Icons.Rounded.EmojiEvents,
                         contentDescription = null,
-                        tint = PpPrimary,
-                        modifier = Modifier.size(36.dp)
+                        tint = PpAmberLed,
+                        modifier = Modifier.size(40.dp)
                     )
                 }
-                Spacer(Modifier.height(PpSpacing.lg))
+
                 Text(
                     text = stringResource(R.string.completion_title),
                     style = PpTextStyles.H1,
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = PpTextHigh,
                     textAlign = TextAlign.Center
                 )
-                Spacer(Modifier.height(PpSpacing.xs))
                 val subtitleText = when {
                     outcome == null -> stringResource(R.string.completion_empty_subtitle)
                     outcome.xpCourseBonus > 0 && outcome.nextLessonId == null ->
@@ -121,20 +126,23 @@ fun CompletionScreen(
                 Text(
                     text = subtitleText,
                     style = PpTextStyles.Body,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = PpTextMid,
                     textAlign = TextAlign.Center
                 )
-                Spacer(Modifier.height(PpSpacing.xl))
 
+                Spacer(Modifier.height(PpSpacing.sm))
                 Text(
                     text = stringResource(R.string.completion_xp_gained_format, outcome?.totalXpGained ?: 0),
                     style = PpTextStyles.DisplayNum,
-                    color = PpPrimary,
+                    color = PpAmberLed,
                     modifier = Modifier.testTag("completion_xp_value")
                 )
-                Spacer(Modifier.height(PpSpacing.lg))
+                Spacer(Modifier.height(PpSpacing.sm))
 
-                PpCard(modifier = Modifier.fillMaxWidth()) {
+                PpCard(
+                    accent = PpAmberLed,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Column(verticalArrangement = Arrangement.spacedBy(PpSpacing.xs)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -145,8 +153,8 @@ fun CompletionScreen(
                                     R.string.completion_breakdown_lesson_format,
                                     outcome?.xpLesson ?: 0
                                 ),
-                                style = PpTextStyles.Label,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                style = PpTextStyles.Label.copy(fontFeatureSettings = "tnum"),
+                                color = PpTextMid
                             )
                             Text(
                                 text = stringResource(
@@ -155,8 +163,8 @@ fun CompletionScreen(
                                     outcome?.totalQuestions ?: 0,
                                     outcome?.xpQuiz ?: 0
                                 ),
-                                style = PpTextStyles.Label,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                style = PpTextStyles.Label.copy(fontFeatureSettings = "tnum"),
+                                color = PpTextMid
                             )
                         }
                         if ((outcome?.xpCourseBonus ?: 0) > 0) {
@@ -165,20 +173,19 @@ fun CompletionScreen(
                                     R.string.completion_breakdown_course_bonus_format,
                                     outcome?.xpCourseBonus ?: 0
                                 ),
-                                style = PpTextStyles.Label,
-                                color = PpPrimary
+                                style = PpTextStyles.Label.copy(fontFeatureSettings = "tnum"),
+                                color = PpAmberLed
                             )
                         }
                         if (outcome?.isReviewRepeat == true && outcome.totalXpGained == 0) {
                             Text(
                                 text = stringResource(R.string.completion_review_badge),
                                 style = PpTextStyles.Label,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = PpTextMid
                             )
                         }
                     }
                 }
-                Spacer(Modifier.height(PpSpacing.md))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -187,7 +194,7 @@ fun CompletionScreen(
                     PpStatCard(
                         value = outcome?.let { "${it.scorePercent}%" } ?: stringResource(R.string.dash_placeholder),
                         label = stringResource(R.string.completion_stat_quiz_score),
-                        accentValue = (outcome?.scorePercent ?: 0) == 100,
+                        accent = if ((outcome?.scorePercent ?: 0) == 100) PpLime else PpGlassCyan,
                         modifier = Modifier.weight(1f)
                     )
                     PpStatCard(
@@ -197,37 +204,43 @@ fun CompletionScreen(
                             outcome?.courseTotalLessons ?: 4
                         ),
                         label = stringResource(R.string.completion_stat_course_lessons),
+                        accent = PpGlassCyan,
                         modifier = Modifier.weight(1f)
                     )
                 }
 
                 if (outcome?.newlyUnlockedAchievements?.isNotEmpty() == true) {
-                    Spacer(Modifier.height(PpSpacing.md))
                     Column(verticalArrangement = Arrangement.spacedBy(PpSpacing.sm)) {
                         outcome.newlyUnlockedAchievements.forEach { achievement ->
                             PpCard(
+                                accent = PpTrophyMagenta,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .testTag("completion_achievement_${achievement.id}"),
-                                borderColor = PpPrimary.copy(alpha = 0.7f),
-                                containerColor = PpPrimaryTint.copy(alpha = 0.35f)
+                                    .testTag("completion_achievement_${achievement.id}")
                             ) {
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Box(
-                                        modifier = Modifier
-                                            .size(40.dp)
-                                            .clip(CircleShape)
-                                            .background(PpPrimaryTint)
-                                            .border(1.dp, PpPrimary, CircleShape),
+                                        modifier = Modifier.size(44.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
+                                        Canvas(Modifier.size(44.dp)) {
+                                            drawCircle(
+                                                Brush.radialGradient(
+                                                    listOf(Color(0x4DFF3D8F), Color(0x1AFFB43D), Color.Transparent)
+                                                )
+                                            )
+                                            drawCircle(
+                                                brush = PpTrophySweep,
+                                                style = Stroke(width = 2.dp.toPx())
+                                            )
+                                        }
                                         Icon(
                                             imageVector = Icons.Rounded.EmojiEvents,
                                             contentDescription = null,
-                                            tint = PpPrimary,
+                                            tint = PpAmberLed,
                                             modifier = Modifier.size(20.dp)
                                         )
                                     }
@@ -236,18 +249,18 @@ fun CompletionScreen(
                                         Text(
                                             text = stringResource(R.string.completion_achievement_label),
                                             style = PpTextStyles.Micro,
-                                            color = PpPrimary
+                                            color = PpTrophyMagenta
                                         )
                                         Text(
                                             text = achievement.title,
                                             style = PpTextStyles.Title,
-                                            color = MaterialTheme.colorScheme.onBackground
+                                            color = PpTextHigh
                                         )
                                         if (achievement.description.isNotBlank()) {
                                             Text(
                                                 text = achievement.description,
                                                 style = PpTextStyles.Label,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                color = PpTextMid
                                             )
                                         }
                                     }
@@ -256,25 +269,23 @@ fun CompletionScreen(
                         }
                     }
                 }
-            }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = PpSpacing.xl),
-                verticalArrangement = Arrangement.spacedBy(PpSpacing.md)
-            ) {
+                Spacer(Modifier.height(PpSpacing.md))
                 val nextLessonId = outcome?.nextLessonId
                 PpPrimaryButton(
                     text = stringResource(R.string.action_continue),
                     onClick = { nextLessonId?.let(onContinueNext) },
                     enabled = nextLessonId != null,
-                    modifier = Modifier.testTag("completion_continue_button")
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("completion_continue_button")
                 )
                 PpSecondaryButton(
                     text = stringResource(R.string.completion_btn_return_academy),
                     onClick = onReturnToAcademy,
-                    modifier = Modifier.testTag("completion_return_academy_button")
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("completion_return_academy_button")
                 )
             }
         }

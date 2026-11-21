@@ -1,15 +1,16 @@
 package com.padelpro.app.feature.history
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.width
@@ -22,7 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.SportsTennis
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,10 +38,12 @@ import com.padelpro.app.core.designsystem.components.PpEmptyState
 import com.padelpro.app.core.designsystem.components.PpFilterChip
 import com.padelpro.app.core.designsystem.components.PpIconButton
 import com.padelpro.app.core.designsystem.components.PpMatchCard
+import com.padelpro.app.core.designsystem.components.PpPrimaryButton
 import com.padelpro.app.core.designsystem.components.PpSectionHeader
 import com.padelpro.app.core.designsystem.components.PpTextField
-import com.padelpro.app.core.designsystem.theme.PpBackground
+import com.padelpro.app.core.designsystem.theme.PpGlassCyan
 import com.padelpro.app.core.designsystem.theme.PpSpacing
+import com.padelpro.app.core.designsystem.theme.PpTextHigh
 import com.padelpro.app.core.designsystem.theme.PpTextStyles
 
 @Composable
@@ -58,7 +60,6 @@ fun MatchHistoryScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(PpBackground)
             .windowInsetsPadding(WindowInsets.safeDrawing),
         contentAlignment = Alignment.TopCenter
     ) {
@@ -86,7 +87,7 @@ fun MatchHistoryScreen(
                         Text(
                             text = stringResource(R.string.history_title),
                             style = PpTextStyles.H1,
-                            color = MaterialTheme.colorScheme.onBackground
+                            color = PpTextHigh
                         )
                     }
                     Text(
@@ -95,8 +96,8 @@ fun MatchHistoryScreen(
                             state.filteredCount,
                             state.filteredCount
                         ),
-                        style = PpTextStyles.Micro,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = PpTextStyles.Micro.copy(fontFeatureSettings = "tnum"),
+                        color = PpGlassCyan,
                         modifier = Modifier.testTag("history_count_label")
                     )
                 }
@@ -162,25 +163,43 @@ fun MatchHistoryScreen(
 
             if (state.matches.isEmpty()) {
                 item {
-                    PpEmptyState(
-                        icon = Icons.Rounded.SportsTennis,
-                        title = stringResource(R.string.history_empty_title),
-                        subtitle = stringResource(R.string.history_empty_body),
-                        ctaText = stringResource(R.string.action_start_a_match),
-                        onCtaClick = onStartMatch,
-                        modifier = Modifier.testTag("history_empty_state")
-                    )
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        PpEmptyState(
+                            icon = Icons.Rounded.SportsTennis,
+                            title = stringResource(R.string.history_empty_title),
+                            subtitle = stringResource(R.string.history_empty_body),
+                            modifier = Modifier.testTag("history_empty_state")
+                        )
+                        Spacer(Modifier.height(PpSpacing.md))
+                        PpPrimaryButton(
+                            text = stringResource(R.string.action_start_a_match),
+                            onClick = onStartMatch,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
             } else if (state.groupedFilteredMatches.isEmpty()) {
                 item {
-                    PpEmptyState(
-                        icon = Icons.Rounded.Search,
-                        title = stringResource(R.string.history_empty_filter_title),
-                        subtitle = stringResource(R.string.history_empty_filter_body),
-                        ctaText = stringResource(R.string.action_clear_filters),
-                        onCtaClick = viewModel::clearFilters,
-                        modifier = Modifier.testTag("history_empty_filter_state")
-                    )
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        PpEmptyState(
+                            icon = Icons.Rounded.Search,
+                            title = stringResource(R.string.history_empty_filter_title),
+                            subtitle = stringResource(R.string.history_empty_filter_body),
+                            modifier = Modifier.testTag("history_empty_filter_state")
+                        )
+                        Spacer(Modifier.height(PpSpacing.md))
+                        PpPrimaryButton(
+                            text = stringResource(R.string.action_clear_filters),
+                            onClick = viewModel::clearFilters,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
             } else {
                 state.groupedFilteredMatches.forEach { group ->

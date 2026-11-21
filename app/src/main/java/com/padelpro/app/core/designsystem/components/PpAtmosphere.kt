@@ -70,7 +70,7 @@ fun PpNightCourt(
                 val top = size.height - h * 0.62f
                 val line = Color(0x142C5566)
                 val s = Stroke(width = 1.4f)
-                drawRect(line, Offset(left, top), Size(w, h), s)
+                drawRect(line, Offset(left, top), Size(w, h), style = s)
                 drawLine(line, Offset(left, top + h / 2), Offset(left + w, top + h / 2), 1.4f)
                 drawLine(line, Offset(left + w * 0.30f, top), Offset(left + w * 0.30f, top + h), 1.4f)
                 drawLine(line, Offset(left + w * 0.70f, top), Offset(left + w * 0.70f, top + h), 1.4f)

@@ -10,6 +10,7 @@ object PpSpacing {
     val lg = 16.dp
     val xl = 24.dp
     val xxl = 32.dp
+    val xxxl = 32.dp
 }
 
 object PpRadius {
@@ -18,6 +19,7 @@ object PpRadius {
     val card = 22.dp
     val panel = 28.dp
     val sheet = 30.dp
+    val sheetTop = 30.dp
     val pill = RoundedCornerShape(50)
     val cardShape = RoundedCornerShape(card)
     val panelShape = RoundedCornerShape(panel)

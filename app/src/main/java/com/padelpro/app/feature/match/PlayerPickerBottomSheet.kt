@@ -145,14 +145,16 @@ fun PlayerPickerBottomSheet(
                 Spacer(Modifier.height(PpSpacing.lg))
                 PpPrimaryButton(
                     text = stringResource(R.string.match_setup_add_friend_btn),
-                    icon = Icons.Rounded.PersonAdd,
+                    leadingIcon = Icons.Rounded.PersonAdd,
                     onClick = {
                         onDismissError()
                         draftName = ""
                         draftAvatarId = (friends.size + 1) % 12
                         mode = PickerMode.CREATE
                     },
-                    modifier = Modifier.testTag("setup_add_friend_button")
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("setup_add_friend_button")
                 )
             }
 

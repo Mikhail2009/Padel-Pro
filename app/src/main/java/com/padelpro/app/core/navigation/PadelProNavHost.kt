@@ -3,7 +3,6 @@ package com.padelpro.app.core.navigation
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +17,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -29,7 +29,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.padelpro.app.core.designsystem.components.BottomTab
 import com.padelpro.app.core.designsystem.components.PpBottomBar
-import com.padelpro.app.core.designsystem.theme.PpBackground
+import com.padelpro.app.core.designsystem.components.PpNightCourt
+import com.padelpro.app.core.designsystem.theme.LocalPpMotion
 import com.padelpro.app.feature.academy.AcademyScreen
 import com.padelpro.app.feature.academy.AcademyViewModel
 import com.padelpro.app.feature.academy.CompletionScreen
@@ -82,11 +83,9 @@ fun PadelProNavHost(
 
     val startDestination = resolvedStartDestination
     if (startDestination == null) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(PpBackground)
-        )
+        PpNightCourt(floodlight = true, courtLines = false) {
+            Box(modifier = Modifier.fillMaxSize())
+        }
     } else {
         PadelProNavGraph(
             startDestination = startDestination,
@@ -104,6 +103,7 @@ private fun PadelProNavGraph(
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
     val scope = rememberCoroutineScope()
+    val motion = LocalPpMotion.current
 
     val homeListState = rememberLazyListState()
     val academyListState = rememberLazyListState()
@@ -145,27 +145,28 @@ private fun PadelProNavGraph(
         }
     }
 
-    Scaffold(
-        containerColor = PpBackground,
-        contentWindowInsets = WindowInsets.safeDrawing,
-        bottomBar = {
-            if (activeTab != null) {
-                PpBottomBar(
-                    selectedTab = activeTab,
-                    onSelectTab = ::navigateToTab
-                )
+    PpNightCourt(floodlight = true, courtLines = true) {
+        Scaffold(
+            containerColor = Color.Transparent,
+            contentWindowInsets = WindowInsets.safeDrawing,
+            bottomBar = {
+                if (activeTab != null) {
+                    PpBottomBar(
+                        selectedTab = activeTab,
+                        onSelectTab = ::navigateToTab
+                    )
+                }
             }
-        }
-    ) { innerPadding ->
-        NavHost(
-            navController = navController,
-            startDestination = startDestination,
-            enterTransition = { fadeIn(animationSpec = tween(220)) },
-            exitTransition = { fadeOut(animationSpec = tween(220)) },
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-        ) {
+        ) { innerPadding ->
+            NavHost(
+                navController = navController,
+                startDestination = startDestination,
+                enterTransition = { fadeIn(animationSpec = tween(motion.base)) },
+                exitTransition = { fadeOut(animationSpec = tween(motion.base)) },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+            ) {
             // 01 Onboarding
             composable<AppRoute.Onboarding> {
                 val vm: OnboardingViewModel = viewModel(factory = viewModelFactory)
@@ -396,5 +397,6 @@ private fun PadelProNavGraph(
                 )
             }
         }
+    }
     }
 }

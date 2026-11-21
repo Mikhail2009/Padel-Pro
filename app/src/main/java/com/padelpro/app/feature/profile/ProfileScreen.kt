@@ -3,6 +3,7 @@ package com.padelpro.app.feature.profile
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -19,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -37,7 +39,6 @@ import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.material.icons.rounded.RadioButtonChecked
 import androidx.compose.material.icons.rounded.RadioButtonUnchecked
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -51,6 +52,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -77,14 +80,19 @@ import com.padelpro.app.core.designsystem.components.PpStatCard
 import com.padelpro.app.core.designsystem.components.PpTextField
 import com.padelpro.app.core.designsystem.components.PpXpIndicator
 import com.padelpro.app.core.designsystem.components.levelTitleRes
-import com.padelpro.app.core.designsystem.theme.PpBackground
-import com.padelpro.app.core.designsystem.theme.PpError
+import com.padelpro.app.core.designsystem.theme.PpAmberLed
+import com.padelpro.app.core.designsystem.theme.PpCourtLineStrong
+import com.padelpro.app.core.designsystem.theme.PpCourtNight
+import com.padelpro.app.core.designsystem.theme.PpDanger
 import com.padelpro.app.core.designsystem.theme.PpErrorTint
-import com.padelpro.app.core.designsystem.theme.PpOutline
-import com.padelpro.app.core.designsystem.theme.PpPrimary
-import com.padelpro.app.core.designsystem.theme.PpPrimaryTint
+import com.padelpro.app.core.designsystem.theme.PpGlassCyan
+import com.padelpro.app.core.designsystem.theme.PpLime
+import com.padelpro.app.core.designsystem.theme.PpOnAccent
 import com.padelpro.app.core.designsystem.theme.PpRadius
 import com.padelpro.app.core.designsystem.theme.PpSpacing
+import com.padelpro.app.core.designsystem.theme.PpTextHigh
+import com.padelpro.app.core.designsystem.theme.PpTextLow
+import com.padelpro.app.core.designsystem.theme.PpTextMid
 import com.padelpro.app.core.designsystem.theme.PpTextStyles
 import com.padelpro.app.domain.model.BackupValidationError
 import com.padelpro.app.domain.model.DeuceMode
@@ -159,7 +167,6 @@ fun ProfileScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(PpBackground)
             .windowInsetsPadding(WindowInsets.safeDrawing),
         contentAlignment = Alignment.TopCenter
     ) {
@@ -187,12 +194,13 @@ fun ProfileScreen(
                         Text(
                             text = stringResource(R.string.profile_title),
                             style = PpTextStyles.H1,
-                            color = MaterialTheme.colorScheme.onBackground
+                            color = PpTextHigh
                         )
                     }
                     PpIconButton(
                         icon = Icons.Rounded.Edit,
                         contentDescription = stringResource(R.string.action_edit),
+                        tint = PpGlassCyan,
                         onClick = { showEditSheet = true },
                         modifier = Modifier.testTag("profile_edit_button")
                     )
@@ -200,7 +208,10 @@ fun ProfileScreen(
             }
 
             item {
-                PpCard(modifier = Modifier.fillMaxWidth()) {
+                PpCard(
+                    accent = PpGlassCyan,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -215,14 +226,14 @@ fun ProfileScreen(
                         Text(
                             text = state.displayName.ifBlank { stringResource(R.string.profile_default_player_name) },
                             style = PpTextStyles.H2,
-                            color = MaterialTheme.colorScheme.onBackground
+                            color = PpTextHigh
                         )
                         if (state.memberSinceText.isNotBlank()) {
                             Spacer(Modifier.height(PpSpacing.xs))
                             Text(
                                 text = stringResource(R.string.profile_member_since_format, state.memberSinceText),
                                 style = PpTextStyles.Label,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = PpTextMid
                             )
                         }
                         Spacer(Modifier.height(PpSpacing.lg))
@@ -245,17 +256,19 @@ fun ProfileScreen(
                     PpStatCard(
                         value = state.totalMatches.toString(),
                         label = stringResource(R.string.profile_stat_matches),
+                        accent = PpGlassCyan,
                         modifier = Modifier.weight(1f)
                     )
                     PpStatCard(
                         value = state.winRatePercent?.let { "$it%" } ?: stringResource(R.string.dash_placeholder),
                         label = stringResource(R.string.profile_stat_win_rate),
-                        accentValue = state.winRatePercent != null,
+                        accent = PpLime,
                         modifier = Modifier.weight(1f)
                     )
                     PpStatCard(
                         value = "${state.completedLessons}/${state.totalLessons}",
                         label = stringResource(R.string.profile_stat_lessons),
+                        accent = PpAmberLed,
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -285,11 +298,32 @@ fun ProfileScreen(
 
             item {
                 val unlockedCount = state.achievements.count { it.isUnlocked }
-                PpSectionHeader(
-                    title = stringResource(R.string.profile_section_achievements),
-                    actionText = stringResource(R.string.profile_achievements_count_format, unlockedCount, state.achievements.size),
-                    onActionClick = null
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = PpSpacing.sm),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Canvas(Modifier.size(6.dp)) { drawCircle(PpLime) }
+                        Spacer(Modifier.size(PpSpacing.sm))
+                        Text(
+                            text = stringResource(R.string.profile_section_achievements).uppercase(),
+                            style = PpTextStyles.Micro,
+                            color = PpTextMid
+                        )
+                    }
+                    Text(
+                        text = stringResource(
+                            R.string.profile_achievements_count_format,
+                            unlockedCount,
+                            state.achievements.size
+                        ),
+                        style = PpTextStyles.Micro.copy(fontFeatureSettings = "tnum"),
+                        color = PpAmberLed
+                    )
+                }
                 Spacer(Modifier.height(PpSpacing.sm))
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(PpSpacing.md),
@@ -321,7 +355,7 @@ fun ProfileScreen(
                         Text(
                             text = stringResource(R.string.profile_players_empty),
                             style = PpTextStyles.Label,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = PpTextMid
                         )
                     } else {
                         Column(verticalArrangement = Arrangement.spacedBy(PpSpacing.sm)) {
@@ -348,12 +382,14 @@ fun ProfileScreen(
                     Spacer(Modifier.height(PpSpacing.md))
                     PpSecondaryButton(
                         text = stringResource(R.string.profile_add_player),
-                        icon = Icons.Rounded.PersonAdd,
+                        leadingIcon = Icons.Rounded.PersonAdd,
                         onClick = {
                             viewModel.clearFriendError()
                             friendSheet = FriendSheetState.Create
                         },
-                        modifier = Modifier.testTag("profile_add_friend_button")
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("profile_add_friend_button")
                     )
                 }
             }
@@ -386,18 +422,18 @@ fun ProfileScreen(
                             Text(
                                 text = stringResource(R.string.profile_setting_default_scoring),
                                 style = PpTextStyles.Body,
-                                color = MaterialTheme.colorScheme.onBackground
+                                color = PpTextHigh
                             )
                             Text(
                                 text = deuceModeLabel(state.defaultDeuceMode),
                                 style = PpTextStyles.Label,
-                                color = PpPrimary
+                                color = PpGlassCyan
                             )
                         }
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            tint = PpTextLow
                         )
                     }
                 }
@@ -407,7 +443,10 @@ fun ProfileScreen(
             item {
                 PpSectionHeader(title = stringResource(R.string.profile_section_data))
                 Spacer(Modifier.height(PpSpacing.sm))
-                PpCard(modifier = Modifier.fillMaxWidth()) {
+                PpCard(
+                    accent = PpGlassCyan,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     val exportSubtitle = state.backupLastExportedText?.let { date ->
                         stringResource(R.string.profile_data_last_export_format, date)
                     } ?: stringResource(R.string.profile_data_never_exported)
@@ -415,7 +454,7 @@ fun ProfileScreen(
                     Text(
                         text = exportSubtitle,
                         style = PpTextStyles.Label,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = PpTextMid,
                         modifier = Modifier.testTag("profile_last_export_text")
                     )
 
@@ -431,6 +470,7 @@ fun ProfileScreen(
                     Spacer(Modifier.height(PpSpacing.md))
                     DataActionRow(
                         icon = Icons.Rounded.FileUpload,
+                        iconTint = PpGlassCyan,
                         title = stringResource(R.string.profile_data_export),
                         subtitle = stringResource(R.string.profile_data_export_sub),
                         enabled = !state.isBackupBusy,
@@ -444,6 +484,7 @@ fun ProfileScreen(
                     Spacer(Modifier.height(PpSpacing.sm))
                     DataActionRow(
                         icon = Icons.Rounded.FileDownload,
+                        iconTint = PpLime,
                         title = stringResource(R.string.profile_data_import),
                         subtitle = stringResource(R.string.profile_data_import_sub),
                         enabled = !state.isBackupBusy,
@@ -460,13 +501,15 @@ fun ProfileScreen(
                 PpSectionHeader(title = stringResource(R.string.profile_section_danger))
                 Spacer(Modifier.height(PpSpacing.sm))
                 PpCard(
-                    borderColor = PpError.copy(alpha = 0.45f),
+                    accent = PpDanger,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     PpDangerOutlineButton(
                         text = stringResource(R.string.profile_reset_btn),
                         onClick = { resetStep = 1 },
-                        modifier = Modifier.testTag("profile_reset_button")
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("profile_reset_button")
                     )
                 }
             }
@@ -499,7 +542,8 @@ fun ProfileScreen(
                 onClick = {
                     viewModel.saveProfile(editName, editAvatar)
                     showEditSheet = false
-                }
+                },
+                modifier = Modifier.fillMaxWidth()
             )
         }
     }
@@ -597,13 +641,13 @@ fun ProfileScreen(
                     Icon(
                         imageVector = if (selected) Icons.Rounded.RadioButtonChecked else Icons.Rounded.RadioButtonUnchecked,
                         contentDescription = null,
-                        tint = if (selected) PpPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = if (selected) PpLime else PpTextMid
                     )
                     Spacer(Modifier.width(PpSpacing.md))
                     Text(
                         text = deuceModeLabel(mode),
                         style = PpTextStyles.Body,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = PpTextHigh
                     )
                 }
             }
@@ -636,7 +680,8 @@ fun ProfileScreen(
 
 @Composable
 private fun DataActionRow(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
+    iconTint: Color,
     title: String,
     subtitle: String,
     enabled: Boolean,
@@ -649,8 +694,8 @@ private fun DataActionRow(
             .fillMaxWidth()
             .heightIn(min = 56.dp)
             .clip(shape)
-            .background(MaterialTheme.colorScheme.surface)
-            .border(1.dp, PpOutline, shape)
+            .background(PpCourtNight)
+            .border(1.dp, PpCourtLineStrong, shape)
             .clickable(enabled = enabled, onClick = onClick)
             .padding(horizontal = PpSpacing.md, vertical = PpSpacing.sm),
         verticalAlignment = Alignment.CenterVertically
@@ -658,25 +703,25 @@ private fun DataActionRow(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = PpPrimary
+            tint = iconTint
         )
         Spacer(Modifier.width(PpSpacing.md))
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
                 style = PpTextStyles.Body,
-                color = MaterialTheme.colorScheme.onBackground
+                color = PpTextHigh
             )
             Text(
                 text = subtitle,
                 style = PpTextStyles.Label,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = PpTextMid
             )
         }
         Icon(
             imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
+            tint = PpTextLow
         )
     }
 }
@@ -709,10 +754,10 @@ private fun BackupFeedbackBanner(
         modifier = Modifier
             .fillMaxWidth()
             .clip(shape)
-            .background(if (isSuccess) PpPrimaryTint else PpErrorTint)
+            .background(if (isSuccess) PpLime.copy(alpha = 0.14f) else PpErrorTint)
             .border(
                 1.dp,
-                if (isSuccess) PpPrimary.copy(alpha = 0.6f) else PpError.copy(alpha = 0.6f),
+                if (isSuccess) PpLime.copy(alpha = 0.6f) else PpDanger.copy(alpha = 0.6f),
                 shape
             )
             .clickable(onClick = onDismiss)
@@ -722,7 +767,7 @@ private fun BackupFeedbackBanner(
         Text(
             text = text,
             style = PpTextStyles.Label,
-            color = if (isSuccess) PpPrimary else PpError
+            color = if (isSuccess) PpLime else PpDanger
         )
     }
 }
@@ -743,17 +788,17 @@ private fun SettingToggleRow(
         Text(
             text = label,
             style = PpTextStyles.Body,
-            color = MaterialTheme.colorScheme.onBackground,
+            color = PpTextHigh,
             modifier = Modifier.weight(1f)
         )
         Switch(
             checked = checked,
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
-                checkedThumbColor = PpBackground,
-                checkedTrackColor = PpPrimary,
-                uncheckedThumbColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                uncheckedTrackColor = PpOutline
+                checkedThumbColor = PpOnAccent,
+                checkedTrackColor = PpLime,
+                uncheckedThumbColor = PpTextMid,
+                uncheckedTrackColor = PpCourtLineStrong
             )
         )
     }

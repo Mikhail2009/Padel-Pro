@@ -39,6 +39,7 @@ val PpBackground = PpCourtDeep
 val PpSurface = PpCourtNight
 val PpSurfaceVariant = PpCourtPanel
 val PpCardSurface = PpCourtPanel
+val PpCard = PpCourtPanel
 val PpPrimary = PpLime
 val PpPrimaryDim = PpLimeDeep
 val PpPrimaryTint = Color(0x1FC8F751)
@@ -49,6 +50,7 @@ val PpTextTertiary = PpTextLow
 val PpOutline = PpCourtLine
 val PpOutlineStrong = PpCourtLineStrong
 val PpError = PpDanger
+val PpErrorTint = Color(0x26FF4D5E)
 
 // ── Градиенты через реально разные оттенки ────────────────────────────────────
 val PpCourtSweep: Brush get() = Brush.linearGradient(listOf(PpCourtBlue, PpGlassCyan, PpLime))

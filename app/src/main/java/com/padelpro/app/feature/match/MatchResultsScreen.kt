@@ -1,5 +1,6 @@
 package com.padelpro.app.feature.match
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -17,15 +18,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.EmojiEvents
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -34,6 +32,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -43,16 +44,21 @@ import com.padelpro.app.R
 import com.padelpro.app.core.designsystem.components.PpCard
 import com.padelpro.app.core.designsystem.components.PpEmptyState
 import com.padelpro.app.core.designsystem.components.PpPrimaryButton
+import com.padelpro.app.core.designsystem.components.PpScrollColumn
 import com.padelpro.app.core.designsystem.components.PpSecondaryButton
 import com.padelpro.app.core.designsystem.components.PpSectionHeader
 import com.padelpro.app.core.designsystem.components.PpSetScoreRow
 import com.padelpro.app.core.designsystem.components.formatDurationRu
-import com.padelpro.app.core.designsystem.theme.PpBackground
-import com.padelpro.app.core.designsystem.theme.PpPrimary
-import com.padelpro.app.core.designsystem.theme.PpPrimaryTint
-import com.padelpro.app.core.designsystem.theme.PpRadius
+import com.padelpro.app.core.designsystem.theme.PpAmberLed
+import com.padelpro.app.core.designsystem.theme.PpCourtGlass
+import com.padelpro.app.core.designsystem.theme.PpCourtLineStrong
+import com.padelpro.app.core.designsystem.theme.PpGlassCyan
+import com.padelpro.app.core.designsystem.theme.PpLime
 import com.padelpro.app.core.designsystem.theme.PpSpacing
+import com.padelpro.app.core.designsystem.theme.PpTextHigh
+import com.padelpro.app.core.designsystem.theme.PpTextMid
 import com.padelpro.app.core.designsystem.theme.PpTextStyles
+import com.padelpro.app.core.designsystem.theme.PpTrophySweep
 import com.padelpro.app.domain.model.DeuceMode
 import com.padelpro.app.domain.model.MatchFormat
 import com.padelpro.app.domain.model.MatchSummary
@@ -76,7 +82,6 @@ fun MatchResultsScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(PpBackground)
             .windowInsetsPadding(WindowInsets.safeDrawing),
         contentAlignment = Alignment.TopCenter
     ) {
@@ -86,43 +91,47 @@ fun MatchResultsScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = PpPrimary)
+                    CircularProgressIndicator(color = PpLime)
                 }
             }
 
             state.match == null -> {
-                Column(
+                PpScrollColumn(
                     modifier = Modifier
                         .fillMaxSize()
                         .widthIn(max = 600.dp)
-                        .verticalScroll(rememberScrollState())
-                        .padding(PpSpacing.lg),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(PpSpacing.lg),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.padding(top = PpSpacing.xl)
+                        verticalArrangement = Arrangement.spacedBy(PpSpacing.lg)
                     ) {
-                        Text(
-                            text = stringResource(R.string.results_completed_label),
-                            style = PpTextStyles.Micro,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(Modifier.height(PpSpacing.lg))
-                        PpEmptyState(
-                            icon = Icons.Rounded.EmojiEvents,
-                            title = stringResource(R.string.results_empty_title),
-                            subtitle = stringResource(R.string.results_empty_body)
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(top = PpSpacing.xl)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.results_completed_label),
+                                style = PpTextStyles.Micro,
+                                color = PpTextMid
+                            )
+                            Spacer(Modifier.height(PpSpacing.lg))
+                            PpEmptyState(
+                                icon = Icons.Rounded.EmojiEvents,
+                                title = stringResource(R.string.results_empty_title),
+                                subtitle = stringResource(R.string.results_empty_body)
+                            )
+                        }
+                        ResultsActionButtons(
+                            matchId = matchId,
+                            detailsEnabled = false,
+                            onViewStatistics = onViewStatistics,
+                            onOpenDetails = onOpenDetails,
+                            onReturnHome = onReturnHome
                         )
                     }
-                    ResultsActionButtons(
-                        matchId = matchId,
-                        detailsEnabled = false,
-                        onViewStatistics = onViewStatistics,
-                        onOpenDetails = onOpenDetails,
-                        onReturnHome = onReturnHome
-                    )
                 }
             }
 
@@ -165,173 +174,202 @@ private fun MatchResultsContent(
         TeamSide.B -> stringResource(R.string.results_winner_team_b)
         null -> ""
     }
-    val headline = if (match.userWon == true) {
+    val isWin = match.userWon == true
+    val headline = if (isWin) {
         stringResource(R.string.results_win_title)
     } else {
         stringResource(R.string.results_loss_title)
     }
 
-    Column(
+    PpScrollColumn(
         modifier = Modifier
             .fillMaxSize()
             .widthIn(max = 600.dp)
-            .verticalScroll(rememberScrollState())
-            .padding(PpSpacing.lg),
-        verticalArrangement = Arrangement.spacedBy(PpSpacing.lg)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = PpSpacing.md),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(PpSpacing.lg),
+            verticalArrangement = Arrangement.spacedBy(PpSpacing.lg)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(72.dp)
-                    .clip(CircleShape)
-                    .background(PpPrimaryTint)
-                    .border(1.5.dp, PpPrimary, CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Rounded.EmojiEvents,
-                    contentDescription = null,
-                    tint = PpPrimary,
-                    modifier = Modifier.size(34.dp)
-                )
-            }
-            Spacer(Modifier.height(PpSpacing.md))
-            Text(
-                text = headline,
-                style = PpTextStyles.H1,
-                color = if (match.userWon == true) PpPrimary else MaterialTheme.colorScheme.onBackground,
-                textAlign = TextAlign.Center
-            )
-            Spacer(Modifier.height(PpSpacing.xs))
-            Text(
-                text = winnerNames,
-                style = PpTextStyles.Title,
-                color = MaterialTheme.colorScheme.onBackground,
-                textAlign = TextAlign.Center
-            )
-            if (winnerSubtitle.isNotEmpty()) {
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    text = winnerSubtitle,
-                    style = PpTextStyles.Label,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-
-        if (xpEarned > 0) {
-            PpCard(
-                borderColor = PpPrimary.copy(alpha = 0.65f),
-                containerColor = PpPrimaryTint,
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .testTag("results_xp_card")
+                    .padding(top = PpSpacing.md),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                Box(
+                    modifier = Modifier.size(80.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.Rounded.Bolt,
-                            contentDescription = null,
-                            tint = PpPrimary,
-                            modifier = Modifier.size(22.dp)
-                        )
-                        Spacer(Modifier.width(PpSpacing.sm))
-                        Text(
-                            text = if (match.userWon == true) {
-                                stringResource(R.string.results_xp_breakdown_win)
-                            } else {
-                                stringResource(R.string.results_xp_breakdown_participation)
-                            },
-                            style = PpTextStyles.Label,
-                            color = MaterialTheme.colorScheme.onBackground
+                    if (isWin) {
+                        Canvas(Modifier.size(80.dp)) {
+                            drawCircle(
+                                Brush.radialGradient(
+                                    listOf(
+                                        Color(0x4DFF3D8F),
+                                        Color(0x26FFB43D),
+                                        Color.Transparent
+                                    )
+                                )
+                            )
+                            drawCircle(
+                                brush = PpTrophySweep,
+                                style = Stroke(width = 2.dp.toPx())
+                            )
+                        }
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .size(76.dp)
+                                .clip(CircleShape)
+                                .background(PpCourtGlass.copy(alpha = 0.6f))
+                                .border(1.5.dp, PpCourtLineStrong, CircleShape)
                         )
                     }
+                    Icon(
+                        imageVector = Icons.Rounded.EmojiEvents,
+                        contentDescription = null,
+                        tint = if (isWin) PpAmberLed else PpTextMid,
+                        modifier = Modifier.size(36.dp)
+                    )
+                }
+                Spacer(Modifier.height(PpSpacing.md))
+                Text(
+                    text = headline,
+                    style = PpTextStyles.H1,
+                    color = if (isWin) PpLime else PpTextHigh,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(Modifier.height(PpSpacing.xs))
+                Text(
+                    text = winnerNames,
+                    style = PpTextStyles.Title,
+                    color = PpTextHigh,
+                    textAlign = TextAlign.Center
+                )
+                if (winnerSubtitle.isNotEmpty()) {
+                    Spacer(Modifier.height(2.dp))
                     Text(
-                        text = stringResource(R.string.results_xp_earned_format, xpEarned),
-                        style = PpTextStyles.Title,
-                        color = PpPrimary
+                        text = winnerSubtitle,
+                        style = PpTextStyles.Label,
+                        color = PpTextMid,
+                        textAlign = TextAlign.Center
                     )
                 }
             }
-        }
 
-        PpSectionHeader(title = stringResource(R.string.results_sets_section))
-        PpCard(modifier = Modifier.fillMaxWidth()) {
-            val formattedSetsSummary = formatSetsLine(match.sets)
-            Text(
-                text = formattedSetsSummary,
-                style = PpTextStyles.H2,
-                color = PpPrimary,
-                modifier = Modifier.testTag("results_sets_line")
-            )
-            Spacer(Modifier.height(PpSpacing.md))
-            PpSetScoreRow(
-                teamLabel = teamAText,
-                setScores = match.sets.map { formatSetCell(it.gamesA, it.tbA, it.tbB) },
-                isWinner = match.winnerTeam == TeamSide.A
-            )
-            Spacer(Modifier.height(PpSpacing.sm))
-            PpSetScoreRow(
-                teamLabel = teamBText,
-                setScores = match.sets.map { formatSetCell(it.gamesB, it.tbB, it.tbA) },
-                isWinner = match.winnerTeam == TeamSide.B
-            )
-        }
-
-        PpCard(modifier = Modifier.fillMaxWidth()) {
-            val formatText = when (match.format) {
-                MatchFormat.SINGLES -> stringResource(R.string.match_format_singles)
-                MatchFormat.DOUBLES -> stringResource(R.string.match_format_doubles)
+            if (xpEarned > 0) {
+                PpCard(
+                    accent = PpAmberLed,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("results_xp_card")
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Bolt,
+                                contentDescription = null,
+                                tint = PpAmberLed,
+                                modifier = Modifier.size(22.dp)
+                            )
+                            Spacer(Modifier.width(PpSpacing.sm))
+                            Text(
+                                text = if (isWin) {
+                                    stringResource(R.string.results_xp_breakdown_win)
+                                } else {
+                                    stringResource(R.string.results_xp_breakdown_participation)
+                                },
+                                style = PpTextStyles.Label,
+                                color = PpTextHigh
+                            )
+                        }
+                        Spacer(Modifier.width(PpSpacing.md))
+                        Text(
+                            text = stringResource(R.string.results_xp_earned_format, xpEarned),
+                            style = PpTextStyles.Numeral,
+                            color = PpAmberLed
+                        )
+                    }
+                }
             }
-            val scoringText = when (match.deuceMode) {
-                DeuceMode.ADVANTAGE -> stringResource(R.string.match_setup_deuce_advantage)
-                DeuceMode.GOLDEN_POINT -> stringResource(R.string.match_setup_deuce_golden)
-                DeuceMode.STAR_POINT -> stringResource(R.string.match_setup_deuce_star)
+
+            PpSectionHeader(title = stringResource(R.string.results_sets_section))
+            PpCard(modifier = Modifier.fillMaxWidth()) {
+                val formattedSetsSummary = formatSetsLine(match.sets)
+                Text(
+                    text = formattedSetsSummary,
+                    style = PpTextStyles.H2.copy(fontFeatureSettings = "tnum"),
+                    color = PpLime,
+                    modifier = Modifier.testTag("results_sets_line")
+                )
+                Spacer(Modifier.height(PpSpacing.md))
+                PpSetScoreRow(
+                    teamLabel = teamAText,
+                    setScores = match.sets.map { formatSetCell(it.gamesA, it.tbA, it.tbB) },
+                    isWinner = match.winnerTeam == TeamSide.A
+                )
+                Spacer(Modifier.height(PpSpacing.sm))
+                PpSetScoreRow(
+                    teamLabel = teamBText,
+                    setScores = match.sets.map { formatSetCell(it.gamesB, it.tbB, it.tbA) },
+                    isWinner = match.winnerTeam == TeamSide.B
+                )
             }
 
-            ResultMetaRow(
-                label = stringResource(R.string.results_duration_label),
-                value = formatDurationRu(match.durationMs ?: 0L)
-            )
-            Spacer(Modifier.height(PpSpacing.sm))
-            ResultMetaRow(
-                label = stringResource(R.string.results_date_label),
-                value = formattedDate
-            )
-            Spacer(Modifier.height(PpSpacing.sm))
-            ResultMetaRow(
-                label = stringResource(R.string.results_format_label),
-                value = formatText
-            )
-            Spacer(Modifier.height(PpSpacing.sm))
-            ResultMetaRow(
-                label = stringResource(R.string.results_scoring_label),
-                value = scoringText
-            )
-            Spacer(Modifier.height(PpSpacing.sm))
-            ResultMetaRow(
-                label = stringResource(R.string.results_players_section),
-                value = stringResource(R.string.match_card_teams_vs_format, teamAText, teamBText)
+            PpCard(modifier = Modifier.fillMaxWidth()) {
+                val formatText = when (match.format) {
+                    MatchFormat.SINGLES -> stringResource(R.string.match_format_singles)
+                    MatchFormat.DOUBLES -> stringResource(R.string.match_format_doubles)
+                }
+                val scoringText = when (match.deuceMode) {
+                    DeuceMode.ADVANTAGE -> stringResource(R.string.match_setup_deuce_advantage)
+                    DeuceMode.GOLDEN_POINT -> stringResource(R.string.match_setup_deuce_golden)
+                    DeuceMode.STAR_POINT -> stringResource(R.string.match_setup_deuce_star)
+                }
+
+                ResultMetaRow(
+                    label = stringResource(R.string.results_duration_label),
+                    value = formatDurationRu(match.durationMs ?: 0L)
+                )
+                Spacer(Modifier.height(PpSpacing.sm))
+                ResultMetaRow(
+                    label = stringResource(R.string.results_date_label),
+                    value = formattedDate
+                )
+                Spacer(Modifier.height(PpSpacing.sm))
+                ResultMetaRow(
+                    label = stringResource(R.string.results_format_label),
+                    value = formatText
+                )
+                Spacer(Modifier.height(PpSpacing.sm))
+                ResultMetaRow(
+                    label = stringResource(R.string.results_scoring_label),
+                    value = scoringText
+                )
+                Spacer(Modifier.height(PpSpacing.sm))
+                ResultMetaRow(
+                    label = stringResource(R.string.results_players_section),
+                    value = stringResource(R.string.match_card_teams_vs_format, teamAText, teamBText)
+                )
+            }
+
+            ResultsActionButtons(
+                matchId = match.id,
+                detailsEnabled = true,
+                onViewStatistics = onViewStatistics,
+                onOpenDetails = onOpenDetails,
+                onReturnHome = onReturnHome
             )
         }
-
-        ResultsActionButtons(
-            matchId = match.id,
-            detailsEnabled = true,
-            onViewStatistics = onViewStatistics,
-            onOpenDetails = onOpenDetails,
-            onReturnHome = onReturnHome
-        )
     }
 }
 
@@ -353,13 +391,17 @@ private fun ResultsActionButtons(
         PpPrimaryButton(
             text = stringResource(R.string.results_btn_view_stats),
             onClick = onViewStatistics,
-            modifier = Modifier.testTag("results_view_stats_button")
+            modifier = Modifier
+                .fillMaxWidth()
+                .testTag("results_view_stats_button")
         )
         if (detailsEnabled) {
             PpSecondaryButton(
                 text = stringResource(R.string.results_btn_match_details),
                 onClick = { onOpenDetails(matchId) },
-                modifier = Modifier.testTag("results_match_details_button")
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("results_match_details_button")
             )
         }
         TextButton(
@@ -369,7 +411,7 @@ private fun ResultsActionButtons(
             Text(
                 text = stringResource(R.string.results_btn_return_home),
                 style = PpTextStyles.Label,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = PpGlassCyan
             )
         }
     }
@@ -385,13 +427,13 @@ private fun ResultMetaRow(label: String, value: String) {
         Text(
             text = label.uppercase(),
             style = PpTextStyles.Micro,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = PpTextMid
         )
         Spacer(Modifier.width(PpSpacing.md))
         Text(
             text = value,
             style = PpTextStyles.Label,
-            color = MaterialTheme.colorScheme.onBackground,
+            color = PpTextHigh,
             textAlign = TextAlign.End,
             modifier = Modifier.weight(1f)
         )

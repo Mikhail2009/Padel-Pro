@@ -1,6 +1,7 @@
 package com.padelpro.app.feature.history
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -23,12 +24,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.EmojiEvents
 import androidx.compose.material.icons.rounded.SportsTennis
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,6 +38,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -55,13 +60,19 @@ import com.padelpro.app.core.designsystem.components.PpIconButton
 import com.padelpro.app.core.designsystem.components.PpSectionHeader
 import com.padelpro.app.core.designsystem.components.PpSetScoreRow
 import com.padelpro.app.core.designsystem.components.formatDurationRu
-import com.padelpro.app.core.designsystem.theme.PpBackground
-import com.padelpro.app.core.designsystem.theme.PpOutline
-import com.padelpro.app.core.designsystem.theme.PpPrimary
-import com.padelpro.app.core.designsystem.theme.PpPrimaryTint
+import com.padelpro.app.core.designsystem.theme.PpAmberLed
+import com.padelpro.app.core.designsystem.theme.PpCourtGlass
+import com.padelpro.app.core.designsystem.theme.PpCourtLine
+import com.padelpro.app.core.designsystem.theme.PpCourtLineStrong
+import com.padelpro.app.core.designsystem.theme.PpGlassCyan
+import com.padelpro.app.core.designsystem.theme.PpLime
 import com.padelpro.app.core.designsystem.theme.PpRadius
 import com.padelpro.app.core.designsystem.theme.PpSpacing
+import com.padelpro.app.core.designsystem.theme.PpTextHigh
+import com.padelpro.app.core.designsystem.theme.PpTextMid
 import com.padelpro.app.core.designsystem.theme.PpTextStyles
+import com.padelpro.app.core.designsystem.theme.PpTrophyMagenta
+import com.padelpro.app.core.designsystem.theme.PpTrophySweep
 import com.padelpro.app.domain.model.DeuceMode
 import com.padelpro.app.domain.model.MatchDetailsData
 import com.padelpro.app.domain.model.MatchFormat
@@ -92,7 +103,6 @@ fun MatchDetailsScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(PpBackground)
             .windowInsetsPadding(WindowInsets.safeDrawing),
         contentAlignment = Alignment.TopCenter
     ) {
@@ -102,7 +112,7 @@ fun MatchDetailsScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = PpPrimary)
+                    CircularProgressIndicator(color = PpLime)
                 }
             }
 
@@ -169,7 +179,7 @@ private fun DetailsTopBar(onBack: () -> Unit) {
         Text(
             text = stringResource(R.string.details_title),
             style = PpTextStyles.H1,
-            color = MaterialTheme.colorScheme.onBackground
+            color = PpTextHigh
         )
     }
 }
@@ -183,7 +193,11 @@ private fun MatchDetailsBody(
     onRequestDelete: () -> Unit
 ) {
     val summary = details.summary
-    val isUserWin = summary.userWon == true
+    val bannerAccent = when (summary.userWon) {
+        true -> PpLime
+        false -> PpTrophyMagenta
+        null -> PpGlassCyan
+    }
     val teamAText = summary.teamANames.joinToString(" & ")
         .ifBlank { stringResource(R.string.live_match_team_a_placeholder) }
     val teamBText = summary.teamBNames.joinToString(" & ")
@@ -224,8 +238,7 @@ private fun MatchDetailsBody(
         // 1. Winner banner card
         item {
             PpCard(
-                borderColor = if (isUserWin) PpPrimary.copy(alpha = 0.6f) else PpOutline,
-                containerColor = if (isUserWin) PpPrimaryTint else MaterialTheme.colorScheme.surfaceVariant,
+                accent = bannerAccent,
                 modifier = Modifier
                     .fillMaxWidth()
                     .testTag("details_winner_banner")
@@ -235,36 +248,49 @@ private fun MatchDetailsBody(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(if (isUserWin) PpPrimary.copy(alpha = 0.16f) else MaterialTheme.colorScheme.surface)
-                            .border(
-                                1.dp,
-                                if (isUserWin) PpPrimary else PpOutline,
-                                CircleShape
-                            ),
+                        modifier = Modifier.size(50.dp),
                         contentAlignment = Alignment.Center
                     ) {
+                        if (summary.userWon == true) {
+                            Canvas(Modifier.size(50.dp)) {
+                                drawCircle(
+                                    Brush.radialGradient(
+                                        listOf(Color(0x4DFF3D8F), Color(0x1AFFB43D), Color.Transparent)
+                                    )
+                                )
+                                drawCircle(
+                                    brush = PpTrophySweep,
+                                    style = Stroke(width = 1.6.dp.toPx())
+                                )
+                            }
+                        } else {
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape)
+                                    .background(bannerAccent.copy(alpha = 0.14f))
+                                    .border(1.dp, bannerAccent.copy(alpha = 0.55f), CircleShape)
+                            )
+                        }
                         Icon(
                             imageVector = Icons.Rounded.EmojiEvents,
                             contentDescription = null,
-                            tint = if (isUserWin) PpPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint = if (summary.userWon == true) PpAmberLed else bannerAccent,
                             modifier = Modifier.size(24.dp)
                         )
                     }
                     Spacer(Modifier.width(PpSpacing.md))
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = bannerTitle,
+                            text = bannerTitle.uppercase(),
                             style = PpTextStyles.Micro,
-                            color = if (isUserWin) PpPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                            color = bannerAccent
                         )
                         Spacer(Modifier.height(2.dp))
                         Text(
                             text = winnerNames,
                             style = PpTextStyles.Title,
-                            color = MaterialTheme.colorScheme.onBackground,
+                            color = PpTextHigh,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -272,8 +298,8 @@ private fun MatchDetailsBody(
                             Spacer(Modifier.height(2.dp))
                             Text(
                                 text = "$winnerLabel · $setsSummaryText",
-                                style = PpTextStyles.Label,
-                                color = if (isUserWin) PpPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                                style = PpTextStyles.Label.copy(fontFeatureSettings = "tnum"),
+                                color = if (summary.userWon == true) PpLime else PpTextMid
                             )
                         }
                     }
@@ -298,14 +324,14 @@ private fun MatchDetailsBody(
                     Text(
                         text = stringResource(R.string.details_table_team),
                         style = PpTextStyles.Micro,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = PpTextMid,
                         modifier = Modifier.weight(1f)
                     )
                     if (sets.isEmpty()) {
                         Text(
                             text = stringResource(R.string.dash_placeholder),
                             style = PpTextStyles.Micro,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            color = PpTextMid,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.width(44.dp)
                         )
@@ -314,7 +340,7 @@ private fun MatchDetailsBody(
                             Text(
                                 text = stringResource(R.string.details_table_set_format, set.setIndex),
                                 style = PpTextStyles.Micro,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                color = PpTextMid,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier.width(44.dp)
                             )
@@ -345,12 +371,14 @@ private fun MatchDetailsBody(
             PpCard(modifier = Modifier.fillMaxWidth()) {
                 RosterTeamBlock(
                     teamTitle = stringResource(R.string.match_setup_team_a),
+                    accent = PpLime,
                     isWinner = summary.winnerTeam == TeamSide.A,
                     players = details.teamAPlayers
                 )
                 Spacer(Modifier.height(PpSpacing.md))
                 RosterTeamBlock(
                     teamTitle = stringResource(R.string.match_setup_team_b),
+                    accent = PpGlassCyan,
                     isWinner = summary.winnerTeam == TeamSide.B,
                     players = details.teamBPlayers
                 )
@@ -402,6 +430,7 @@ private fun MatchDetailsBody(
                 PpSectionHeader(title = stringResource(R.string.details_section_stats))
                 Spacer(Modifier.height(PpSpacing.sm))
                 PpCard(
+                    accent = PpGlassCyan,
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("details_stats_card")
@@ -419,6 +448,13 @@ private fun MatchDetailsBody(
                             stats.teamBPoints
                         )
                     )
+                    if (stats.totalPoints > 0) {
+                        Spacer(Modifier.height(PpSpacing.sm))
+                        PointsComparisonBar(
+                            teamAPoints = stats.teamAPoints,
+                            teamBPoints = stats.teamBPoints
+                        )
+                    }
                     if (stats.longestSetIndex != null && stats.longestSetDurationMs != null) {
                         Spacer(Modifier.height(PpSpacing.sm))
                         DetailMetaRow(
@@ -438,10 +474,67 @@ private fun MatchDetailsBody(
         item {
             PpDangerOutlineButton(
                 text = stringResource(R.string.details_delete_btn),
-                icon = Icons.Rounded.DeleteOutline,
                 onClick = onRequestDelete,
                 enabled = !isDeleting,
-                modifier = Modifier.testTag("details_delete_button")
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("details_delete_button")
+            )
+        }
+    }
+}
+
+@Composable
+private fun PointsComparisonBar(
+    teamAPoints: Int,
+    teamBPoints: Int
+) {
+    val total = (teamAPoints + teamBPoints).coerceAtLeast(1)
+    val ratioA = (teamAPoints.toFloat() / total).coerceIn(0f, 1f)
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(8.dp)
+        ) {
+            val r = size.height / 2f
+            drawRoundRect(
+                color = PpCourtLine,
+                cornerRadius = CornerRadius(r, r)
+            )
+            val widthA = size.width * ratioA
+            if (widthA > 0f) {
+                drawRoundRect(
+                    color = PpLime,
+                    topLeft = Offset.Zero,
+                    size = Size(widthA, size.height),
+                    cornerRadius = CornerRadius(r, r)
+                )
+            }
+            val widthB = size.width - widthA
+            if (widthB > 0f) {
+                drawRoundRect(
+                    color = PpGlassCyan,
+                    topLeft = Offset(widthA, 0f),
+                    size = Size(widthB, size.height),
+                    cornerRadius = CornerRadius(r, r)
+                )
+            }
+        }
+        Spacer(Modifier.height(PpSpacing.xs))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                text = "${stringResource(R.string.match_setup_team_a)}: $teamAPoints",
+                style = PpTextStyles.Overline.copy(fontFeatureSettings = "tnum"),
+                color = PpLime
+            )
+            Text(
+                text = "${stringResource(R.string.match_setup_team_b)}: $teamBPoints",
+                style = PpTextStyles.Overline.copy(fontFeatureSettings = "tnum"),
+                color = PpGlassCyan
             )
         }
     }
@@ -450,21 +543,22 @@ private fun MatchDetailsBody(
 @Composable
 private fun RosterTeamBlock(
     teamTitle: String,
+    accent: Color,
     isWinner: Boolean,
     players: List<MatchParticipantDetail>
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            text = teamTitle,
+            text = teamTitle.uppercase(),
             style = PpTextStyles.Micro,
-            color = if (isWinner) PpPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+            color = if (isWinner) accent else PpTextMid
         )
         Spacer(Modifier.height(PpSpacing.sm))
         if (players.isEmpty()) {
             Text(
                 text = stringResource(R.string.dash_placeholder),
                 style = PpTextStyles.Label,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = PpTextMid
             )
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(PpSpacing.sm)) {
@@ -482,7 +576,7 @@ private fun RosterTeamBlock(
                         Text(
                             text = participant.player.displayName,
                             style = PpTextStyles.Body,
-                            color = MaterialTheme.colorScheme.onBackground,
+                            color = PpTextHigh,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f, fill = false)
@@ -492,13 +586,14 @@ private fun RosterTeamBlock(
                             Box(
                                 modifier = Modifier
                                     .clip(PpRadius.pill)
-                                    .background(PpPrimaryTint)
+                                    .background(PpLime.copy(alpha = 0.16f))
+                                    .border(1.dp, PpLime.copy(alpha = 0.55f), PpRadius.pill)
                                     .padding(horizontal = PpSpacing.sm, vertical = 2.dp)
                             ) {
                                 Text(
                                     text = stringResource(R.string.label_you),
                                     style = PpTextStyles.Micro,
-                                    color = PpPrimary
+                                    color = PpLime
                                 )
                             }
                         }
@@ -519,13 +614,13 @@ private fun DetailMetaRow(label: String, value: String) {
         Text(
             text = label.uppercase(),
             style = PpTextStyles.Micro,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = PpTextMid
         )
         Spacer(Modifier.width(PpSpacing.md))
         Text(
             text = value,
-            style = PpTextStyles.Label,
-            color = MaterialTheme.colorScheme.onBackground,
+            style = PpTextStyles.Label.copy(fontFeatureSettings = "tnum"),
+            color = PpTextHigh,
             textAlign = TextAlign.End,
             modifier = Modifier.weight(1f)
         )

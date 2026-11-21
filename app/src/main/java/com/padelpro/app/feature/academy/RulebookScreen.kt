@@ -3,6 +3,7 @@ package com.padelpro.app.feature.academy
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,7 +33,6 @@ import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.StarOutline
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,23 +42,31 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.padelpro.app.R
-import com.padelpro.app.core.designsystem.components.PpCard
 import com.padelpro.app.core.designsystem.components.PpCourtGraphic
 import com.padelpro.app.core.designsystem.components.PpEmptyState
 import com.padelpro.app.core.designsystem.components.PpFilterChip
 import com.padelpro.app.core.designsystem.components.PpIconButton
 import com.padelpro.app.core.designsystem.components.PpTextField
-import com.padelpro.app.core.designsystem.theme.PpBackground
-import com.padelpro.app.core.designsystem.theme.PpOutline
-import com.padelpro.app.core.designsystem.theme.PpPrimary
-import com.padelpro.app.core.designsystem.theme.PpPrimaryTint
+import com.padelpro.app.core.designsystem.components.accentRail
+import com.padelpro.app.core.designsystem.components.glassPanel
+import com.padelpro.app.core.designsystem.theme.PpAmberLed
+import com.padelpro.app.core.designsystem.theme.PpCourtGlass
+import com.padelpro.app.core.designsystem.theme.PpCourtLine
+import com.padelpro.app.core.designsystem.theme.PpCourtPanel
+import com.padelpro.app.core.designsystem.theme.PpGlassCyan
+import com.padelpro.app.core.designsystem.theme.PpLime
 import com.padelpro.app.core.designsystem.theme.PpRadius
 import com.padelpro.app.core.designsystem.theme.PpSpacing
+import com.padelpro.app.core.designsystem.theme.PpTextHigh
+import com.padelpro.app.core.designsystem.theme.PpTextLow
+import com.padelpro.app.core.designsystem.theme.PpTextMid
 import com.padelpro.app.core.designsystem.theme.PpTextStyles
 import com.padelpro.app.domain.model.RulebookCategory
 import com.padelpro.app.domain.model.RulebookItem
@@ -74,7 +82,6 @@ fun RulebookScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(PpBackground)
             .windowInsetsPadding(WindowInsets.safeDrawing),
         contentAlignment = Alignment.TopCenter
     ) {
@@ -100,7 +107,7 @@ fun RulebookScreen(
                     Text(
                         text = stringResource(R.string.rulebook_title),
                         style = PpTextStyles.H1,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = PpTextHigh
                     )
                 }
             }
@@ -130,7 +137,7 @@ fun RulebookScreen(
                                     Icon(
                                         imageVector = Icons.Rounded.Star,
                                         contentDescription = null,
-                                        tint = if (state.rulebookCategory == cat) PpPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        tint = if (state.rulebookCategory == cat) PpAmberLed else PpTextMid,
                                         modifier = Modifier.size(14.dp)
                                     )
                                 }
@@ -192,12 +199,22 @@ private fun RulebookCard(
     onToggleExpand: () -> Unit,
     onToggleFavorite: () -> Unit
 ) {
-    PpCard(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .testTag("rule_card_${item.id}"),
-        borderColor = if (expanded) PpPrimary.copy(alpha = 0.6f) else PpOutline,
-        onClick = onToggleExpand
+            .testTag("rule_card_${item.id}")
+            .glassPanel(
+                radius = PpRadius.card,
+                fill = Brush.verticalGradient(listOf(PpCourtGlass, PpCourtPanel)),
+                edge = if (expanded) {
+                    Brush.linearGradient(listOf(PpGlassCyan, PpLime.copy(alpha = 0.45f)))
+                } else {
+                    Brush.linearGradient(listOf(PpCourtLine, PpCourtLine))
+                }
+            )
+            .then(if (expanded) Modifier.accentRail(PpGlassCyan) else Modifier)
+            .clickable(onClick = onToggleExpand)
+            .padding(PpSpacing.lg)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -212,21 +229,29 @@ private fun RulebookCard(
                 Box(
                     modifier = Modifier
                         .clip(PpRadius.pill)
-                        .background(PpPrimaryTint)
-                        .border(1.dp, PpPrimary.copy(alpha = 0.5f), PpRadius.pill)
+                        .background(Color(0x1FC8F751))
+                        .border(1.dp, PpLime.copy(alpha = 0.45f), PpRadius.pill)
                         .padding(horizontal = PpSpacing.sm, vertical = 2.dp)
                 ) {
                     Text(
                         text = stringResource(rulebookCategoryLabelRes(item.category)),
-                        style = PpTextStyles.Micro,
-                        color = PpPrimary
+                        style = PpTextStyles.Overline,
+                        color = PpLime
                     )
                 }
-                Text(
-                    text = stringResource(R.string.rulebook_fip_ref_format, item.fipRef),
-                    style = PpTextStyles.Micro,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Box(
+                    modifier = Modifier
+                        .clip(PpRadius.pill)
+                        .background(Color(0x1F5FE3FF))
+                        .border(1.dp, PpGlassCyan.copy(alpha = 0.55f), PpRadius.pill)
+                        .padding(horizontal = PpSpacing.sm, vertical = 2.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.rulebook_fip_ref_format, item.fipRef),
+                        style = PpTextStyles.Overline,
+                        color = PpGlassCyan
+                    )
+                }
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -242,7 +267,7 @@ private fun RulebookCard(
                             if (item.isFavorite) R.string.rulebook_cd_favorite_remove
                             else R.string.rulebook_cd_favorite_add
                         ),
-                        tint = if (item.isFavorite) PpPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = if (item.isFavorite) PpAmberLed else PpTextLow
                     )
                 }
                 Icon(
@@ -250,7 +275,7 @@ private fun RulebookCard(
                     contentDescription = stringResource(
                         if (expanded) R.string.rulebook_cd_collapse else R.string.rulebook_cd_expand
                     ),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    tint = PpTextMid,
                     modifier = Modifier.size(22.dp)
                 )
             }
@@ -260,7 +285,7 @@ private fun RulebookCard(
         Text(
             text = item.title,
             style = PpTextStyles.Title,
-            color = MaterialTheme.colorScheme.onBackground
+            color = PpTextHigh
         )
 
         AnimatedVisibility(visible = expanded) {
@@ -270,14 +295,14 @@ private fun RulebookCard(
                         diagramId = item.diagramId,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(120.dp)
+                            .height(128.dp)
                     )
                     Spacer(Modifier.height(PpSpacing.md))
                 }
                 Text(
                     text = item.body,
                     style = PpTextStyles.Body,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = PpTextMid
                 )
             }
         }
