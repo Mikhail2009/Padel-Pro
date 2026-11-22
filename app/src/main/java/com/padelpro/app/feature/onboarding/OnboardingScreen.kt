@@ -43,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
@@ -167,11 +168,11 @@ private fun WelcomeStep(
                     .size(64.dp)
                     .clip(CircleShape)
                     .background(
-                        Brush.radialGradient(listOf(Color(0x1FC2F54C), Color(0x1472B7F0)))
+                        Color(0x1FC2F54C)
                     )
                     .border(
                         1.5.dp,
-                        Brush.sweepGradient(listOf(PpGlassCyan, PpLime, PpGlassCyan)),
+                        SolidColor(PpLime),
                         CircleShape
                     ),
                 contentAlignment = Alignment.Center

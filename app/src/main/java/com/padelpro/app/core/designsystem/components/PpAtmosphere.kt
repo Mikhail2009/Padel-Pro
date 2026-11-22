@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -99,20 +100,29 @@ fun Modifier.glassPanel(
     }
 
 /**
- * Индикатор состояния слева: короткая скруглённая метка по центру кромки
- * (вместо сплошной цветной полосы на всю высоту карточки — частый шаблонный приём).
+ * Раньше рисовал цветную метку слева на карточке — шаблонный приём, от него отказались.
+ * Имя и сигнатура оставлены, чтобы не трогать вызовы; метод ничего не рисует.
  */
-fun Modifier.accentRail(color: Color = PpLime, width: Dp = 3.dp): Modifier = this.drawWithCache {
-    val w = width.toPx()
-    val h = (size.height * 0.46f).coerceIn(18.dp.toPx(), 44.dp.toPx())
-    onDrawBehind {
-        drawRoundRect(
-            color = color,
-            topLeft = Offset(0f, (size.height - h) / 2f),
-            size = Size(w + 2.dp.toPx(), h),
-            cornerRadius = CornerRadius(w, w)
-        )
-    }
+@Suppress("UNUSED_PARAMETER")
+fun Modifier.accentRail(color: Color = PpLime, width: Dp = 3.dp): Modifier = this
+
+/**
+ * Едва заметный рисунок корта в правом нижнем углу карточки — фирменный штрих для «героев»
+ * экрана (уровень, новая игра, статистика). Рисуется тонкой линией, без заливок.
+ */
+fun Modifier.courtMotif(color: Color = PpLime, alpha: Float = 0.09f): Modifier = this.drawBehind {
+    val u = 1.dp.toPx()
+    val w = size.width * 0.46f
+    val h = w * 0.62f
+    val left = size.width - w - 14 * u
+    val top = size.height - h - 14 * u
+    if (left < 0f || top < 0f) return@drawBehind
+    val c = color.copy(alpha = alpha)
+    drawRoundRect(c, Offset(left, top), Size(w, h), CornerRadius(6 * u, 6 * u), Stroke(1.2f * u))
+    drawLine(c, Offset(left + w / 2, top - 4 * u), Offset(left + w / 2, top + h + 4 * u), 1.2f * u)
+    drawLine(c, Offset(left + w * 0.2f, top), Offset(left + w * 0.2f, top + h), 1f * u)
+    drawLine(c, Offset(left + w * 0.8f, top), Offset(left + w * 0.8f, top + h), 1f * u)
+    drawLine(c, Offset(left + w * 0.2f, top + h / 2), Offset(left + w * 0.8f, top + h / 2), 1f * u)
 }
 
 /** Вертикальный скролл с тонким индикатором. */

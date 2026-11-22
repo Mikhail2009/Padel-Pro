@@ -1,6 +1,7 @@
 package com.padelpro.app.core.designsystem.theme
 
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.Color
 
 // ── Основа: «обсидиан» — почти чёрный с едва заметным зелёным подтоном ───────────
@@ -68,7 +69,7 @@ val PpSpecularEdge: Brush get() = Brush.verticalGradient(
 )
 
 /** Заливка карточки: на 2–3% светлее к верху — почти плоская. */
-val PpPanelFill: Brush get() = Brush.verticalGradient(listOf(PpCourtPanel, Color(0xFF141915)))
+val PpPanelFill: Brush get() = SolidColor(PpCourtPanel)
 val PpScrimVertical: Brush get() = Brush.verticalGradient(
     listOf(Color(0x00090B0A), Color(0xB3090B0A), PpCourtDeep)
 )

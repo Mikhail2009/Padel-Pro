@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -57,7 +58,6 @@ import com.padelpro.app.core.designsystem.components.PpTextField
 import com.padelpro.app.core.designsystem.components.accentRail
 import com.padelpro.app.core.designsystem.components.glassPanel
 import com.padelpro.app.core.designsystem.theme.PpAmberLed
-import com.padelpro.app.core.designsystem.theme.PpCourtGlass
 import com.padelpro.app.core.designsystem.theme.PpCourtLine
 import com.padelpro.app.core.designsystem.theme.PpCourtPanel
 import com.padelpro.app.core.designsystem.theme.PpGlassCyan
@@ -205,12 +205,8 @@ private fun RulebookCard(
             .testTag("rule_card_${item.id}")
             .glassPanel(
                 radius = PpRadius.card,
-                fill = Brush.verticalGradient(listOf(PpCourtGlass, PpCourtPanel)),
-                edge = if (expanded) {
-                    Brush.linearGradient(listOf(PpGlassCyan, PpLime.copy(alpha = 0.45f)))
-                } else {
-                    Brush.linearGradient(listOf(PpCourtLine, PpCourtLine))
-                }
+                fill = SolidColor(PpCourtPanel),
+                edge = SolidColor(if (expanded) PpLime.copy(alpha = 0.45f) else PpCourtLine)
             )
             .then(if (expanded) Modifier.accentRail(PpGlassCyan) else Modifier)
             .clickable(onClick = onToggleExpand)

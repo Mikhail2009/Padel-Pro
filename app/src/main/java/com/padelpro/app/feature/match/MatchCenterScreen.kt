@@ -31,7 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
@@ -50,9 +50,7 @@ import com.padelpro.app.core.designsystem.components.PpSectionHeader
 import com.padelpro.app.core.designsystem.components.accentRail
 import com.padelpro.app.core.designsystem.components.glassPanel
 import com.padelpro.app.core.designsystem.theme.PpAmberLed
-import com.padelpro.app.core.designsystem.theme.PpCourtGlass
 import com.padelpro.app.core.designsystem.theme.PpCourtPanel
-import com.padelpro.app.core.designsystem.theme.PpCourtSweep
 import com.padelpro.app.core.designsystem.theme.PpGlassCyan
 import com.padelpro.app.core.designsystem.theme.PpLime
 import com.padelpro.app.core.designsystem.theme.PpRadius
@@ -131,9 +129,7 @@ fun MatchCenterScreen(
                         .fillMaxWidth()
                         .glassPanel(
                             radius = PpRadius.panel,
-                            fill = Brush.verticalGradient(listOf(PpCourtGlass, PpCourtPanel)),
-                            edge = PpCourtSweep,
-                            borderWidth = 1.5.dp
+                            fill = SolidColor(PpCourtPanel)
                         )
                         .padding(PpSpacing.lg)
                 ) {

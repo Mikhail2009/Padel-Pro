@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -54,7 +55,7 @@ enum class BottomTab(val labelRes: Int, val icon: ImageVector, val testTag: Stri
 /**
  * Нижняя навигация, «пристыкованная» к краю экрана: сплошной фон, тонкая линия сверху.
  * Раньше это была плавающая стеклянная таблетка, под которой просвечивал контент.
- * Активная вкладка — мягкая лаймовая «капсула» вокруг иконки, подпись без капса.
+ * Активная вкладка — короткая лаймовая черта над иконкой, подпись без капса.
  */
 @Composable
 fun PpBottomBar(
@@ -95,18 +96,17 @@ fun PpBottomBar(
                 ) {
                     Box(
                         Modifier
-                            .width(58.dp)
-                            .height(30.dp)
-                            .clip(RoundedCornerShape(15.dp))
-                            .drawBehind { drawRect(PpLime.copy(alpha = 0.16f * glow)) },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            tab.icon, stringResource(tab.labelRes),
-                            tint = if (active) PpLime else PpTextLow,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+                            .width(24.dp)
+                            .height(2.dp)
+                            .clip(RoundedCornerShape(1.dp))
+                            .drawBehind { drawRect(PpLime.copy(alpha = glow)) }
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Icon(
+                        tab.icon, stringResource(tab.labelRes),
+                        tint = if (active) PpLime else PpTextLow,
+                        modifier = Modifier.size(24.dp)
+                    )
                     Text(
                         stringResource(tab.labelRes),
                         style = PpTextStyles.Micro.copy(fontSize = 11.sp, lineHeight = 14.sp),

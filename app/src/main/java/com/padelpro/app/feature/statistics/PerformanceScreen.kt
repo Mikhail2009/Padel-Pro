@@ -167,7 +167,7 @@ fun PerformanceScreen(
                         PpEmptyState(
                             icon = Icons.Rounded.SportsTennis,
                             title = stringResource(R.string.performance_empty_cta_text),
-                            subtitle = stringResource(R.string.home_recent_match_empty_sub),
+                            subtitle = stringResource(R.string.performance_empty_sub),
                             modifier = Modifier.testTag("performance_empty_state")
                         )
                         Spacer(Modifier.height(PpSpacing.md))

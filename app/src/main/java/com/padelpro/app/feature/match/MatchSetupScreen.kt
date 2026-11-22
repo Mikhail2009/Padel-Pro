@@ -43,6 +43,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -324,16 +326,8 @@ fun MatchSetupScreen(
                                     .weight(1f)
                                     .glassPanel(
                                         radius = PpRadius.input,
-                                        fill = if (selected) {
-                                            Brush.verticalGradient(listOf(Color(0x1A72B7F0), PpCourtPanel))
-                                        } else {
-                                            Brush.verticalGradient(listOf(PpCourtNight, PpCourtNight))
-                                        },
-                                        edge = if (selected) {
-                                            Brush.linearGradient(listOf(PpGlassCyan, PpLime))
-                                        } else {
-                                            Brush.linearGradient(listOf(PpCourtLine, PpCourtLine))
-                                        }
+                                        fill = SolidColor(if (selected) PpLime.copy(alpha = 0.10f).compositeOver(PpCourtPanel) else PpCourtNight),
+                                        edge = SolidColor(if (selected) PpLime else PpCourtLine)
                                     )
                                     .clickable { viewModel.setFirstServerIndex(serverIdx) }
                                     .padding(vertical = PpSpacing.sm, horizontal = PpSpacing.xs),

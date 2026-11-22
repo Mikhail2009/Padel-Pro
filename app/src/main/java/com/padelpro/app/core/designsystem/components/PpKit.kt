@@ -49,11 +49,13 @@ import com.padelpro.app.core.designsystem.theme.PpTextStyles
 fun PpCard(
     modifier: Modifier = Modifier,
     accent: Color? = null,
+    motif: Boolean = false,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(
         modifier
             .glassPanel()
+            .then(if (motif) Modifier.courtMotif() else Modifier)
             .then(if (accent != null) Modifier.accentRail(accent) else Modifier)
             .padding(PpSpacing.lg + 2.dp),
         content = content

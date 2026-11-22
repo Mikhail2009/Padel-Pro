@@ -30,7 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
@@ -50,7 +50,6 @@ import com.padelpro.app.core.designsystem.components.PpSectionHeader
 import com.padelpro.app.core.designsystem.components.PpStatCard
 import com.padelpro.app.core.designsystem.components.PpStreakFlame
 import com.padelpro.app.core.designsystem.components.PpXpIndicator
-import com.padelpro.app.core.designsystem.components.accentRail
 import com.padelpro.app.core.designsystem.components.glassPanel
 import com.padelpro.app.core.designsystem.components.levelTitleRes
 import com.padelpro.app.core.designsystem.theme.PpAmberLed
@@ -62,6 +61,7 @@ import com.padelpro.app.core.designsystem.theme.PpLime
 import com.padelpro.app.core.designsystem.theme.PpOnAccent
 import com.padelpro.app.core.designsystem.theme.PpRadius
 import com.padelpro.app.core.designsystem.theme.PpSpacing
+import com.padelpro.app.core.designsystem.theme.PpSpecularEdge
 import com.padelpro.app.core.designsystem.theme.PpTextHigh
 import com.padelpro.app.core.designsystem.theme.PpTextMid
 import com.padelpro.app.core.designsystem.theme.PpTextStyles
@@ -171,7 +171,7 @@ fun HomeScreen(
             }
 
             item {
-                PpCard(modifier = Modifier.fillMaxWidth()) {
+                PpCard(modifier = Modifier.fillMaxWidth(), motif = true) {
                     PpXpIndicator(
                         level = state.level,
                         levelTitle = stringResource(levelTitleRes(state.level)),
@@ -325,17 +325,15 @@ private fun QuickActionCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val titleColor = if (highlighted) PpOnAccent else PpTextHigh
+    val subColor = if (highlighted) PpOnAccent.copy(alpha = 0.72f) else PpTextMid
     Column(
         modifier = modifier
             .glassPanel(
                 radius = PpRadius.card,
-                fill = if (highlighted) {
-                    Brush.verticalGradient(listOf(Color(0x1FC2F54C), PpCourtPanel))
-                } else {
-                    Brush.verticalGradient(listOf(PpCourtGlass, PpCourtPanel))
-                }
+                fill = SolidColor(if (highlighted) PpLime else PpCourtPanel),
+                edge = if (highlighted) SolidColor(PpLime) else PpSpecularEdge
             )
-            .accentRail(accentColor)
             .clickable(onClick = onClick)
             .padding(PpSpacing.lg)
     ) {
@@ -343,28 +341,29 @@ private fun QuickActionCard(
             modifier = Modifier
                 .size(42.dp)
                 .clip(CircleShape)
-                .background(if (highlighted) PpLime else accentColor.copy(alpha = 0.16f))
-                .border(1.dp, accentColor.copy(alpha = 0.7f), CircleShape),
+                .background(if (highlighted) PpOnAccent else PpCourtGlass),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = if (highlighted) PpOnAccent else accentColor,
+                tint = if (highlighted) PpLime else accentColor,
                 modifier = Modifier.size(20.dp)
             )
         }
-        Spacer(Modifier.height(PpSpacing.md))
+        Spacer(Modifier.height(PpSpacing.lg))
         Text(
             text = title,
-            style = PpTextStyles.Micro,
-            color = accentColor
+            style = PpTextStyles.Title,
+            color = titleColor,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis
         )
         Spacer(Modifier.height(PpSpacing.xs))
         Text(
             text = subtitle,
             style = PpTextStyles.Label,
-            color = PpTextMid,
+            color = subColor,
             maxLines = 2,
             overflow = TextOverflow.Ellipsis
         )

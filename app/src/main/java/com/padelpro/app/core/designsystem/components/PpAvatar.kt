@@ -34,7 +34,6 @@ import com.padelpro.app.R
 import com.padelpro.app.core.designsystem.theme.PpCourtGlass
 import com.padelpro.app.core.designsystem.theme.PpCourtLineStrong
 import com.padelpro.app.core.designsystem.theme.PpCourtNight
-import com.padelpro.app.core.designsystem.theme.PpCourtPanel
 import com.padelpro.app.core.designsystem.theme.PpGlassCyan
 import com.padelpro.app.core.designsystem.theme.PpLime
 import com.padelpro.app.core.designsystem.theme.PpSpacing
@@ -59,7 +58,7 @@ fun PpAvatar(
         .size(size)
         .clip(CircleShape)
         .background(
-            Brush.radialGradient(listOf(PpCourtGlass, PpCourtPanel))
+            PpCourtGlass
         )
         .border(borderWidth, ringBrush, CircleShape)
         .semantics { contentDescription = cd }

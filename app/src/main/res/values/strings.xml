@@ -46,10 +46,10 @@
     <string name="xp_progress_format">%1$d / %2$d XP</string>
     <string name="xp_total_format">%1$d XP</string>
     <plurals name="streak_days_format">
-        <item quantity="one">СЕРИЯ %1$d ДЕНЬ</item>
-        <item quantity="few">СЕРИЯ %1$d ДНЯ</item>
-        <item quantity="many">СЕРИЯ %1$d ДНЕЙ</item>
-        <item quantity="other">СЕРИЯ %1$d ДН.</item>
+        <item quantity="one">Серия %1$d день</item>
+        <item quantity="few">Серия %1$d дня</item>
+        <item quantity="many">Серия %1$d дней</item>
+        <item quantity="other">Серия %1$d дн.</item>
     </plurals>
     <string name="streak_win_short_format">В%1$d</string>
     <string name="streak_loss_short_format">П%1$d</string>
@@ -164,10 +164,10 @@
 
     <!-- Экран 04: Детали курса -->
     <plurals name="course_meta_lessons_format">
-        <item quantity="one">%1$d УРОК</item>
-        <item quantity="few">%1$d УРОКА</item>
-        <item quantity="many">%1$d УРОКОВ</item>
-        <item quantity="other">%1$d УРОКОВ</item>
+        <item quantity="one">%1$d урок</item>
+        <item quantity="few">%1$d урока</item>
+        <item quantity="many">%1$d уроков</item>
+        <item quantity="other">%1$d уроков</item>
     </plurals>
     <string name="course_meta_min_format">%1$d мин</string>
     <string name="course_meta_xp_format">+%1$d XP</string>
@@ -283,7 +283,7 @@
     <string name="match_center_most_popular">Популярный</string>
     <string name="match_center_recent_matches">Недавние матчи</string>
     <string name="match_center_view_all">Все</string>
-    <string name="match_center_empty_recent">Пока нет матчей. Ваша история начинается здесь.</string>
+    <string name="match_center_empty_recent">Здесь появится история ваших матчей</string>
     <string name="match_center_format_sheet_title">Выберите формат матча</string>
 
     <!-- Экран 10: Настройка матча -->
@@ -394,10 +394,10 @@
     <!-- Экран 13: История матчей -->
     <string name="history_title">История матчей</string>
     <plurals name="history_count_format">
-        <item quantity="one">%1$d МАТЧ</item>
-        <item quantity="few">%1$d МАТЧА</item>
-        <item quantity="many">%1$d МАТЧЕЙ</item>
-        <item quantity="other">%1$d МАТЧЕЙ</item>
+        <item quantity="one">%1$d матч</item>
+        <item quantity="few">%1$d матча</item>
+        <item quantity="many">%1$d матчей</item>
+        <item quantity="other">%1$d матчей</item>
     </plurals>
     <string name="history_search_hint">Поиск по игроку…</string>
     <string name="history_filter_all">Все</string>
@@ -441,16 +441,16 @@
     <string name="performance_title">Статистика</string>
     <string name="performance_win_rate_label">Победы</string>
     <plurals name="performance_wins_format">
-        <item quantity="one">%1$d ПОБЕДА</item>
-        <item quantity="few">%1$d ПОБЕДЫ</item>
-        <item quantity="many">%1$d ПОБЕД</item>
-        <item quantity="other">%1$d ПОБЕД</item>
+        <item quantity="one">%1$d победа</item>
+        <item quantity="few">%1$d победы</item>
+        <item quantity="many">%1$d побед</item>
+        <item quantity="other">%1$d побед</item>
     </plurals>
     <plurals name="performance_losses_format">
-        <item quantity="one">%1$d ПОРАЖЕНИЕ</item>
-        <item quantity="few">%1$d ПОРАЖЕНИЯ</item>
-        <item quantity="many">%1$d ПОРАЖЕНИЙ</item>
-        <item quantity="other">%1$d ПОРАЖЕНИЙ</item>
+        <item quantity="one">%1$d поражение</item>
+        <item quantity="few">%1$d поражения</item>
+        <item quantity="many">%1$d поражений</item>
+        <item quantity="other">%1$d поражений</item>
     </plurals>
     <string name="performance_kpi_matches">Матчи</string>
     <string name="performance_kpi_current_streak">Текущая серия</string>
@@ -466,6 +466,7 @@
     </plurals>
     <string name="performance_section_recent_form">Последняя форма</string>
     <string name="performance_last_5_matches">Последние 5 матчей</string>
+    <string name="performance_empty_sub">Результаты, серии и графики появятся после первого завершённого матча.</string>
     <string name="performance_view_history">История матчей →</string>
     <string name="performance_empty_cta_text">Сыграйте первый матч, чтобы открыть статистику</string>
     <string name="performance_form_w">В</string>

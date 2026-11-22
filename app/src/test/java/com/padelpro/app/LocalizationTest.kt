@@ -60,13 +60,13 @@ class LocalizationTest {
         }
         val res = baseContext.createConfigurationContext(ruConfig).resources
 
-        assertEquals("1 МАТЧ", res.getQuantityString(R.plurals.history_count_format, 1, 1))
-        assertEquals("2 МАТЧА", res.getQuantityString(R.plurals.history_count_format, 2, 2))
-        assertEquals("5 МАТЧЕЙ", res.getQuantityString(R.plurals.history_count_format, 5, 5))
+        assertEquals("1 матч", res.getQuantityString(R.plurals.history_count_format, 1, 1))
+        assertEquals("2 матча", res.getQuantityString(R.plurals.history_count_format, 2, 2))
+        assertEquals("5 матчей", res.getQuantityString(R.plurals.history_count_format, 5, 5))
 
-        assertEquals("СЕРИЯ 1 ДЕНЬ", res.getQuantityString(R.plurals.streak_days_format, 1, 1))
-        assertEquals("СЕРИЯ 3 ДНЯ", res.getQuantityString(R.plurals.streak_days_format, 3, 3))
-        assertEquals("СЕРИЯ 7 ДНЕЙ", res.getQuantityString(R.plurals.streak_days_format, 7, 7))
+        assertEquals("Серия 1 день", res.getQuantityString(R.plurals.streak_days_format, 1, 1))
+        assertEquals("Серия 3 дня", res.getQuantityString(R.plurals.streak_days_format, 3, 3))
+        assertEquals("Серия 7 дней", res.getQuantityString(R.plurals.streak_days_format, 7, 7))
 
         assertEquals("1 очко", res.getQuantityString(R.plurals.points_count_format, 1, 1))
         assertEquals("4 очка", res.getQuantityString(R.plurals.points_count_format, 4, 4))

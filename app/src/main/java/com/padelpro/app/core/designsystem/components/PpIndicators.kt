@@ -36,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.padelpro.app.R
 import com.padelpro.app.core.designsystem.theme.PpAmberLed
 import com.padelpro.app.core.designsystem.theme.PpBallTrail
@@ -74,39 +75,37 @@ fun PpXpIndicator(
     progress: Float,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        PpXpRing(
-            progress = progress,
-            center = level.toString(),
-            caption = levelTitle
-        )
-        Spacer(Modifier.width(PpSpacing.xl))
-        Column(modifier = Modifier.weight(1f)) {
+    Column(modifier = modifier.fillMaxWidth()) {
+        Row(verticalAlignment = Alignment.Bottom) {
             Text(
-                text = stringResource(R.string.level_badge_format, level, levelTitle),
-                style = PpTextStyles.Label,
-                color = PpTextMid,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                text = level.toString(),
+                style = PpTextStyles.ScoreDisplay.copy(fontSize = 64.sp, lineHeight = 64.sp, letterSpacing = (-2).sp),
+                color = PpLime
             )
-            Spacer(Modifier.height(PpSpacing.xs))
-            Text(
-                text = stringResource(R.string.xp_progress_format, currentXp, nextLevelXp),
-                style = PpTextStyles.Numeral,
-                color = PpTextHigh,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(Modifier.height(PpSpacing.md + 2.dp))
-            PpProgressBar(
-                progress = progress,
-                brush = PpBallTrail,
-                modifier = Modifier.fillMaxWidth()
-            )
+            Spacer(Modifier.width(PpSpacing.md))
+            Column(Modifier.weight(1f).padding(bottom = 6.dp)) {
+                Text(
+                    text = stringResource(R.string.level_badge_format, level, levelTitle),
+                    style = PpTextStyles.Label,
+                    color = PpTextMid,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = stringResource(R.string.xp_progress_format, currentXp, nextLevelXp),
+                    style = PpTextStyles.Numeral,
+                    color = PpTextHigh,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
+        Spacer(Modifier.height(PpSpacing.md))
+        PpProgressBar(
+            progress = progress,
+            brush = PpBallTrail,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
