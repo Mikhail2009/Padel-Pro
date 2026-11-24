@@ -27,10 +27,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.padelpro.app.R
 import com.padelpro.app.core.designsystem.theme.LocalPpMotion
 import com.padelpro.app.core.designsystem.theme.PpCourtLine
 import com.padelpro.app.core.designsystem.theme.PpCourtLineStrong
+import com.padelpro.app.core.designsystem.theme.PpGlassCyan
 import com.padelpro.app.core.designsystem.theme.PpTrophyMagenta
 import com.padelpro.app.core.designsystem.theme.PpLime
 import com.padelpro.app.core.designsystem.theme.PpSpacing
@@ -38,6 +41,7 @@ import com.padelpro.app.core.designsystem.theme.PpTextHigh
 import com.padelpro.app.core.designsystem.theme.PpTextLow
 import com.padelpro.app.core.designsystem.theme.PpTextMid
 import com.padelpro.app.core.designsystem.theme.PpTextStyles
+import com.padelpro.app.domain.model.MatchFormOutcome
 
 @Composable
 fun PpWinDonut(fraction: Float, centerLabel: String, modifier: Modifier = Modifier) {
@@ -110,10 +114,14 @@ fun PpActivityBars(labels: List<String>, values: List<Int>, modifier: Modifier =
 }
 
 @Composable
-fun PpFormChips(results: List<Boolean>, modifier: Modifier = Modifier) {
+fun PpFormChips(results: List<MatchFormOutcome>, modifier: Modifier = Modifier) {
     Row(modifier, horizontalArrangement = Arrangement.spacedBy(PpSpacing.sm)) {
-        results.forEach { win ->
-            val c = if (win) PpLime else PpTrophyMagenta
+        results.forEach { outcome ->
+            val (c, label) = when (outcome) {
+                MatchFormOutcome.WIN -> PpLime to stringResource(R.string.performance_form_w)
+                MatchFormOutcome.LOSS -> PpTrophyMagenta to stringResource(R.string.performance_form_l)
+                MatchFormOutcome.DRAW -> PpGlassCyan to stringResource(R.string.performance_form_d)
+            }
             Box(
                 Modifier.size(36.dp).glassPanel(
                     radius = 18.dp,
@@ -121,7 +129,7 @@ fun PpFormChips(results: List<Boolean>, modifier: Modifier = Modifier) {
                     edge = SolidColor(c.copy(alpha = 0.35f))
                 ),
                 contentAlignment = Alignment.Center
-            ) { Text(if (win) "В" else "П", style = PpTextStyles.Label, color = c) }
+            ) { Text(label, style = PpTextStyles.Label, color = c) }
         }
     }
 }

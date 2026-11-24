@@ -54,6 +54,7 @@ import com.padelpro.app.core.designsystem.theme.PpCourtGlass
 import com.padelpro.app.core.designsystem.theme.PpCourtLineStrong
 import com.padelpro.app.core.designsystem.theme.PpGlassCyan
 import com.padelpro.app.core.designsystem.theme.PpLime
+import com.padelpro.app.core.designsystem.theme.PpRadius
 import com.padelpro.app.core.designsystem.theme.PpSpacing
 import com.padelpro.app.core.designsystem.theme.PpTextHigh
 import com.padelpro.app.core.designsystem.theme.PpTextMid
@@ -164,21 +165,24 @@ private fun MatchResultsContent(
     val teamBText = match.teamBNames.joinToString(" и ")
         .ifBlank { stringResource(R.string.live_match_team_b_placeholder) }
 
-    val winnerNames = when (match.winnerTeam) {
-        TeamSide.A -> teamAText
-        TeamSide.B -> teamBText
-        null -> stringResource(R.string.dash_placeholder)
-    }
-    val winnerSubtitle = when (match.winnerTeam) {
-        TeamSide.A -> stringResource(R.string.results_winner_team_a)
-        TeamSide.B -> stringResource(R.string.results_winner_team_b)
-        null -> ""
-    }
+    val isManualDraw = match.isManuallyCompleted
     val isWin = match.userWon == true
-    val headline = if (isWin) {
-        stringResource(R.string.results_win_title)
-    } else {
-        stringResource(R.string.results_loss_title)
+    val winnerNames = when {
+        isManualDraw -> stringResource(R.string.match_card_teams_vs_format, teamAText, teamBText)
+        match.winnerTeam == TeamSide.A -> teamAText
+        match.winnerTeam == TeamSide.B -> teamBText
+        else -> stringResource(R.string.dash_placeholder)
+    }
+    val winnerSubtitle = when {
+        isManualDraw -> stringResource(R.string.results_draw_subtitle)
+        match.winnerTeam == TeamSide.A -> stringResource(R.string.results_winner_team_a)
+        match.winnerTeam == TeamSide.B -> stringResource(R.string.results_winner_team_b)
+        else -> ""
+    }
+    val headline = when {
+        isWin -> stringResource(R.string.results_win_title)
+        isManualDraw -> stringResource(R.string.results_draw_title)
+        else -> stringResource(R.string.results_loss_title)
     }
 
     PpScrollColumn(
@@ -238,9 +242,30 @@ private fun MatchResultsContent(
                 Text(
                     text = headline,
                     style = PpTextStyles.H1,
-                    color = if (isWin) PpLime else PpTextHigh,
+                    color = when {
+                        isWin -> PpLime
+                        isManualDraw -> PpGlassCyan
+                        else -> PpTextHigh
+                    },
                     textAlign = TextAlign.Center
                 )
+                if (isManualDraw) {
+                    Spacer(Modifier.height(PpSpacing.xs))
+                    Box(
+                        modifier = Modifier
+                            .clip(PpRadius.pill)
+                            .background(PpAmberLed.copy(alpha = 0.14f))
+                            .border(1.dp, PpAmberLed.copy(alpha = 0.45f), PpRadius.pill)
+                            .padding(horizontal = PpSpacing.md, vertical = 4.dp)
+                            .testTag("results_manual_badge")
+                    ) {
+                        Text(
+                            text = stringResource(R.string.results_manual_finish_badge),
+                            style = PpTextStyles.Micro,
+                            color = PpAmberLed
+                        )
+                    }
+                }
                 Spacer(Modifier.height(PpSpacing.xs))
                 Text(
                     text = winnerNames,
@@ -283,10 +308,10 @@ private fun MatchResultsContent(
                             )
                             Spacer(Modifier.width(PpSpacing.sm))
                             Text(
-                                text = if (isWin) {
-                                    stringResource(R.string.results_xp_breakdown_win)
-                                } else {
-                                    stringResource(R.string.results_xp_breakdown_participation)
+                                text = when {
+                                    isManualDraw -> stringResource(R.string.results_xp_breakdown_manual)
+                                    isWin -> stringResource(R.string.results_xp_breakdown_win)
+                                    else -> stringResource(R.string.results_xp_breakdown_participation)
                                 },
                                 style = PpTextStyles.Label,
                                 color = PpTextHigh
@@ -308,21 +333,62 @@ private fun MatchResultsContent(
                 Text(
                     text = formattedSetsSummary,
                     style = PpTextStyles.H2.copy(fontFeatureSettings = "tnum"),
-                    color = PpLime,
+                    color = if (isManualDraw) PpTextHigh else PpLime,
                     modifier = Modifier.testTag("results_sets_line")
                 )
-                Spacer(Modifier.height(PpSpacing.md))
-                PpSetScoreRow(
-                    teamLabel = teamAText,
-                    setScores = match.sets.map { formatSetCell(it.gamesA, it.tbA, it.tbB) },
-                    isWinner = match.winnerTeam == TeamSide.A
-                )
-                Spacer(Modifier.height(PpSpacing.sm))
-                PpSetScoreRow(
-                    teamLabel = teamBText,
-                    setScores = match.sets.map { formatSetCell(it.gamesB, it.tbB, it.tbA) },
-                    isWinner = match.winnerTeam == TeamSide.B
-                )
+                if (match.sets.isNotEmpty()) {
+                    Spacer(Modifier.height(PpSpacing.md))
+                    PpSetScoreRow(
+                        teamLabel = teamAText,
+                        setScores = match.sets.map { formatSetCell(it.gamesA, it.tbA, it.tbB) },
+                        isWinner = match.winnerTeam == TeamSide.A
+                    )
+                    Spacer(Modifier.height(PpSpacing.sm))
+                    PpSetScoreRow(
+                        teamLabel = teamBText,
+                        setScores = match.sets.map { formatSetCell(it.gamesB, it.tbB, it.tbA) },
+                        isWinner = match.winnerTeam == TeamSide.B
+                    )
+                }
+                match.incompleteSet?.let { inc ->
+                    Spacer(Modifier.height(PpSpacing.md))
+                    val scoreA = if (inc.scoreA == "AD") stringResource(R.string.live_score_advantage_short) else inc.scoreA
+                    val scoreB = if (inc.scoreB == "AD") stringResource(R.string.live_score_advantage_short) else inc.scoreB
+                    val incText = if (inc.isTieBreak) {
+                        stringResource(
+                            R.string.incomplete_set_tiebreak_score_format,
+                            inc.setIndex,
+                            inc.gamesA,
+                            inc.gamesB,
+                            scoreA,
+                            scoreB
+                        )
+                    } else {
+                        stringResource(
+                            R.string.incomplete_set_score_format,
+                            inc.setIndex,
+                            inc.gamesA,
+                            inc.gamesB,
+                            scoreA,
+                            scoreB
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(PpRadius.inputShape)
+                            .background(PpGlassCyan.copy(alpha = 0.10f))
+                            .border(1.dp, PpGlassCyan.copy(alpha = 0.35f), PpRadius.inputShape)
+                            .padding(horizontal = PpSpacing.md, vertical = PpSpacing.sm)
+                            .testTag("results_incomplete_set_box")
+                    ) {
+                        Text(
+                            text = incText,
+                            style = PpTextStyles.Label.copy(fontFeatureSettings = "tnum"),
+                            color = PpGlassCyan
+                        )
+                    }
+                }
             }
 
             PpCard(modifier = Modifier.fillMaxWidth()) {

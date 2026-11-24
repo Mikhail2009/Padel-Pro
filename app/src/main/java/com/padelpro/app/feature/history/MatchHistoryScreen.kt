@@ -144,6 +144,14 @@ fun MatchHistoryScreen(
                     }
                     item {
                         PpFilterChip(
+                            label = stringResource(R.string.history_filter_draws),
+                            selected = state.resultFilter == HistoryResultFilter.DRAWS,
+                            onClick = { viewModel.toggleResultFilter(HistoryResultFilter.DRAWS) },
+                            modifier = Modifier.testTag("history_filter_draws")
+                        )
+                    }
+                    item {
+                        PpFilterChip(
                             label = stringResource(R.string.history_filter_singles),
                             selected = state.formatFilter == HistoryFormatFilter.SINGLES,
                             onClick = { viewModel.toggleFormatFilter(HistoryFormatFilter.SINGLES) },

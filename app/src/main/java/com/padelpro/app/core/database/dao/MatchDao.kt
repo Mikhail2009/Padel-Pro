@@ -96,7 +96,7 @@ interface MatchDao {
     )
     suspend fun completeMatchIfActive(
         matchId: String,
-        winnerTeam: String,
+        winnerTeam: String?,
         endedAt: Long,
         durationMs: Long
     ): Int

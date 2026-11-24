@@ -16,7 +16,8 @@ import java.util.Locale
 enum class HistoryResultFilter {
     ALL,
     WINS,
-    LOSSES
+    LOSSES,
+    DRAWS
 }
 
 enum class HistoryFormatFilter {
@@ -68,6 +69,7 @@ class HistoryViewModel(
                 HistoryResultFilter.ALL -> true
                 HistoryResultFilter.WINS -> match.userWon == true
                 HistoryResultFilter.LOSSES -> match.userWon == false
+                HistoryResultFilter.DRAWS -> match.isManuallyCompleted
             }
             val matchesFormat = when (fmtFilter) {
                 HistoryFormatFilter.ALL -> true

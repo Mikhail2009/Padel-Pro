@@ -357,8 +357,8 @@
     <string name="live_match_set_chip_format">С%1$d</string>
     <string name="live_match_sets_won_format">Сеты %1$d:%2$d</string>
     <string name="live_match_games_score_format">%1$d — %2$d</string>
-    <string name="live_match_end_early_title">Завершить досрочно?</string>
-    <string name="live_match_end_early_body">Незавершённые матчи не сохраняются и не влияют на статистику.</string>
+    <string name="live_match_end_early_title">Завершить матч?</string>
+    <string name="live_match_end_early_body">Матчи дольше 10 минут сохраняются в истории как завершённые вручную без победителя (+15 XP). Матчи до 10 минут включительно удаляются без сохранения.</string>
     <string name="live_match_end_early_confirm">Завершить</string>
     <string name="live_match_return_center">В центр матчей</string>
     <string name="live_match_deuce_short_adv">Больше/меньше</string>
@@ -369,6 +369,9 @@
     <string name="results_completed_label">Матч завершён</string>
     <string name="results_win_title">Победа!</string>
     <string name="results_loss_title">Матч завершён</string>
+    <string name="results_draw_title">Ничья</string>
+    <string name="results_draw_subtitle">Матч завершён вручную без определения победителя</string>
+    <string name="results_manual_finish_badge">Завершён вручную</string>
     <string name="results_winner_team_a">Победила Команда A</string>
     <string name="results_winner_team_b">Победила Команда B</string>
     <string name="results_winners_label">Победители</string>
@@ -378,10 +381,14 @@
     <string name="results_format_label">Формат</string>
     <string name="results_scoring_label">Правила счёта</string>
     <string name="results_sets_section">Счёт по сетам</string>
+    <string name="incomplete_set_label_format">Сет %1$d (не завершён)</string>
+    <string name="incomplete_set_score_format">Сет %1$d (не завершён): %2$d-%3$d (%4$s:%5$s)</string>
+    <string name="incomplete_set_tiebreak_score_format">Сет %1$d (не завершён · тай-брейк): %2$d-%3$d (%4$s:%5$s)</string>
     <string name="results_players_section">Участники</string>
     <string name="results_xp_earned_format">+%1$d XP</string>
     <string name="results_xp_breakdown_win">Участие +30 XP · Победа +20 XP</string>
     <string name="results_xp_breakdown_participation">Участие +30 XP</string>
+    <string name="results_xp_breakdown_manual">Участие (завершён вручную) +15 XP</string>
     <string name="results_duration_sec_format">%1$d сек</string>
     <string name="results_duration_min_sec_format">%1$d мин %2$02d сек</string>
     <string name="results_duration_hour_min_format">%1$d ч %2$02d мин</string>
@@ -403,10 +410,12 @@
     <string name="history_filter_all">Все</string>
     <string name="history_filter_wins">Победы</string>
     <string name="history_filter_losses">Поражения</string>
+    <string name="history_filter_draws">Ничьи</string>
     <string name="history_filter_singles">Одиночный</string>
     <string name="history_filter_doubles">Парный</string>
     <string name="history_chip_win">Победа</string>
     <string name="history_chip_loss">Поражение</string>
+    <string name="history_chip_draw">Ничья</string>
     <string name="history_chip_completed">Завершён</string>
     <string name="history_empty_title">Пока нет матчей</string>
     <string name="history_empty_body">Сыграйте первый матч, чтобы начать собирать архив результатов.</string>
@@ -417,7 +426,10 @@
     <string name="details_title">Детали матча</string>
     <string name="details_winner_banner_win">Победа в матче</string>
     <string name="details_winner_banner_loss">Поражение в матче</string>
+    <string name="details_winner_banner_draw">Ничья · завершён вручную</string>
     <string name="details_winner_banner_neutral">Матч завершён</string>
+    <string name="details_completion_mode_label">Завершение</string>
+    <string name="details_completion_mode_manual">Вручную</string>
     <string name="details_table_team">Команда</string>
     <string name="details_table_set_format">С%1$d</string>
     <string name="details_table_set1">Сет 1</string>
@@ -452,6 +464,12 @@
         <item quantity="many">%1$d поражений</item>
         <item quantity="other">%1$d поражений</item>
     </plurals>
+    <plurals name="performance_draws_format">
+        <item quantity="one">%1$d ничья</item>
+        <item quantity="few">%1$d ничьи</item>
+        <item quantity="many">%1$d ничьих</item>
+        <item quantity="other">%1$d ничьих</item>
+    </plurals>
     <string name="performance_kpi_matches">Матчи</string>
     <string name="performance_kpi_current_streak">Текущая серия</string>
     <string name="performance_kpi_best_streak">Лучшая серия</string>
@@ -471,6 +489,7 @@
     <string name="performance_empty_cta_text">Сыграйте первый матч, чтобы открыть статистику</string>
     <string name="performance_form_w">В</string>
     <string name="performance_form_l">П</string>
+    <string name="performance_form_d">Н</string>
 
     <!-- Экран 16: Профиль игрока -->
     <string name="profile_title">Профиль</string>

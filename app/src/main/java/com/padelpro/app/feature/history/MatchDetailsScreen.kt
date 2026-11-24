@@ -191,29 +191,33 @@ private fun MatchDetailsBody(
     onRequestDelete: () -> Unit
 ) {
     val summary = details.summary
-    val bannerAccent = when (summary.userWon) {
-        true -> PpLime
-        false -> PpTrophyMagenta
-        null -> PpGlassCyan
+    val isManualDraw = summary.isManuallyCompleted
+    val bannerAccent = when {
+        summary.userWon == true -> PpLime
+        summary.userWon == false -> PpTrophyMagenta
+        else -> PpGlassCyan
     }
     val teamAText = summary.teamANames.joinToString(" & ")
         .ifBlank { stringResource(R.string.live_match_team_a_placeholder) }
     val teamBText = summary.teamBNames.joinToString(" & ")
         .ifBlank { stringResource(R.string.live_match_team_b_placeholder) }
-    val winnerLabel = when (summary.winnerTeam) {
-        TeamSide.A -> stringResource(R.string.results_winner_team_a)
-        TeamSide.B -> stringResource(R.string.results_winner_team_b)
-        null -> ""
+    val winnerLabel = when {
+        isManualDraw -> stringResource(R.string.results_manual_finish_badge)
+        summary.winnerTeam == TeamSide.A -> stringResource(R.string.results_winner_team_a)
+        summary.winnerTeam == TeamSide.B -> stringResource(R.string.results_winner_team_b)
+        else -> ""
     }
-    val winnerNames = when (summary.winnerTeam) {
-        TeamSide.A -> teamAText
-        TeamSide.B -> teamBText
-        null -> stringResource(R.string.dash_placeholder)
+    val winnerNames = when {
+        isManualDraw -> stringResource(R.string.match_card_teams_vs_format, teamAText, teamBText)
+        summary.winnerTeam == TeamSide.A -> teamAText
+        summary.winnerTeam == TeamSide.B -> teamBText
+        else -> stringResource(R.string.dash_placeholder)
     }
-    val bannerTitle = when (summary.userWon) {
-        true -> stringResource(R.string.details_winner_banner_win)
-        false -> stringResource(R.string.details_winner_banner_loss)
-        null -> stringResource(R.string.details_winner_banner_neutral)
+    val bannerTitle = when {
+        summary.userWon == true -> stringResource(R.string.details_winner_banner_win)
+        summary.userWon == false -> stringResource(R.string.details_winner_banner_loss)
+        isManualDraw -> stringResource(R.string.details_winner_banner_draw)
+        else -> stringResource(R.string.details_winner_banner_neutral)
     }
     val setsSummaryText = summary.sets.joinToString(" · ") { set ->
         val tb = if (set.tbA != null && set.tbB != null) {
@@ -359,6 +363,45 @@ private fun MatchDetailsBody(
                     else sets.map { formatSetCell(it.gamesB, it.tbB, it.tbA) },
                     isWinner = summary.winnerTeam == TeamSide.B
                 )
+                summary.incompleteSet?.let { inc ->
+                    Spacer(Modifier.height(PpSpacing.md))
+                    val scoreA = if (inc.scoreA == "AD") stringResource(R.string.live_score_advantage_short) else inc.scoreA
+                    val scoreB = if (inc.scoreB == "AD") stringResource(R.string.live_score_advantage_short) else inc.scoreB
+                    val incText = if (inc.isTieBreak) {
+                        stringResource(
+                            R.string.incomplete_set_tiebreak_score_format,
+                            inc.setIndex,
+                            inc.gamesA,
+                            inc.gamesB,
+                            scoreA,
+                            scoreB
+                        )
+                    } else {
+                        stringResource(
+                            R.string.incomplete_set_score_format,
+                            inc.setIndex,
+                            inc.gamesA,
+                            inc.gamesB,
+                            scoreA,
+                            scoreB
+                        )
+                    }
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(PpRadius.inputShape)
+                            .background(PpGlassCyan.copy(alpha = 0.10f))
+                            .border(1.dp, PpGlassCyan.copy(alpha = 0.35f), PpRadius.inputShape)
+                            .padding(horizontal = PpSpacing.md, vertical = PpSpacing.sm)
+                            .testTag("details_incomplete_set_box")
+                    ) {
+                        Text(
+                            text = incText,
+                            style = PpTextStyles.Label.copy(fontFeatureSettings = "tnum"),
+                            color = PpGlassCyan
+                        )
+                    }
+                }
             }
         }
 
@@ -418,6 +461,13 @@ private fun MatchDetailsBody(
                     label = stringResource(R.string.results_date_label),
                     value = formattedDate
                 )
+                if (isManualDraw) {
+                    Spacer(Modifier.height(PpSpacing.sm))
+                    DetailMetaRow(
+                        label = stringResource(R.string.details_completion_mode_label),
+                        value = stringResource(R.string.details_completion_mode_manual)
+                    )
+                }
             }
         }
 

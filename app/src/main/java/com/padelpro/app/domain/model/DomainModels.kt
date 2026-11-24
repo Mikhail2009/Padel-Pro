@@ -168,6 +168,21 @@ data class SetScore(
     val tbB: Int? = null
 )
 
+data class IncompleteSetScore(
+    val setIndex: Int,
+    val gamesA: Int,
+    val gamesB: Int,
+    val scoreA: String,
+    val scoreB: String,
+    val isTieBreak: Boolean = false
+)
+
+enum class MatchFormOutcome {
+    WIN,
+    LOSS,
+    DRAW
+}
+
 data class MatchSummary(
     val id: String,
     val format: MatchFormat,
@@ -180,8 +195,13 @@ data class MatchSummary(
     val userWon: Boolean?,
     val teamANames: List<String>,
     val teamBNames: List<String>,
-    val sets: List<SetScore>
-)
+    val sets: List<SetScore>,
+    val isUserParticipant: Boolean = userWon != null,
+    val incompleteSet: IncompleteSetScore? = null
+) {
+    val isManuallyCompleted: Boolean
+        get() = status == MatchStatus.COMPLETED && winnerTeam == null
+}
 
 data class MonthlyMatchCount(
     val label: String,
@@ -193,6 +213,7 @@ data class PerformanceSummary(
     val totalMatches: Int = 0,
     val wins: Int = 0,
     val losses: Int = 0,
+    val draws: Int = 0,
     val winRatePercent: Int? = null,
     val currentStreakLabel: String? = null,
     val currentStreakCount: Int = 0,
@@ -202,7 +223,7 @@ data class PerformanceSummary(
     val singlesWinRatePercent: Int? = null,
     val doublesMatches: Int = 0,
     val doublesWinRatePercent: Int? = null,
-    val recentForm: List<Boolean> = emptyList(),
+    val recentForm: List<MatchFormOutcome> = emptyList(),
     val monthlyActivity: List<MonthlyMatchCount> = emptyList()
 )
 
@@ -228,10 +249,21 @@ sealed interface StartMatchResult {
 
 data class MatchCompletionResult(
     val matchId: String,
-    val winnerTeam: TeamSide,
+    val winnerTeam: TeamSide?,
     val xpAwarded: Int,
     val alreadyCompleted: Boolean
 )
+
+sealed interface ManualFinishResult {
+    data class Saved(
+        val matchId: String,
+        val xpAwarded: Int,
+        val alreadyCompleted: Boolean
+    ) : ManualFinishResult
+
+    data object DiscardedTooShort : ManualFinishResult
+    data object NoActiveMatch : ManualFinishResult
+}
 
 data class LiveMatchSnapshot(
     val matchId: String,

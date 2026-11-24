@@ -229,10 +229,10 @@ fun LiveMatchScreen(
             title = stringResource(R.string.live_match_end_early_title),
             body = stringResource(R.string.live_match_end_early_body),
             confirmText = stringResource(R.string.live_match_end_early_confirm),
-            isDestructive = true,
+            isDestructive = false,
             onConfirm = {
                 showEndEarlyDialog = false
-                viewModel.cancelMatchEarly()
+                viewModel.finishMatchManually()
             },
             onDismiss = { showEndEarlyDialog = false }
         )

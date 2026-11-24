@@ -16,7 +16,9 @@ import com.padelpro.app.domain.engine.MatchEngine
 import com.padelpro.app.domain.engine.MatchEngineEvent
 import com.padelpro.app.domain.engine.MatchEngineState
 import com.padelpro.app.domain.model.DeuceMode
+import com.padelpro.app.domain.model.IncompleteSetScore
 import com.padelpro.app.domain.model.LiveMatchSnapshot
+import com.padelpro.app.domain.model.ManualFinishResult
 import com.padelpro.app.domain.model.MatchCompletionResult
 import com.padelpro.app.domain.model.MatchDetailsData
 import com.padelpro.app.domain.model.MatchFormat
@@ -118,6 +120,19 @@ class MatchRepositoryImpl(
             val userTeam = participants.firstOrNull { it.isUser == 1 }?.team
                 ?.let { runCatching { TeamSide.valueOf(it) }.getOrNull() }
             val userWon = if (winner != null && userTeam != null) winner == userTeam else null
+            val isUserParticipant = userTeam != null
+
+            val config = buildConfig(
+                entity = entity,
+                teamAPlayers = teamADetails.map { it.player },
+                teamBPlayers = teamBDetails.map { it.player }
+            )
+            val engineEvents = eventEntities.mapNotNull { it.toEngineEvent() }
+            val incompleteSet = if (entity.status == MatchStatus.COMPLETED.name && winner == null) {
+                extractIncompleteSet(MatchEngine.replay(config, engineEvents))
+            } else {
+                null
+            }
 
             val summary = MatchSummary(
                 id = entity.id,
@@ -131,15 +146,11 @@ class MatchRepositoryImpl(
                 userWon = userWon,
                 teamANames = teamADetails.map { it.player.displayName },
                 teamBNames = teamBDetails.map { it.player.displayName },
-                sets = sets
+                sets = sets,
+                isUserParticipant = isUserParticipant,
+                incompleteSet = incompleteSet
             )
 
-            val config = buildConfig(
-                entity = entity,
-                teamAPlayers = teamADetails.map { it.player },
-                teamBPlayers = teamBDetails.map { it.player }
-            )
-            val engineEvents = eventEntities.mapNotNull { it.toEngineEvent() }
             val eventStats = MatchStatsCalculator.computeFromEvents(config, engineEvents)
 
             MatchDetailsData(
@@ -349,6 +360,74 @@ class MatchRepositoryImpl(
         }
     }
 
+    override suspend fun finishActiveMatchManually(): ManualFinishResult =
+        withContext(Dispatchers.IO) {
+            database.withTransaction {
+                val active = matchDao.getActiveMatchOnce()
+                    ?: return@withTransaction ManualFinishResult.NoActiveMatch
+                val (config, events) = loadConfigAndEvents(active)
+                val finalState = MatchEngine.replay(config, events)
+                val now = timeProvider.nowMillis()
+                val durationMs = finalState.elapsedDurationMillis(now)
+
+                if (durationMs <= MANUAL_FINISH_MIN_DURATION_MS) {
+                    matchDao.deleteSetResultsForMatch(active.id)
+                    matchDao.deleteEventsForMatch(active.id)
+                    matchDao.deleteParticipantsForMatch(active.id)
+                    matchDao.deleteMatchById(active.id)
+                    return@withTransaction ManualFinishResult.DiscardedTooShort
+                }
+
+                val updatedRows = matchDao.completeMatchIfActive(
+                    matchId = active.id,
+                    winnerTeam = null,
+                    endedAt = now,
+                    durationMs = durationMs
+                )
+                if (updatedRows != 1) {
+                    return@withTransaction ManualFinishResult.Saved(
+                        matchId = active.id,
+                        xpAwarded = 0,
+                        alreadyCompleted = true
+                    )
+                }
+
+                val setEntities = finalState.completedSets.map { set ->
+                    SetResultEntity(
+                        matchId = active.id,
+                        setIndex = set.setIndex,
+                        gamesA = set.gamesA,
+                        gamesB = set.gamesB,
+                        tbA = set.tbA,
+                        tbB = set.tbB
+                    )
+                }
+                if (setEntities.isNotEmpty()) {
+                    matchDao.insertSetResults(setEntities)
+                }
+
+                val participants = matchDao.getParticipantsForMatch(active.id)
+                val userParticipant = participants.firstOrNull { it.isUser == 1 }
+                val xpAwarded = if (userParticipant != null) XP_MATCH_MANUAL_PARTICIPATION else 0
+
+                awardXpIfNeeded(xpAwarded, userParticipant?.playerId)
+
+                contentPackProvider()?.let { pack ->
+                    AchievementSyncHelper.evaluateAndUnlock(
+                        database = database,
+                        contentPack = pack,
+                        unlockedAtMillis = now
+                    )
+                }
+
+                ManualFinishResult.Saved(
+                    matchId = active.id,
+                    xpAwarded = xpAwarded,
+                    alreadyCompleted = false
+                )
+            }
+        }
+
     override suspend fun deleteMatch(matchId: String): Boolean = withContext(Dispatchers.IO) {
         database.withTransaction {
             matchDao.deleteSetResultsForMatch(matchId)
@@ -365,7 +444,7 @@ class MatchRepositoryImpl(
                 if (entity.status != MatchStatus.ACTIVE.name) {
                     val winner = entity.winnerTeam?.let {
                         runCatching { TeamSide.valueOf(it) }.getOrNull()
-                    } ?: TeamSide.A
+                    }
                     return@withTransaction MatchCompletionResult(
                         matchId = entity.id,
                         winnerTeam = winner,
@@ -433,24 +512,7 @@ class MatchRepositoryImpl(
             0
         }
 
-        if (xpAwarded > 0) {
-            val existingProgress = userProgressDao.getUserProgressOnce()
-            if (existingProgress != null) {
-                userProgressDao.addXp(existingProgress.userId, xpAwarded)
-            } else {
-                val userId = userParticipant?.playerId ?: playerDao.getUserProfileOnce()?.id
-                if (userId != null) {
-                    userProgressDao.upsertUserProgress(
-                        UserProgressEntity(
-                            userId = userId,
-                            totalXp = xpAwarded,
-                            streakCount = 0,
-                            lastLearningDate = null
-                        )
-                    )
-                }
-            }
-        }
+        awardXpIfNeeded(xpAwarded, userParticipant?.playerId)
 
         contentPackProvider()?.let { pack ->
             AchievementSyncHelper.evaluateAndUnlock(
@@ -466,6 +528,26 @@ class MatchRepositoryImpl(
             xpAwarded = xpAwarded,
             alreadyCompleted = false
         )
+    }
+
+    private suspend fun awardXpIfNeeded(xpAwarded: Int, userParticipantPlayerId: String?) {
+        if (xpAwarded <= 0) return
+        val existingProgress = userProgressDao.getUserProgressOnce()
+        if (existingProgress != null) {
+            userProgressDao.addXp(existingProgress.userId, xpAwarded)
+        } else {
+            val userId = userParticipantPlayerId ?: playerDao.getUserProfileOnce()?.id
+            if (userId != null) {
+                userProgressDao.upsertUserProgress(
+                    UserProgressEntity(
+                        userId = userId,
+                        totalXp = xpAwarded,
+                        streakCount = 0,
+                        lastLearningDate = null
+                    )
+                )
+            }
+        }
     }
 
     private suspend fun loadConfigAndEvents(entity: MatchEntity): Pair<MatchConfig, List<MatchEngineEvent>> {
@@ -522,15 +604,24 @@ class MatchRepositoryImpl(
         val userTeam = participants.firstOrNull { it.isUser == 1 }?.team
             ?.let { runCatching { TeamSide.valueOf(it) }.getOrNull() }
         val userWon = if (winner != null && userTeam != null) winner == userTeam else null
+        val isUserParticipant = userTeam != null
 
-        val teamANames = participants
+        val teamAPlayers = participants
             .filter { it.team == TeamSide.A.name }
             .sortedBy { it.position }
-            .map { playersById[it.playerId]?.displayName ?: it.playerId }
-        val teamBNames = participants
+            .map { p -> playersById[p.playerId] ?: fallbackPlayer(p) }
+        val teamBPlayers = participants
             .filter { it.team == TeamSide.B.name }
             .sortedBy { it.position }
-            .map { playersById[it.playerId]?.displayName ?: it.playerId }
+            .map { p -> playersById[p.playerId] ?: fallbackPlayer(p) }
+
+        val incompleteSet = if (entity.status == MatchStatus.COMPLETED.name && winner == null) {
+            val config = buildConfig(entity, teamAPlayers, teamBPlayers)
+            val engineEvents = matchDao.getEventsForMatch(entity.id).mapNotNull { it.toEngineEvent() }
+            extractIncompleteSet(MatchEngine.replay(config, engineEvents))
+        } else {
+            null
+        }
 
         return MatchSummary(
             id = entity.id,
@@ -542,9 +633,26 @@ class MatchRepositoryImpl(
             durationMs = entity.durationMs,
             winnerTeam = winner,
             userWon = userWon,
-            teamANames = teamANames,
-            teamBNames = teamBNames,
-            sets = sets
+            teamANames = teamAPlayers.map { it.displayName },
+            teamBNames = teamBPlayers.map { it.displayName },
+            sets = sets,
+            isUserParticipant = isUserParticipant,
+            incompleteSet = incompleteSet
+        )
+    }
+
+    private fun extractIncompleteSet(state: MatchEngineState): IncompleteSetScore? {
+        val hasCurrentSetActivity = state.gamesA > 0 || state.gamesB > 0 ||
+            state.pointsA > 0 || state.pointsB > 0 ||
+            (state.isTieBreak && (state.tbPointsA > 0 || state.tbPointsB > 0))
+        if (!hasCurrentSetActivity) return null
+        return IncompleteSetScore(
+            setIndex = state.currentSetIndex,
+            gamesA = state.gamesA,
+            gamesB = state.gamesB,
+            scoreA = state.displayScoreA(),
+            scoreB = state.displayScoreB(),
+            isTieBreak = state.isTieBreak
         )
     }
 
@@ -587,5 +695,7 @@ class MatchRepositoryImpl(
         const val EVENT_RESUMED = "RESUMED"
         const val XP_MATCH_PARTICIPATION = 30
         const val XP_MATCH_WIN_BONUS = 20
+        const val XP_MATCH_MANUAL_PARTICIPATION = 15
+        const val MANUAL_FINISH_MIN_DURATION_MS = 10L * 60L * 1000L
     }
 }

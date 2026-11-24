@@ -35,10 +35,15 @@ class MatchResultsViewModel(
                 flowOf(MatchResultsUiState(isLoading = false, match = null))
             } else {
                 matchRepository.observeMatchById(id).map { summary ->
-                    val xp = when (summary?.userWon) {
-                        true -> MatchRepositoryImpl.XP_MATCH_PARTICIPATION + MatchRepositoryImpl.XP_MATCH_WIN_BONUS
-                        false -> MatchRepositoryImpl.XP_MATCH_PARTICIPATION
-                        null -> 0
+                    val xp = when {
+                        summary == null -> 0
+                        summary.isManuallyCompleted && summary.isUserParticipant ->
+                            MatchRepositoryImpl.XP_MATCH_MANUAL_PARTICIPATION
+                        summary.userWon == true ->
+                            MatchRepositoryImpl.XP_MATCH_PARTICIPATION + MatchRepositoryImpl.XP_MATCH_WIN_BONUS
+                        summary.userWon == false ->
+                            MatchRepositoryImpl.XP_MATCH_PARTICIPATION
+                        else -> 0
                     }
                     MatchResultsUiState(
                         isLoading = false,

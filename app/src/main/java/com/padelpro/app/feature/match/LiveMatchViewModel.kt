@@ -7,6 +7,7 @@ import com.padelpro.app.core.datastore.AppSettings
 import com.padelpro.app.core.datastore.SettingsRepository
 import com.padelpro.app.domain.engine.SideSwap
 import com.padelpro.app.domain.model.LiveMatchSnapshot
+import com.padelpro.app.domain.model.ManualFinishResult
 import com.padelpro.app.domain.model.MatchStatus
 import com.padelpro.app.domain.model.TeamSide
 import com.padelpro.app.domain.repository.MatchRepository
@@ -175,6 +176,22 @@ class LiveMatchViewModel(
             try {
                 matchRepository.cancelActiveMatch()
                 _navEvents.emit(LiveMatchNavEvent.Cancelled)
+            } finally {
+                isMutating.value = false
+            }
+        }
+    }
+
+    fun finishMatchManually() {
+        if (isMutating.value) return
+        viewModelScope.launch {
+            isMutating.value = true
+            try {
+                when (val result = matchRepository.finishActiveMatchManually()) {
+                    is ManualFinishResult.Saved -> _navEvents.emit(LiveMatchNavEvent.Finished(result.matchId))
+                    ManualFinishResult.DiscardedTooShort,
+                    ManualFinishResult.NoActiveMatch -> _navEvents.emit(LiveMatchNavEvent.Cancelled)
+                }
             } finally {
                 isMutating.value = false
             }

@@ -33,9 +33,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.padelpro.app.R
+import com.padelpro.app.core.designsystem.theme.PpAmberLed
 import com.padelpro.app.core.designsystem.theme.PpBallTrail
 import com.padelpro.app.core.designsystem.theme.PpCourtGlass
 import com.padelpro.app.core.designsystem.theme.PpCourtNight
+import com.padelpro.app.core.designsystem.theme.PpGlassCyan
 import com.padelpro.app.core.designsystem.theme.PpLime
 import com.padelpro.app.core.designsystem.theme.PpOnAccent
 import com.padelpro.app.core.designsystem.theme.PpPanelFill
@@ -290,23 +292,48 @@ fun PpMatchCard(
 ) {
     val teamAText = match.teamANames.joinToString(" & ").ifBlank { stringResource(R.string.live_match_team_a_placeholder) }
     val teamBText = match.teamBNames.joinToString(" & ").ifBlank { stringResource(R.string.live_match_team_b_placeholder) }
-    val resultColor = when (match.userWon) {
-        true -> PpLime
-        false -> PpTrophyMagenta
-        null -> PpTextMid
+    val resultColor = when {
+        match.userWon == true -> PpLime
+        match.userWon == false -> PpTrophyMagenta
+        match.isManuallyCompleted -> PpGlassCyan
+        else -> PpTextMid
     }
     val isWin = match.userWon == true
-    val chipText = when (match.userWon) {
-        true -> stringResource(R.string.history_chip_win)
-        false -> stringResource(R.string.history_chip_loss)
-        null -> stringResource(R.string.history_chip_completed)
+    val chipText = when {
+        match.userWon == true -> stringResource(R.string.history_chip_win)
+        match.userWon == false -> stringResource(R.string.history_chip_loss)
+        match.isManuallyCompleted -> stringResource(R.string.history_chip_draw)
+        else -> stringResource(R.string.history_chip_completed)
     }
-    val scoreLine = match.sets.joinToString("  ") { set ->
+    val completedSetsLine = match.sets.joinToString("  ") { set ->
         val tb = if (set.tbA != null && set.tbB != null) {
             "(${minOf(set.tbA, set.tbB)})"
         } else ""
         "${set.gamesA}-${set.gamesB}$tb"
-    }.ifBlank { stringResource(R.string.dash_placeholder) }
+    }
+    val incompleteSetText = match.incompleteSet?.let { inc ->
+        val scoreA = if (inc.scoreA == "AD") stringResource(R.string.live_score_advantage_short) else inc.scoreA
+        val scoreB = if (inc.scoreB == "AD") stringResource(R.string.live_score_advantage_short) else inc.scoreB
+        if (inc.isTieBreak) {
+            stringResource(
+                R.string.incomplete_set_tiebreak_score_format,
+                inc.setIndex,
+                inc.gamesA,
+                inc.gamesB,
+                scoreA,
+                scoreB
+            )
+        } else {
+            stringResource(
+                R.string.incomplete_set_score_format,
+                inc.setIndex,
+                inc.gamesA,
+                inc.gamesB,
+                scoreA,
+                scoreB
+            )
+        }
+    }
 
     Column(
         modifier = modifier
@@ -320,17 +347,36 @@ fun PpMatchCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1f)) {
-                Box(
-                    modifier = Modifier
-                        .clip(PpRadius.pill)
-                        .background(resultColor.copy(alpha = 0.14f))
-                        .padding(horizontal = PpSpacing.md, vertical = 3.dp)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(PpSpacing.xs),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(
-                        text = chipText,
-                        style = PpTextStyles.Micro,
-                        color = resultColor
-                    )
+                    Box(
+                        modifier = Modifier
+                            .clip(PpRadius.pill)
+                            .background(resultColor.copy(alpha = 0.14f))
+                            .padding(horizontal = PpSpacing.md, vertical = 3.dp)
+                    ) {
+                        Text(
+                            text = chipText,
+                            style = PpTextStyles.Micro,
+                            color = resultColor
+                        )
+                    }
+                    if (match.isManuallyCompleted) {
+                        Box(
+                            modifier = Modifier
+                                .clip(PpRadius.pill)
+                                .background(PpAmberLed.copy(alpha = 0.14f))
+                                .padding(horizontal = PpSpacing.md, vertical = 3.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.results_manual_finish_badge),
+                                style = PpTextStyles.Micro,
+                                color = PpAmberLed
+                            )
+                        }
+                    }
                 }
                 Spacer(Modifier.height(PpSpacing.sm + 2.dp))
                 val formatLabel = when (match.format) {
@@ -345,11 +391,22 @@ fun PpMatchCard(
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(Modifier.height(2.dp))
-                Text(
-                    text = scoreLine,
-                    style = PpTextStyles.H2.copy(fontFeatureSettings = "tnum"),
-                    color = if (isWin) PpLime else PpTextHigh
-                )
+                if (completedSetsLine.isNotEmpty() || incompleteSetText == null) {
+                    Text(
+                        text = completedSetsLine.ifBlank { stringResource(R.string.dash_placeholder) },
+                        style = PpTextStyles.H2.copy(fontFeatureSettings = "tnum"),
+                        color = if (isWin) PpLime else PpTextHigh
+                    )
+                }
+                if (incompleteSetText != null) {
+                    Text(
+                        text = incompleteSetText,
+                        style = PpTextStyles.Label.copy(fontFeatureSettings = "tnum"),
+                        color = PpGlassCyan,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
                 Spacer(Modifier.height(2.dp))
                 val metaText = if (match.durationMs != null) {
                     stringResource(

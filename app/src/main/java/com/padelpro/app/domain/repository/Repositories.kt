@@ -9,6 +9,7 @@ import com.padelpro.app.domain.model.DeleteFriendResult
 import com.padelpro.app.domain.model.LessonCompletionOutcome
 import com.padelpro.app.domain.model.LessonDetailData
 import com.padelpro.app.domain.model.LiveMatchSnapshot
+import com.padelpro.app.domain.model.ManualFinishResult
 import com.padelpro.app.domain.model.MatchCompletionResult
 import com.padelpro.app.domain.model.MatchDetailsData
 import com.padelpro.app.domain.model.MatchFormat
@@ -94,6 +95,7 @@ interface MatchRepository {
     suspend fun pauseActiveMatch(): Boolean
     suspend fun resumeActiveMatch(): Boolean
     suspend fun cancelActiveMatch(): Boolean
+    suspend fun finishActiveMatchManually(): ManualFinishResult
     suspend fun deleteMatch(matchId: String): Boolean
     suspend fun completeMatchIfFinished(matchId: String): MatchCompletionResult?
     fun dismissRestoredBanner(matchId: String)

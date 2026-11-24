@@ -4,7 +4,9 @@ import com.padelpro.app.core.common.TimeProvider
 import com.padelpro.app.data.repository.StatsRepositoryImpl
 import com.padelpro.app.domain.model.DeuceMode
 import com.padelpro.app.domain.model.LiveMatchSnapshot
+import com.padelpro.app.domain.model.ManualFinishResult
 import com.padelpro.app.domain.model.MatchDetailsData
+import com.padelpro.app.domain.model.MatchFormOutcome
 import com.padelpro.app.domain.model.MatchFormat
 import com.padelpro.app.domain.model.MatchStatus
 import com.padelpro.app.domain.model.MatchSummary
@@ -43,6 +45,8 @@ class StatsRepositoryTest {
         override suspend fun pauseActiveMatch(): Boolean = false
         override suspend fun resumeActiveMatch(): Boolean = false
         override suspend fun cancelActiveMatch(): Boolean = false
+        override suspend fun finishActiveMatchManually(): ManualFinishResult =
+            ManualFinishResult.NoActiveMatch
         override suspend fun completeMatchIfFinished(matchId: String) = null
         override suspend fun deleteMatch(matchId: String): Boolean {
             val before = completedFlow.value.size
@@ -69,7 +73,9 @@ class StatsRepositoryTest {
         id: String,
         format: MatchFormat = MatchFormat.DOUBLES,
         userWon: Boolean?,
-        endedAt: Long
+        endedAt: Long,
+        winnerTeam: TeamSide? = if (userWon == true) TeamSide.A else TeamSide.B,
+        isUserParticipant: Boolean = userWon != null
     ) = MatchSummary(
         id = id,
         format = format,
@@ -78,11 +84,12 @@ class StatsRepositoryTest {
         startedAt = endedAt - 1_800_000L,
         endedAt = endedAt,
         durationMs = 1_800_000L,
-        winnerTeam = if (userWon == true) TeamSide.A else TeamSide.B,
+        winnerTeam = winnerTeam,
         userWon = userWon,
         teamANames = listOf("Алекс"),
         teamBNames = listOf("Марк"),
-        sets = listOf(SetScore(1, 6, 4))
+        sets = listOf(SetScore(1, 6, 4)),
+        isUserParticipant = isUserParticipant
     )
 
     @Test
@@ -157,8 +164,17 @@ class StatsRepositoryTest {
         assertEquals(4, summary.doublesMatches)
         assertEquals(50, summary.doublesWinRatePercent)
 
-        // Recent form (last 5 newest-first): false, false, true, false, true
-        assertEquals(listOf(false, false, true, false, true), summary.recentForm)
+        // Recent form (last 5 newest-first): LOSS, LOSS, WIN, LOSS, WIN
+        assertEquals(
+            listOf(
+                MatchFormOutcome.LOSS,
+                MatchFormOutcome.LOSS,
+                MatchFormOutcome.WIN,
+                MatchFormOutcome.LOSS,
+                MatchFormOutcome.WIN
+            ),
+            summary.recentForm
+        )
     }
 
     @Test
@@ -203,5 +219,93 @@ class StatsRepositoryTest {
         assertEquals(100, after.winRatePercent)
         assertEquals("В1", after.currentStreakLabel)
         assertEquals(1, after.monthlyActivity.last().count)
+    }
+
+    @Test
+    fun `manual draws count in totals, format counts, and monthly activity but exclude from winRate denominator and interrupt streaks`() = runTest {
+        // Chronological: W, W, DRAW (interrupts current & best streak), W, L, DRAW (newest)
+        val matches = listOf(
+            completedMatch(
+                id = "d_new",
+                format = MatchFormat.SINGLES,
+                userWon = null,
+                endedAt = epoch(2026, 11, 19),
+                winnerTeam = null,
+                isUserParticipant = true
+            ),
+            completedMatch("l1", MatchFormat.DOUBLES, userWon = false, endedAt = epoch(2026, 11, 18)),
+            completedMatch("w3", MatchFormat.SINGLES, userWon = true, endedAt = epoch(2026, 11, 15)),
+            completedMatch(
+                id = "d_mid",
+                format = MatchFormat.DOUBLES,
+                userWon = null,
+                endedAt = epoch(2026, 11, 12),
+                winnerTeam = null,
+                isUserParticipant = true
+            ),
+            completedMatch("w2", MatchFormat.SINGLES, userWon = true, endedAt = epoch(2026, 11, 10)),
+            completedMatch("w1", MatchFormat.DOUBLES, userWon = true, endedAt = epoch(2026, 10, 20))
+        )
+        val repo = FakeMatchesRepo(matches)
+        val summary = StatsRepositoryImpl(repo, fixedTimeProvider, fixedZone).observePerformanceSummary().first()
+
+        // 3 wins, 1 loss, 2 draws = 6 total matches
+        assertEquals(6, summary.totalMatches)
+        assertEquals(3, summary.wins)
+        assertEquals(1, summary.losses)
+        assertEquals(2, summary.draws)
+        // Win rate: 3 / (3 + 1) = 75% (draws excluded from denominator)
+        assertEquals(75, summary.winRatePercent)
+        // Latest match is draw -> current streak interrupted
+        assertNull(summary.currentStreakLabel)
+        assertEquals(0, summary.currentStreakCount)
+        assertNull(summary.isCurrentStreakWin)
+        // Best win streak: 2 (w1, w2 before d_mid reset)
+        assertEquals(2, summary.bestWinStreak)
+        // Format counts include draws; winRates exclude draws
+        assertEquals(3, summary.singlesMatches) // w2, w3, d_new
+        assertEquals(100, summary.singlesWinRatePercent) // 2W / 2 decided
+        assertEquals(3, summary.doublesMatches) // w1, d_mid, l1
+        assertEquals(50, summary.doublesWinRatePercent) // 1W / 2 decided
+        // Monthly counts include draws: Oct=1, Nov=5
+        assertEquals(listOf(0, 0, 0, 0, 1, 5), summary.monthlyActivity.map { it.count })
+        // Recent 5 newest-first: DRAW, LOSS, WIN, DRAW, WIN
+        assertEquals(
+            listOf(
+                MatchFormOutcome.DRAW,
+                MatchFormOutcome.LOSS,
+                MatchFormOutcome.WIN,
+                MatchFormOutcome.DRAW,
+                MatchFormOutcome.WIN
+            ),
+            summary.recentForm
+        )
+    }
+
+    @Test
+    fun `only manual draws returns null winRatePercent while counting total matches`() = runTest {
+        val repo = FakeMatchesRepo(
+            listOf(
+                completedMatch(
+                    id = "d1",
+                    format = MatchFormat.DOUBLES,
+                    userWon = null,
+                    endedAt = epoch(2026, 11, 19),
+                    winnerTeam = null,
+                    isUserParticipant = true
+                )
+            )
+        )
+        val summary = StatsRepositoryImpl(repo, fixedTimeProvider, fixedZone).observePerformanceSummary().first()
+
+        assertEquals(1, summary.totalMatches)
+        assertEquals(0, summary.wins)
+        assertEquals(0, summary.losses)
+        assertEquals(1, summary.draws)
+        assertNull(summary.winRatePercent)
+        assertNull(summary.doublesWinRatePercent)
+        assertEquals(1, summary.doublesMatches)
+        assertNull(summary.currentStreakLabel)
+        assertEquals(listOf(MatchFormOutcome.DRAW), summary.recentForm)
     }
 }

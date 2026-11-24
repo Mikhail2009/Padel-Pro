@@ -2,6 +2,7 @@ package com.padelpro.app.data.repository
 
 import com.padelpro.app.core.common.SystemTimeProvider
 import com.padelpro.app.core.common.TimeProvider
+import com.padelpro.app.domain.model.MatchFormOutcome
 import com.padelpro.app.domain.model.MatchFormat
 import com.padelpro.app.domain.model.MatchSummary
 import com.padelpro.app.domain.model.MonthlyMatchCount
@@ -26,7 +27,7 @@ class StatsRepositoryImpl(
     override fun observePerformanceSummary(): Flow<PerformanceSummary> =
         matchRepository.observeCompletedMatches().map { matches ->
             val userMatches = matches
-                .filter { it.userWon != null }
+                .filter { it.isUserParticipant }
                 .sortedByDescending { it.endedAt ?: it.startedAt }
 
             val total = userMatches.size
@@ -37,15 +38,30 @@ class StatsRepositoryImpl(
             }
 
             val wins = userMatches.count { it.userWon == true }
-            val losses = total - wins
-            val winRate = ((wins.toDouble() / total.toDouble()) * 100.0).roundToInt()
-
-            val latestResult = userMatches.first().userWon == true
-            var currentStreakCount = 0
-            for (m in userMatches) {
-                if (m.userWon == latestResult) currentStreakCount++ else break
+            val losses = userMatches.count { it.userWon == false }
+            val draws = userMatches.count { it.isManuallyCompleted }
+            val decided = wins + losses
+            val winRate = if (decided == 0) null else {
+                ((wins.toDouble() / decided.toDouble()) * 100.0).roundToInt()
             }
-            val currentStreakLabel = if (latestResult) "В$currentStreakCount" else "П$currentStreakCount"
+
+            val latestOutcome = userMatches.first().userWon
+            val currentStreakCount: Int
+            val isCurrentStreakWin: Boolean?
+            val currentStreakLabel: String?
+            if (latestOutcome == null) {
+                currentStreakCount = 0
+                isCurrentStreakWin = null
+                currentStreakLabel = null
+            } else {
+                var streak = 0
+                for (m in userMatches) {
+                    if (m.userWon == latestOutcome) streak++ else break
+                }
+                currentStreakCount = streak
+                isCurrentStreakWin = latestOutcome
+                currentStreakLabel = if (latestOutcome) "В$streak" else "П$streak"
+            }
 
             var bestWinStreak = 0
             var runningWins = 0
@@ -60,27 +76,36 @@ class StatsRepositoryImpl(
 
             val singles = userMatches.filter { it.format == MatchFormat.SINGLES }
             val doubles = userMatches.filter { it.format == MatchFormat.DOUBLES }
-            val singlesWinRate = if (singles.isEmpty()) null else {
-                ((singles.count { it.userWon == true }.toDouble() / singles.size) * 100.0).roundToInt()
+            val singlesDecided = singles.count { it.userWon != null }
+            val doublesDecided = doubles.count { it.userWon != null }
+            val singlesWinRate = if (singlesDecided == 0) null else {
+                ((singles.count { it.userWon == true }.toDouble() / singlesDecided) * 100.0).roundToInt()
             }
-            val doublesWinRate = if (doubles.isEmpty()) null else {
-                ((doubles.count { it.userWon == true }.toDouble() / doubles.size) * 100.0).roundToInt()
+            val doublesWinRate = if (doublesDecided == 0) null else {
+                ((doubles.count { it.userWon == true }.toDouble() / doublesDecided) * 100.0).roundToInt()
             }
 
             PerformanceSummary(
                 totalMatches = total,
                 wins = wins,
                 losses = losses,
+                draws = draws,
                 winRatePercent = winRate,
                 currentStreakLabel = currentStreakLabel,
                 currentStreakCount = currentStreakCount,
-                isCurrentStreakWin = latestResult,
+                isCurrentStreakWin = isCurrentStreakWin,
                 bestWinStreak = bestWinStreak,
                 singlesMatches = singles.size,
                 singlesWinRatePercent = singlesWinRate,
                 doublesMatches = doubles.size,
                 doublesWinRatePercent = doublesWinRate,
-                recentForm = userMatches.take(5).map { it.userWon == true },
+                recentForm = userMatches.take(5).map { match ->
+                    when (match.userWon) {
+                        true -> MatchFormOutcome.WIN
+                        false -> MatchFormOutcome.LOSS
+                        null -> MatchFormOutcome.DRAW
+                    }
+                },
                 monthlyActivity = buildSixMonths(userMatches)
             )
         }

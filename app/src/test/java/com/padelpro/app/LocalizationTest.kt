@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.padelpro.app.core.common.SystemTimeProvider
 import com.padelpro.app.data.repository.StatsRepositoryImpl
 import com.padelpro.app.domain.model.DeuceMode
+import com.padelpro.app.domain.model.ManualFinishResult
 import com.padelpro.app.domain.model.MatchFormat
 import com.padelpro.app.domain.model.MatchStatus
 import com.padelpro.app.domain.model.MatchSummary
@@ -122,6 +123,8 @@ class LocalizationTest {
             override suspend fun pauseActiveMatch(): Boolean = false
             override suspend fun resumeActiveMatch(): Boolean = false
             override suspend fun cancelActiveMatch(): Boolean = false
+            override suspend fun finishActiveMatchManually(): ManualFinishResult =
+                ManualFinishResult.NoActiveMatch
             override suspend fun completeMatchIfFinished(matchId: String) = null
             override fun observeMatchDetails(matchId: String): Flow<com.padelpro.app.domain.model.MatchDetailsData?> = flowOf(null)
             override suspend fun deleteMatch(matchId: String): Boolean = false

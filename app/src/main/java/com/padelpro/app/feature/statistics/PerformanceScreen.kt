@@ -115,6 +115,13 @@ fun PerformanceScreen(
                                 style = PpTextStyles.Title.copy(fontFeatureSettings = "tnum"),
                                 color = if (state.losses > 0) PpTrophyMagenta else PpTextMid
                             )
+                            if (state.draws > 0) {
+                                Text(
+                                    text = pluralStringResource(R.plurals.performance_draws_format, state.draws, state.draws),
+                                    style = PpTextStyles.Title.copy(fontFeatureSettings = "tnum"),
+                                    color = PpGlassCyan
+                                )
+                            }
                         }
                     }
                 }
