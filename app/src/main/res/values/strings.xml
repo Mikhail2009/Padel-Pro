@@ -658,4 +658,38 @@
         <item quantity="many">%1$d розыгрышей</item>
         <item quantity="other">%1$d розыгрышей</item>
     </plurals>
+
+    <!-- Экран 18: Постер матча (Stage 2 Match Poster) -->
+    <string name="poster_entry_btn">Постер матча</string>
+    <string name="poster_title">Постер матча</string>
+    <string name="poster_preview_cd">Предпросмотр постера матча</string>
+    <string name="poster_rendering_label">Подготовка постера…</string>
+    <string name="poster_empty_title">Постер недоступен</string>
+    <string name="poster_empty_body">Постер можно создать только для завершённого матча.</string>
+
+    <string name="poster_template_court">Атмосфера корта</string>
+    <string name="poster_template_premium">Премиум-матч</string>
+    <string name="poster_template_performance">Аналитика матча</string>
+
+    <string name="poster_action_share">Поделиться</string>
+    <string name="poster_action_save">Сохранить</string>
+    <string name="poster_share_chooser_title">Поделиться постером матча</string>
+    <string name="poster_save_success">Постер сохранён в галерею</string>
+    <string name="poster_save_error">Не удалось сохранить постер</string>
+    <string name="poster_share_error">Не удалось подготовить постер для отправки</string>
+
+    <string name="poster_outcome_win">Победа</string>
+    <string name="poster_outcome_loss">Поражение</string>
+    <string name="poster_outcome_draw">Ничья</string>
+    <string name="poster_outcome_completed">Матч завершён</string>
+    <string name="poster_manual_finish_badge">Завершён вручную</string>
+    <string name="poster_incomplete_set_badge">Незавершённый сет</string>
+    <string name="poster_stat_points">Очки</string>
+    <string name="poster_stat_games">Геймы</string>
+    <string name="poster_stat_duration">Время</string>
+    <string name="poster_stat_max_point_streak">Макс. серия очков</string>
+    <string name="poster_stat_max_game_streak">Макс. серия геймов</string>
+    <string name="poster_stat_lead_changes">Смены лидера</string>
+    <string name="poster_momentum_title">Динамика преимущества</string>
+    <string name="poster_momentum_empty">Недостаточно розыгрышей для графика динамики</string>
 </resources>
