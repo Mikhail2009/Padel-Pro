@@ -1,23 +1,36 @@
 package com.padelpro.app
 
 import android.content.Context
+import android.os.Looper
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performTouchInput
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelStore
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.padelpro.app.core.common.TimeProvider
 import com.padelpro.app.core.database.PadelProDatabase
 import com.padelpro.app.core.datastore.SettingsRepository
 import com.padelpro.app.core.designsystem.theme.PadelProTheme
+import com.padelpro.app.data.content.AssetAcademyContentLoader
+import com.padelpro.app.data.repository.AcademyRepositoryImpl
 import com.padelpro.app.data.repository.MatchRepositoryImpl
 import com.padelpro.app.data.repository.PlayerRepositoryImpl
+import com.padelpro.app.data.repository.StatsRepositoryImpl
 import com.padelpro.app.domain.model.DeuceMode
 import com.padelpro.app.domain.model.LiveMatchSnapshot
 import com.padelpro.app.domain.model.ManualFinishResult
@@ -33,18 +46,24 @@ import com.padelpro.app.domain.model.TeamSide
 import com.padelpro.app.domain.repository.MatchRepository
 import com.padelpro.app.feature.history.MatchDetailsScreen
 import com.padelpro.app.feature.history.MatchDetailsViewModel
+import com.padelpro.app.feature.home.HomeScreen
+import com.padelpro.app.feature.home.HomeViewModel
 import com.padelpro.app.feature.insights.MatchInsightsScreen
 import com.padelpro.app.feature.insights.MatchInsightsViewModel
 import com.padelpro.app.feature.insights.extractMomentumSetBoundaries
 import com.padelpro.app.feature.insights.findNearestMomentumSample
 import com.padelpro.app.feature.insights.prepareMomentumSamples
+import com.padelpro.app.feature.match.MatchCenterScreen
 import com.padelpro.app.feature.match.MatchResultsScreen
 import com.padelpro.app.feature.match.MatchResultsViewModel
+import com.padelpro.app.feature.match.MatchViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -56,9 +75,11 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows
 import org.robolectric.annotation.Config
 import java.io.File
 import java.time.LocalDate
+import java.time.ZoneId
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [36])
@@ -77,9 +98,10 @@ class MatchInsightsRobolectricTest {
     }
 
     private class SingleMatchReadRepo(
-        private val details: MatchDetailsData?
+        private val details: MatchDetailsData?,
+        private val activeMatch: MatchSummary? = null
     ) : MatchRepository {
-        override fun observeActiveMatch(): Flow<MatchSummary?> = flowOf(null)
+        override fun observeActiveMatch(): Flow<MatchSummary?> = flowOf(activeMatch)
         override fun observeRecentMatches(limit: Int): Flow<List<MatchSummary>> = flowOf(emptyList())
         override fun observeCompletedMatches(): Flow<List<MatchSummary>> = flowOf(emptyList())
         override fun observeMatchById(matchId: String): Flow<MatchSummary?> = flowOf(details?.summary)
@@ -102,6 +124,7 @@ class MatchInsightsRobolectricTest {
     private lateinit var dbFile: File
     private lateinit var db: PadelProDatabase
     private lateinit var timeProvider: TestTimeProvider
+    private lateinit var settingsRepo: SettingsRepository
     private lateinit var playerRepo: PlayerRepositoryImpl
     private lateinit var matchRepo: MatchRepositoryImpl
 
@@ -113,7 +136,8 @@ class MatchInsightsRobolectricTest {
             .allowMainThreadQueries()
             .build()
         timeProvider = TestTimeProvider()
-        playerRepo = PlayerRepositoryImpl(db, SettingsRepository(context), timeProvider)
+        settingsRepo = SettingsRepository(context)
+        playerRepo = PlayerRepositoryImpl(db, settingsRepo, timeProvider)
         matchRepo = MatchRepositoryImpl(db, timeProvider)
     }
 
@@ -121,6 +145,24 @@ class MatchInsightsRobolectricTest {
     fun teardown() {
         if (db.isOpen) db.close()
         dbFile.delete()
+    }
+
+    private suspend fun startSinglesMatch(): String {
+        val user = playerRepo.createLocalProfile("Алекс", 0, MatchFormat.SINGLES)
+        val opp = playerRepo.createFriend("Марк", 1)
+        return (
+            matchRepo.startMatch(
+                StartMatchRequest(
+                    format = MatchFormat.SINGLES,
+                    deuceMode = DeuceMode.GOLDEN_POINT,
+                    firstServerTeam = TeamSide.A,
+                    participants = listOf(
+                        StartMatchParticipant(user.id, TeamSide.A, 0, isUser = true),
+                        StartMatchParticipant(opp.id, TeamSide.B, 0, isUser = false)
+                    )
+                )
+            ) as StartMatchResult.Started
+            ).matchId
     }
 
     private suspend fun startDoublesMatch(): String {
@@ -150,6 +192,16 @@ class MatchInsightsRobolectricTest {
             timeProvider.currentNow += stepMs
             matchRepo.addPoint(team)
         }
+    }
+
+    private suspend fun awaitMainCondition(timeoutMs: Long = 5_000L, predicate: () -> Boolean) {
+        val deadline = System.currentTimeMillis() + timeoutMs
+        while (!predicate()) {
+            Shadows.shadowOf(Looper.getMainLooper()).idle()
+            if (System.currentTimeMillis() >= deadline) break
+            delay(20L)
+        }
+        assertTrue(predicate())
     }
 
     @Test
@@ -222,34 +274,62 @@ class MatchInsightsRobolectricTest {
     }
 
     @Test
-    fun `viewmodel reads MatchDetailsData with analytics directly from Room repository`() = runBlocking {
+    fun `viewmodel reads MatchDetailsData with analytics directly from Room repository`() = runTest {
         val matchId = startDoublesMatch()
         addPoints(TeamSide.A, 24, stepMs = 15_000L) // Сет 1: 6-0
         addPoints(TeamSide.B, 4, stepMs = 15_000L)  // Сет 2: 0-1
         addPoints(TeamSide.A, 1, stepMs = 15_000L)  // 15-0
 
-        val vm = MatchInsightsViewModel(matchRepo, timeProvider)
-        vm.loadMatch(matchId)
-        val loaded = vm.uiState.first { !it.isLoading }
-        val details = requireNotNull(loaded.details)
-        val analytics = requireNotNull(details.analytics)
-        assertFalse(analytics.overview.isCompleted)
-        assertEquals(1, analytics.overview.sets.size)
-        assertEquals(2, analytics.overview.incompleteSet?.setIndex)
-        assertEquals(29, analytics.pointStats.totalPoints)
-        assertEquals("28 нояб 2026, 18:00", vm.formatDateTime(100_000L))
+        val store = ViewModelStore()
+        val vm = ViewModelProvider(
+            store,
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                    MatchInsightsViewModel(matchRepo, timeProvider) as T
+            }
+        )[MatchInsightsViewModel::class.java]
 
-        val missingJob = launch {
-            val missingVm = MatchInsightsViewModel(matchRepo, timeProvider)
-            missingVm.loadMatch("missing-id")
-            val missingState = missingVm.uiState.first { !it.isLoading }
-            assertNull(missingState.details)
+        val job = launch { vm.uiState.collect { } }
+        try {
+            vm.loadMatch(matchId)
+            awaitMainCondition { !vm.uiState.value.isLoading }
+
+            val details = requireNotNull(vm.uiState.value.details)
+            val analytics = requireNotNull(details.analytics)
+            assertFalse(analytics.overview.isCompleted)
+            assertEquals(1, analytics.overview.sets.size)
+            assertEquals(2, analytics.overview.incompleteSet?.setIndex)
+            assertEquals(29, analytics.pointStats.totalPoints)
+            assertEquals("28 нояб 2026, 18:00", vm.formatDateTime(100_000L))
+        } finally {
+            job.cancel()
+            store.clear()
         }
-        missingJob.join()
+
+        val missingStore = ViewModelStore()
+        val missingVm = ViewModelProvider(
+            missingStore,
+            object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T =
+                    MatchInsightsViewModel(matchRepo, timeProvider) as T
+            }
+        )[MatchInsightsViewModel::class.java]
+
+        val missingJob = launch { missingVm.uiState.collect { } }
+        try {
+            missingVm.loadMatch("missing-id")
+            awaitMainCondition { !missingVm.uiState.value.isLoading }
+            assertNull(missingVm.uiState.value.details)
+        } finally {
+            missingJob.cancel()
+            missingStore.clear()
+        }
     }
 
     @Test
-    fun `completed doubles match renders all six insights sections from MatchAnalytics`() {
+    fun `completed doubles match renders all six insights sections and interactive momentum`() {
         val (matchId, details) = runBlocking {
             val id = startDoublesMatch()
             addPoints(TeamSide.A, 24, stepMs = 10_000L) // Сет 1: 6-0
@@ -274,24 +354,85 @@ class MatchInsightsRobolectricTest {
         composeRule.onNodeWithTag("insights_overview_card").assertIsDisplayed()
         composeRule.onNodeWithTag("insights_live_badge").assertDoesNotExist()
         composeRule.onNodeWithTag("insights_manual_badge").assertDoesNotExist()
+        composeRule.onNodeWithText("Парный (2×2)").performScrollTo().assertIsDisplayed()
 
         composeRule.onNodeWithTag("insights_list").performScrollToNode(hasTestTag("insights_points_section"))
         composeRule.onNodeWithTag("insights_points_section").assertIsDisplayed()
+        composeRule.onNodeWithText("56").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("+40").performScrollTo().assertIsDisplayed()
 
         composeRule.onNodeWithTag("insights_list").performScrollToNode(hasTestTag("insights_games_section"))
         composeRule.onNodeWithTag("insights_games_section").assertIsDisplayed()
+        composeRule.onNodeWithText("12 / 2").performScrollTo().assertIsDisplayed()
 
         composeRule.onNodeWithTag("insights_list").performScrollToNode(hasTestTag("insights_sets_section"))
         composeRule.onNodeWithTag("insights_sets_section").assertIsDisplayed()
-        composeRule.onNodeWithTag("insights_set_card_1").assertIsDisplayed()
-        composeRule.onNodeWithTag("insights_set_card_2").assertIsDisplayed()
+        composeRule.onNodeWithTag("insights_set_card_1").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithTag("insights_set_card_2").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Самый долгий сет").performScrollTo().assertIsDisplayed()
 
         composeRule.onNodeWithTag("insights_list").performScrollToNode(hasTestTag("insights_momentum_section"))
-        composeRule.onNodeWithTag("insights_momentum_canvas").assertIsDisplayed()
-        composeRule.onNodeWithTag("insights_momentum_selected_box").assertIsDisplayed()
+        composeRule.onNodeWithTag("insights_momentum_canvas").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithTag("insights_momentum_selected_box").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Розыгрыш #56 · Сет 2").performScrollTo().assertIsDisplayed()
+
+        composeRule.onNodeWithTag("insights_momentum_canvas").performScrollTo().performTouchInput {
+            click(Offset(x = width * 0.2f, y = height * 0.5f))
+        }
+        composeRule.waitForIdle()
+        composeRule.onNodeWithText("Розыгрыш #56 · Сет 2").assertDoesNotExist()
 
         composeRule.onNodeWithTag("insights_list").performScrollToNode(hasTestTag("insights_highlights_section"))
         composeRule.onNodeWithTag("insights_highlights_section").assertIsDisplayed()
+        composeRule.onAllNodesWithText("Лучшая серия очков").onFirst().performScrollTo().assertIsDisplayed()
+        composeRule.onAllNodesWithText("Максимальный отрыв по очкам").onFirst().performScrollTo().assertIsDisplayed()
+    }
+
+    @Test
+    fun `completed singles tiebreak match renders singles format tiebreak and set comparisons`() {
+        val (matchId, details) = runBlocking {
+            val id = startSinglesMatch()
+            // Сет 1: 6-6, затем тай-брейк 7-4 -> 7-6(4)
+            repeat(6) {
+                addPoints(TeamSide.A, 4, stepMs = 15_000L)
+                addPoints(TeamSide.B, 4, stepMs = 15_000L)
+            }
+            addPoints(TeamSide.A, 4, stepMs = 15_000L)
+            addPoints(TeamSide.B, 4, stepMs = 15_000L)
+            addPoints(TeamSide.A, 3, stepMs = 15_000L)
+
+            // Сет 2: 6-2 (короче первого сета)
+            addPoints(TeamSide.B, 8, stepMs = 10_000L)
+            addPoints(TeamSide.A, 24, stepMs = 10_000L)
+
+            id to matchRepo.observeMatchDetails(id).first()!!
+        }
+
+        val analytics = requireNotNull(details.analytics)
+        assertEquals(MatchFormat.SINGLES, analytics.overview.format)
+        assertEquals(7, analytics.overview.sets[0].gamesA)
+        assertEquals(6, analytics.overview.sets[0].gamesB)
+        assertEquals(7, analytics.overview.sets[0].tbA)
+        assertEquals(4, analytics.overview.sets[0].tbB)
+
+        val vm = MatchInsightsViewModel(SingleMatchReadRepo(details), timeProvider)
+        composeRule.setContent {
+            PadelProTheme {
+                MatchInsightsScreen(
+                    matchId = matchId,
+                    viewModel = vm,
+                    onBack = {}
+                )
+            }
+        }
+        composeRule.waitUntil(5_000) { !vm.uiState.value.isLoading }
+        composeRule.waitForIdle()
+
+        composeRule.onNodeWithText("Одиночный (1×1)").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithTag("insights_list").performScrollToNode(hasTestTag("insights_sets_section"))
+        composeRule.onNodeWithText("Тай-брейк 7:4").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Самый короткий сет").performScrollTo().assertIsDisplayed()
+        composeRule.onNodeWithText("Самый упорный сет").performScrollTo().assertIsDisplayed()
     }
 
     @Test
@@ -459,6 +600,75 @@ class MatchInsightsRobolectricTest {
 
         composeRule.onNodeWithTag("results_insights_button").performScrollTo().performClick()
         assertEquals(matchId, openedFromResults)
+    }
+
+    @Test
+    fun `home active match card exposes Match Insights entry point`() {
+        val (matchId, liveDetails) = runBlocking {
+            val id = startDoublesMatch()
+            addPoints(TeamSide.A, 4, stepMs = 15_000L)
+            id to matchRepo.observeMatchDetails(id).first()!!
+        }
+
+        val readRepo = SingleMatchReadRepo(liveDetails, activeMatch = liveDetails.summary)
+        val contentPack = AssetAcademyContentLoader(context).load()
+        val academyRepo = AcademyRepositoryImpl(db, contentPack, timeProvider)
+        val statsRepo = StatsRepositoryImpl(readRepo, timeProvider, ZoneId.of("UTC"))
+        val homeVm = HomeViewModel(playerRepo, academyRepo, readRepo, statsRepo, timeProvider)
+
+        var openedFromHome: String? = null
+        composeRule.setContent {
+            PadelProTheme {
+                val homeListState = rememberLazyListState()
+                HomeScreen(
+                    viewModel = homeVm,
+                    listState = homeListState,
+                    onOpenProfile = {},
+                    onStartMatch = {},
+                    onContinueLearning = {},
+                    onOpenMatchDetails = {},
+                    onResumeMatch = {},
+                    onOpenPerformance = {},
+                    onOpenMatchInsights = { openedFromHome = it }
+                )
+            }
+        }
+        composeRule.waitUntil(5_000) { homeVm.uiState.value.activeMatch?.id == matchId }
+        composeRule.waitForIdle()
+        composeRule.onNodeWithTag("home_active_match_insights_button").performClick()
+        assertEquals(matchId, openedFromHome)
+    }
+
+    @Test
+    fun `match center active match card exposes Match Insights entry point`() {
+        val (matchId, liveDetails) = runBlocking {
+            val id = startDoublesMatch()
+            addPoints(TeamSide.A, 4, stepMs = 15_000L)
+            id to matchRepo.observeMatchDetails(id).first()!!
+        }
+
+        val readRepo = SingleMatchReadRepo(liveDetails, activeMatch = liveDetails.summary)
+        val matchVm = MatchViewModel(playerRepo, readRepo, settingsRepo, timeProvider)
+
+        var openedFromMatchCenter: String? = null
+        composeRule.setContent {
+            PadelProTheme {
+                val playListState = rememberLazyListState()
+                MatchCenterScreen(
+                    viewModel = matchVm,
+                    listState = playListState,
+                    onOpenSetup = {},
+                    onOpenHistory = {},
+                    onOpenMatchDetails = {},
+                    onResumeMatch = {},
+                    onOpenMatchInsights = { openedFromMatchCenter = it }
+                )
+            }
+        }
+        composeRule.waitUntil(5_000) { matchVm.uiState.value.activeMatch?.id == matchId }
+        composeRule.waitForIdle()
+        composeRule.onNodeWithTag("match_center_active_insights_button").performClick()
+        assertEquals(matchId, openedFromMatchCenter)
     }
 
     @Test
