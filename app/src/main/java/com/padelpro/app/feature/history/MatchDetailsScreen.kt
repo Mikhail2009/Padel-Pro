@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.EmojiEvents
+import androidx.compose.material.icons.rounded.Leaderboard
 import androidx.compose.material.icons.rounded.SportsTennis
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -57,6 +58,7 @@ import com.padelpro.app.core.designsystem.components.PpConfirmDialog
 import com.padelpro.app.core.designsystem.components.PpDangerOutlineButton
 import com.padelpro.app.core.designsystem.components.PpEmptyState
 import com.padelpro.app.core.designsystem.components.PpIconButton
+import com.padelpro.app.core.designsystem.components.PpSecondaryButton
 import com.padelpro.app.core.designsystem.components.PpSectionHeader
 import com.padelpro.app.core.designsystem.components.PpSetScoreRow
 import com.padelpro.app.core.designsystem.components.formatDurationRu
@@ -81,7 +83,8 @@ import com.padelpro.app.domain.model.TeamSide
 fun MatchDetailsScreen(
     matchId: String,
     viewModel: MatchDetailsViewModel,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onOpenInsights: (String) -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -143,6 +146,7 @@ fun MatchDetailsScreen(
                     formattedDate = viewModel.formatDateTime(details.summary.endedAt ?: details.summary.startedAt),
                     isDeleting = state.isDeleting,
                     onBack = onBack,
+                    onOpenInsights = { onOpenInsights(details.summary.id) },
                     onRequestDelete = { showDeleteDialog = true }
                 )
             }
@@ -188,6 +192,7 @@ private fun MatchDetailsBody(
     formattedDate: String,
     isDeleting: Boolean,
     onBack: () -> Unit,
+    onOpenInsights: () -> Unit,
     onRequestDelete: () -> Unit
 ) {
     val summary = details.summary
@@ -229,7 +234,8 @@ private fun MatchDetailsBody(
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .widthIn(max = 600.dp),
+            .widthIn(max = 600.dp)
+            .testTag("details_list"),
         contentPadding = PaddingValues(PpSpacing.lg),
         verticalArrangement = Arrangement.spacedBy(PpSpacing.lg)
     ) {
@@ -518,16 +524,26 @@ private fun MatchDetailsBody(
             }
         }
 
-        // 6. Delete match button
+        // 6. Match Insights & Delete match button
         item {
-            PpDangerOutlineButton(
-                text = stringResource(R.string.details_delete_btn),
-                onClick = onRequestDelete,
-                enabled = !isDeleting,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag("details_delete_button")
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(PpSpacing.md)) {
+                PpSecondaryButton(
+                    text = stringResource(R.string.insights_entry_btn),
+                    leadingIcon = Icons.Rounded.Leaderboard,
+                    onClick = onOpenInsights,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("details_insights_button")
+                )
+                PpDangerOutlineButton(
+                    text = stringResource(R.string.details_delete_btn),
+                    onClick = onRequestDelete,
+                    enabled = !isDeleting,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("details_delete_button")
+                )
+            }
         }
     }
 }

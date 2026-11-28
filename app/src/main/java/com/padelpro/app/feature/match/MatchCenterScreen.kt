@@ -71,7 +71,8 @@ fun MatchCenterScreen(
     onOpenHistory: () -> Unit,
     onOpenMatchDetails: (String) -> Unit,
     onResumeMatch: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onOpenMatchInsights: (String) -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var showFormatSheet by remember { mutableStateOf(false) }
@@ -97,26 +98,33 @@ fun MatchCenterScreen(
             }
 
             if (state.activeMatch != null) {
+                val activeMatch = state.activeMatch!!
                 item {
                     PpCard(
                         accent = PpAmberLed,
                         modifier = Modifier.fillMaxWidth()
                     ) {
+                        Text(
+                            text = stringResource(R.string.home_resume_match_title),
+                            style = PpTextStyles.Micro,
+                            color = PpAmberLed
+                        )
+                        Spacer(Modifier.height(PpSpacing.md))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                            horizontalArrangement = Arrangement.spacedBy(PpSpacing.sm)
                         ) {
-                            Text(
-                                text = stringResource(R.string.home_resume_match_title),
-                                style = PpTextStyles.Micro,
-                                color = PpAmberLed,
-                                modifier = Modifier.weight(1f)
+                            PpSecondaryButton(
+                                text = stringResource(R.string.insights_active_card_btn),
+                                onClick = { onOpenMatchInsights(activeMatch.id) },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .testTag("match_center_active_insights_button")
                             )
-                            Spacer(Modifier.width(PpSpacing.md))
                             PpPrimaryButton(
                                 text = stringResource(R.string.home_resume_cta),
-                                onClick = onResumeMatch
+                                onClick = onResumeMatch,
+                                modifier = Modifier.weight(1f)
                             )
                         }
                     }

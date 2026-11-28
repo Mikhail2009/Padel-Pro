@@ -565,4 +565,97 @@
     <string name="ach_level_5_desc">Достигните 5-го уровня</string>
     <string name="ach_golden_win_title">Железные нервы</string>
     <string name="ach_golden_win_desc">Выиграйте матч с золотым мячом</string>
+
+    <!-- Экран 17: Аналитика матча (Stage 1.2 Match Insights) -->
+    <string name="insights_entry_btn">Аналитика матча</string>
+    <string name="insights_active_card_btn">Аналитика</string>
+    <string name="insights_title">Аналитика матча</string>
+    <string name="insights_live_badge">LIVE</string>
+    <string name="insights_live_subtitle">Матч идёт · расчёт по сыгранным розыгрышам</string>
+    <string name="insights_empty_title">Аналитика недоступна</string>
+    <string name="insights_empty_body">Запись о матче не найдена или была удалена.</string>
+    <string name="insights_no_analytics_title">Недостаточно данных</string>
+    <string name="insights_no_analytics_body">Для этого матча нет сохранённых событий розыгрышей.</string>
+
+    <string name="insights_section_overview">Обзор матча</string>
+    <string name="insights_section_points">Статистика очков</string>
+    <string name="insights_section_games">Статистика геймов</string>
+    <string name="insights_section_sets">Статистика сетов</string>
+    <string name="insights_section_momentum">Динамика преимущества</string>
+    <string name="insights_section_highlights">Ключевые моменты</string>
+
+    <string name="insights_sets_score_label">Счёт по сетам</string>
+    <string name="insights_incomplete_set_meta_format">%1$s · %2$s</string>
+
+    <string name="insights_points_total">Всего очков</string>
+    <string name="insights_points_share">Доля очков</string>
+    <string name="insights_points_percent_format">%1$d%%</string>
+    <string name="insights_points_diff">Разница очков (A − B)</string>
+    <string name="insights_points_max_streak">Макс. серия очков</string>
+    <string name="insights_points_lead_span">Удержание лидерства</string>
+    <string name="insights_points_lead_changes">Смены лидера по очкам</string>
+    <string name="insights_points_empty">Розыгрыши ещё не зафиксированы</string>
+    <string name="insights_team_pair_format">%1$s / %2$s</string>
+
+    <string name="insights_games_won">Выиграно геймов</string>
+    <string name="insights_games_max_streak">Макс. серия геймов</string>
+    <string name="insights_games_lead_changes">Смены лидера по геймам</string>
+    <string name="insights_games_biggest_lead">Макс. отрыв по геймам</string>
+    <string name="insights_games_biggest_lead_format">%1$s (+%2$d после %3$d-го гейма)</string>
+    <string name="insights_games_empty">Завершённых геймов пока нет</string>
+
+    <string name="insights_set_card_title_format">Сет %1$d</string>
+    <string name="insights_set_winner_format">Победитель: %1$s</string>
+    <string name="insights_set_tiebreak_format">Тай-брейк %1$d:%2$d</string>
+    <string name="insights_set_duration_label">Длительность</string>
+    <string name="insights_set_points_label">Очки</string>
+    <string name="insights_set_summary_longest">Самый долгий сет</string>
+    <string name="insights_set_summary_shortest">Самый короткий сет</string>
+    <string name="insights_set_summary_dominant">Самый уверенный сет</string>
+    <string name="insights_set_summary_closest">Самый упорный сет</string>
+    <string name="insights_set_summary_score_format">Сет %1$d · %2$d–%3$d</string>
+    <string name="insights_sets_empty">Завершённых сетов пока нет</string>
+    <string name="insights_sets_no_event_timing">Подробный хронометраж сетов доступен при наличии событий розыгрышей</string>
+
+    <string name="insights_momentum_subtitle">Разница выигранных очков (A − B) от розыгрыша к розыгрышу</string>
+    <string name="insights_momentum_legend_a">Выше 0 · %1$s</string>
+    <string name="insights_momentum_legend_b">Ниже 0 · %1$s</string>
+    <string name="insights_momentum_zero_label">0</string>
+    <string name="insights_momentum_tap_hint">Нажмите на график, чтобы посмотреть розыгрыш</string>
+    <string name="insights_momentum_point_header_format">Розыгрыш #%1$d · Сет %2$d</string>
+    <string name="insights_momentum_point_winner_format">Очко: %1$s</string>
+    <string name="insights_momentum_point_diff_a_format">Преимущество %1$s: +%2$d</string>
+    <string name="insights_momentum_point_diff_b_format">Преимущество %1$s: +%2$d</string>
+    <string name="insights_momentum_point_diff_even">Равенство по очкам (0)</string>
+    <string name="insights_momentum_point_games_format">Геймы: %1$d:%2$d</string>
+    <string name="insights_momentum_empty">Нет сохранённых розыгрышей для графика динамики</string>
+    <string name="insights_momentum_chart_cd">График изменения преимущества команд по ходу розыгрышей</string>
+
+    <string name="insights_highlights_empty">Ключевые моменты появятся по мере накопления событий матча</string>
+    <string name="insights_hl_point_streak_title">Лучшая серия очков</string>
+    <string name="insights_hl_point_streak_desc">%1$s · %2$s (розыгрыши %3$d–%4$d)</string>
+    <string name="insights_hl_biggest_lead_title">Максимальный отрыв по очкам</string>
+    <string name="insights_hl_biggest_lead_desc">%1$s · +%2$d на розыгрыше #%3$d</string>
+    <string name="insights_hl_dominant_set_title">Самый уверенный сет</string>
+    <string name="insights_hl_dominant_set_desc">Сет %1$d · %2$s (%3$d–%4$d)</string>
+    <string name="insights_hl_closest_set_title">Самый упорный сет</string>
+    <string name="insights_hl_closest_set_desc">Сет %1$d · %2$d–%3$d</string>
+    <string name="insights_hl_closest_set_tb_desc">Сет %1$d · %2$d–%3$d (тай-брейк)</string>
+    <string name="insights_hl_longest_set_title">Самый продолжительный сет</string>
+    <string name="insights_hl_longest_set_desc">Сет %1$d · %2$s</string>
+    <string name="insights_hl_game_streak_title">Лучшая серия геймов</string>
+    <string name="insights_hl_game_streak_desc">%1$s · %2$s (геймы %3$d–%4$d)</string>
+
+    <plurals name="games_count_format">
+        <item quantity="one">%1$d гейм</item>
+        <item quantity="few">%1$d гейма</item>
+        <item quantity="many">%1$d геймов</item>
+        <item quantity="other">%1$d геймов</item>
+    </plurals>
+    <plurals name="rallies_count_format">
+        <item quantity="one">%1$d розыгрыш</item>
+        <item quantity="few">%1$d розыгрыша</item>
+        <item quantity="many">%1$d розыгрышей</item>
+        <item quantity="other">%1$d розыгрышей</item>
+    </plurals>
 </resources>

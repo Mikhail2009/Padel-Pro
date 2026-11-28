@@ -46,6 +46,7 @@ import com.padelpro.app.core.designsystem.components.PpEmptyState
 import com.padelpro.app.core.designsystem.components.PpMatchCard
 import com.padelpro.app.core.designsystem.components.PpPrimaryButton
 import com.padelpro.app.core.designsystem.components.PpProgressBar
+import com.padelpro.app.core.designsystem.components.PpSecondaryButton
 import com.padelpro.app.core.designsystem.components.PpSectionHeader
 import com.padelpro.app.core.designsystem.components.PpStatCard
 import com.padelpro.app.core.designsystem.components.PpStreakFlame
@@ -77,7 +78,8 @@ fun HomeScreen(
     onOpenMatchDetails: (String) -> Unit,
     onResumeMatch: () -> Unit,
     onOpenPerformance: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onOpenMatchInsights: (String) -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -132,38 +134,43 @@ fun HomeScreen(
             }
 
             if (state.activeMatch != null) {
+                val activeMatch = state.activeMatch!!
                 item {
                     PpCard(
                         accent = PpAmberLed,
                         modifier = Modifier.fillMaxWidth()
                     ) {
+                        Text(
+                            text = stringResource(R.string.home_resume_match_title),
+                            style = PpTextStyles.Micro,
+                            color = PpAmberLed
+                        )
+                        Spacer(Modifier.height(PpSpacing.xs))
+                        val activeFormatText = when (activeMatch.format) {
+                            MatchFormat.SINGLES -> stringResource(R.string.match_format_singles)
+                            MatchFormat.DOUBLES -> stringResource(R.string.match_format_doubles)
+                        }
+                        Text(
+                            text = activeFormatText,
+                            style = PpTextStyles.Title,
+                            color = PpTextHigh
+                        )
+                        Spacer(Modifier.height(PpSpacing.md))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.spacedBy(PpSpacing.sm)
                         ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(
-                                    text = stringResource(R.string.home_resume_match_title),
-                                    style = PpTextStyles.Micro,
-                                    color = PpAmberLed
-                                )
-                                Spacer(Modifier.height(PpSpacing.xs))
-                                val activeFormatText = when (state.activeMatch?.format) {
-                                    MatchFormat.SINGLES -> stringResource(R.string.match_format_singles)
-                                    MatchFormat.DOUBLES -> stringResource(R.string.match_format_doubles)
-                                    null -> ""
-                                }
-                                Text(
-                                    text = activeFormatText,
-                                    style = PpTextStyles.Title,
-                                    color = PpTextHigh
-                                )
-                            }
-                            Spacer(Modifier.width(PpSpacing.md))
+                            PpSecondaryButton(
+                                text = stringResource(R.string.insights_active_card_btn),
+                                onClick = { onOpenMatchInsights(activeMatch.id) },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .testTag("home_active_match_insights_button")
+                            )
                             PpPrimaryButton(
                                 text = stringResource(R.string.home_resume_cta),
-                                onClick = onResumeMatch
+                                onClick = onResumeMatch,
+                                modifier = Modifier.weight(1f)
                             )
                         }
                     }

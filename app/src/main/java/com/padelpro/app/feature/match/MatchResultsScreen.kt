@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.EmojiEvents
+import androidx.compose.material.icons.rounded.Leaderboard
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -72,7 +73,8 @@ fun MatchResultsScreen(
     viewModel: MatchResultsViewModel,
     onViewStatistics: () -> Unit,
     onOpenDetails: (String) -> Unit,
-    onReturnHome: () -> Unit
+    onReturnHome: () -> Unit,
+    onOpenInsights: (String) -> Unit = {}
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -130,6 +132,7 @@ fun MatchResultsScreen(
                             detailsEnabled = false,
                             onViewStatistics = onViewStatistics,
                             onOpenDetails = onOpenDetails,
+                            onOpenInsights = onOpenInsights,
                             onReturnHome = onReturnHome
                         )
                     }
@@ -144,6 +147,7 @@ fun MatchResultsScreen(
                     formattedDate = viewModel.formatDate(match.endedAt ?: match.startedAt),
                     onViewStatistics = onViewStatistics,
                     onOpenDetails = onOpenDetails,
+                    onOpenInsights = onOpenInsights,
                     onReturnHome = onReturnHome
                 )
             }
@@ -158,6 +162,7 @@ private fun MatchResultsContent(
     formattedDate: String,
     onViewStatistics: () -> Unit,
     onOpenDetails: (String) -> Unit,
+    onOpenInsights: (String) -> Unit,
     onReturnHome: () -> Unit
 ) {
     val teamAText = match.teamANames.joinToString(" и ")
@@ -433,6 +438,7 @@ private fun MatchResultsContent(
                 detailsEnabled = true,
                 onViewStatistics = onViewStatistics,
                 onOpenDetails = onOpenDetails,
+                onOpenInsights = onOpenInsights,
                 onReturnHome = onReturnHome
             )
         }
@@ -445,6 +451,7 @@ private fun ResultsActionButtons(
     detailsEnabled: Boolean,
     onViewStatistics: () -> Unit,
     onOpenDetails: (String) -> Unit,
+    onOpenInsights: (String) -> Unit,
     onReturnHome: () -> Unit
 ) {
     Column(
@@ -462,6 +469,14 @@ private fun ResultsActionButtons(
                 .testTag("results_view_stats_button")
         )
         if (detailsEnabled) {
+            PpSecondaryButton(
+                text = stringResource(R.string.insights_entry_btn),
+                leadingIcon = Icons.Rounded.Leaderboard,
+                onClick = { onOpenInsights(matchId) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("results_insights_button")
+            )
             PpSecondaryButton(
                 text = stringResource(R.string.results_btn_match_details),
                 onClick = { onOpenDetails(matchId) },

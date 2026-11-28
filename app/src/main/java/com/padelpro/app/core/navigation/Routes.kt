@@ -46,6 +46,9 @@ sealed interface AppRoute {
     data class MatchDetails(val matchId: String) : AppRoute
 
     @Serializable
+    data class MatchInsights(val matchId: String) : AppRoute
+
+    @Serializable
     data object Performance : AppRoute
 
     @Serializable

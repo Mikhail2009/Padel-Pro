@@ -27,6 +27,7 @@ import com.padelpro.app.feature.academy.LessonViewModel
 import com.padelpro.app.feature.academy.QuizViewModel
 import com.padelpro.app.feature.history.HistoryViewModel
 import com.padelpro.app.feature.history.MatchDetailsViewModel
+import com.padelpro.app.feature.insights.MatchInsightsViewModel
 import com.padelpro.app.feature.home.HomeViewModel
 import com.padelpro.app.feature.main.AppEntryViewModel
 import com.padelpro.app.feature.match.LiveMatchViewModel
@@ -142,6 +143,11 @@ class AppContainer(context: Context) {
                     ) as T
                 modelClass.isAssignableFrom(MatchDetailsViewModel::class.java) ->
                     MatchDetailsViewModel(
+                        matchRepository = matchRepository,
+                        timeProvider = timeProvider
+                    ) as T
+                modelClass.isAssignableFrom(MatchInsightsViewModel::class.java) ->
+                    MatchInsightsViewModel(
                         matchRepository = matchRepository,
                         timeProvider = timeProvider
                     ) as T

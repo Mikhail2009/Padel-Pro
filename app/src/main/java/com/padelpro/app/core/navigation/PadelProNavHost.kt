@@ -48,6 +48,8 @@ import com.padelpro.app.feature.history.MatchDetailsViewModel
 import com.padelpro.app.feature.history.MatchHistoryScreen
 import com.padelpro.app.feature.home.HomeScreen
 import com.padelpro.app.feature.home.HomeViewModel
+import com.padelpro.app.feature.insights.MatchInsightsScreen
+import com.padelpro.app.feature.insights.MatchInsightsViewModel
 import com.padelpro.app.feature.main.AppEntryState
 import com.padelpro.app.feature.main.AppEntryViewModel
 import com.padelpro.app.feature.match.LiveMatchScreen
@@ -198,7 +200,8 @@ private fun PadelProNavGraph(
                     },
                     onOpenMatchDetails = { id -> navController.navigate(AppRoute.MatchDetails(id)) },
                     onResumeMatch = { navController.navigate(AppRoute.LiveMatch) },
-                    onOpenPerformance = { navigateToTab(BottomTab.STATS) }
+                    onOpenPerformance = { navigateToTab(BottomTab.STATS) },
+                    onOpenMatchInsights = { id -> navController.navigate(AppRoute.MatchInsights(id)) }
                 )
             }
 
@@ -294,7 +297,8 @@ private fun PadelProNavGraph(
                     onOpenSetup = { format -> navController.navigate(AppRoute.MatchSetup(format.name)) },
                     onOpenHistory = { navController.navigate(AppRoute.MatchHistory) },
                     onOpenMatchDetails = { id -> navController.navigate(AppRoute.MatchDetails(id)) },
-                    onResumeMatch = { navController.navigate(AppRoute.LiveMatch) }
+                    onResumeMatch = { navController.navigate(AppRoute.LiveMatch) },
+                    onOpenMatchInsights = { id -> navController.navigate(AppRoute.MatchInsights(id)) }
                 )
             }
 
@@ -345,7 +349,8 @@ private fun PadelProNavGraph(
                     viewModel = vm,
                     onViewStatistics = { navigateToTab(BottomTab.STATS) },
                     onOpenDetails = { id -> navController.navigate(AppRoute.MatchDetails(id)) },
-                    onReturnHome = { navigateToTab(BottomTab.HOME) }
+                    onReturnHome = { navigateToTab(BottomTab.HOME) },
+                    onOpenInsights = { id -> navController.navigate(AppRoute.MatchInsights(id)) }
                 )
             }
 
@@ -365,6 +370,18 @@ private fun PadelProNavGraph(
                 val args = entry.toRoute<AppRoute.MatchDetails>()
                 val vm: MatchDetailsViewModel = viewModel(factory = viewModelFactory)
                 MatchDetailsScreen(
+                    matchId = args.matchId,
+                    viewModel = vm,
+                    onBack = { navController.popBackStack() },
+                    onOpenInsights = { id -> navController.navigate(AppRoute.MatchInsights(id)) }
+                )
+            }
+
+            // 17 Match Insights
+            composable<AppRoute.MatchInsights> { entry ->
+                val args = entry.toRoute<AppRoute.MatchInsights>()
+                val vm: MatchInsightsViewModel = viewModel(factory = viewModelFactory)
+                MatchInsightsScreen(
                     matchId = args.matchId,
                     viewModel = vm,
                     onBack = { navController.popBackStack() }
