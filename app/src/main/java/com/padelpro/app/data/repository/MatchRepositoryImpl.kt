@@ -107,15 +107,7 @@ class MatchRepositoryImpl(
                     )
                 }
 
-            val sets = setEntities.map {
-                SetScore(
-                    setIndex = it.setIndex,
-                    gamesA = it.gamesA,
-                    gamesB = it.gamesB,
-                    tbA = it.tbA,
-                    tbB = it.tbB
-                )
-            }
+            val isActive = entity.status == MatchStatus.ACTIVE.name
             val winner = entity.winnerTeam?.let { runCatching { TeamSide.valueOf(it) }.getOrNull() }
             val userTeam = participants.firstOrNull { it.isUser == 1 }?.team
                 ?.let { runCatching { TeamSide.valueOf(it) }.getOrNull() }
@@ -128,10 +120,38 @@ class MatchRepositoryImpl(
                 teamBPlayers = teamBDetails.map { it.player }
             )
             val engineEvents = eventEntities.mapNotNull { it.toEngineEvent() }
-            val incompleteSet = if (entity.status == MatchStatus.COMPLETED.name && winner == null) {
-                extractIncompleteSet(MatchEngine.replay(config, engineEvents))
+            val replayedState = if (isActive || (entity.status == MatchStatus.COMPLETED.name && winner == null)) {
+                MatchEngine.replay(config, engineEvents)
             } else {
                 null
+            }
+
+            val sets = if (isActive) {
+                replayedState?.completedSets.orEmpty()
+            } else {
+                setEntities.map {
+                    SetScore(
+                        setIndex = it.setIndex,
+                        gamesA = it.gamesA,
+                        gamesB = it.gamesB,
+                        tbA = it.tbA,
+                        tbB = it.tbB
+                    )
+                }
+            }
+            val incompleteSet = if (isActive || (entity.status == MatchStatus.COMPLETED.name && winner == null)) {
+                replayedState?.let { extractIncompleteSet(it) }
+            } else {
+                null
+            }
+            val durationMs = if (isActive) {
+                val referenceNow = maxOf(
+                    timeProvider.nowMillis(),
+                    engineEvents.lastOrNull()?.timestampMillis ?: entity.startedAt
+                )
+                replayedState?.elapsedDurationMillis(referenceNow)
+            } else {
+                entity.durationMs
             }
 
             val summary = MatchSummary(
@@ -141,7 +161,7 @@ class MatchRepositoryImpl(
                 status = runCatching { MatchStatus.valueOf(entity.status) }.getOrDefault(MatchStatus.COMPLETED),
                 startedAt = entity.startedAt,
                 endedAt = entity.endedAt,
-                durationMs = entity.durationMs,
+                durationMs = durationMs,
                 winnerTeam = winner,
                 userWon = userWon,
                 teamANames = teamADetails.map { it.player.displayName },
@@ -151,13 +171,14 @@ class MatchRepositoryImpl(
                 incompleteSet = incompleteSet
             )
 
-            val eventStats = MatchStatsCalculator.computeFromEvents(config, engineEvents)
+            val analytics = MatchStatsCalculator.computeAnalytics(config, summary, engineEvents)
 
             MatchDetailsData(
                 summary = summary,
                 teamAPlayers = teamADetails,
                 teamBPlayers = teamBDetails,
-                stats = eventStats
+                stats = analytics.eventStats,
+                analytics = analytics
             )
         }
 

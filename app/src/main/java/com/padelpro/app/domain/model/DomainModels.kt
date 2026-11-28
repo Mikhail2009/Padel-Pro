@@ -302,7 +302,9 @@ data class MatchDetailsData(
     val summary: MatchSummary,
     val teamAPlayers: List<MatchParticipantDetail>,
     val teamBPlayers: List<MatchParticipantDetail>,
-    val stats: MatchEventStats?
+    val stats: MatchEventStats?,
+    /** Расширенная аналитика; null только для совместимости со старыми вызовами. */
+    val analytics: MatchAnalytics? = null
 )
 
 enum class BackupValidationError {
